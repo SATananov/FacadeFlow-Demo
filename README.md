@@ -1,32 +1,27 @@
-# React + TypeScript + Vite
+# FacadeFlow Demo — Phase 01
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+Безопасен визуален прототип за подготовка на операции върху един алуминиев профил. Позволява примерни размери, позициониране на пробивания и фрезования и визуална проверка на реда им.
 
-Currently, two official plugins are available:
+## Стартиране
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
-
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the Oxlint configuration
-
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
-
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
+```bash
+npm install
+npm run dev
 ```
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+Проверка: `npm run lint` и `npm run build`.
+
+## Възможности
+
+- параметри на проект и тестов профил;
+- лява или дясна отправна точка;
+- SVG визуализация с мащабирани X позиции;
+- добавяне, редактиране, изтриване и пренареждане на операции;
+- проверки с ясни съобщения на български;
+- локален export на `.simulation.json`.
+
+## Ограничения и безопасност
+
+Това е само UI симулация. Няма backend, база данни, автентикация, мрежова комуникация или машинна връзка. Прототипът **не трябва да управлява, свързва или изпраща данни към машина**. Не създава LTE, XM, G-code, CNC или MECAL файлове и не прави предположения за реални производствени формати.
+
+JSON export-ът е означен с `simulationOnly: true`. Вижте [границата за безопасност](docs/SAFETY_BOUNDARY.md) и [критериите за приемане](docs/PHASE_01_ACCEPTANCE.md).
