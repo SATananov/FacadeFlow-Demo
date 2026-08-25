@@ -108,22 +108,134 @@ function App() {
     else exportSimulation({ project, profile, orientation: standaloneOrientation, operations: standaloneOperations, validation })
   }
 
-  return <div className="app-shell">
-    <header><div className="brand-mark">FF</div><div className="brand"><h1>FacadeFlow Demo</h1><p>Визуална подготовка на операции за алуминиеви профили</p></div><div className="safety-badge"><span>●</span> СИМУЛАЦИЯ — БЕЗ ВРЪЗКА С МАШИНА</div></header>
-    <main>
-      <div className={`mode-indicator ${activeComponent ? 'component-mode' : ''}`}>{activeComponent ? 'Детайл от изделие' : 'Самостоятелен профил'}</div>
-      {activeComponent && <SelectedComponentContext component={activeComponent} onBackToProduct={() => setShowProductPreview(true)} onStandalone={returnToStandalone}/>} 
-      <div className="layout">
-        <ProfilePanel project={project} profile={profile} orientation={currentOrientation} product={product} productTemplate={productTemplate} productErrors={productErrors} onProject={setProject} onProfile={(next) => { setProfile(next); if (formErrors.length) setFormErrors(validateOperation(draft, activeComponent ? { ...next, length: activeComponent.nominalLength } : next).errors) }} onOrientation={changeOrientation} onProduct={changeProduct} onProductPreview={openProductPreview} onChooseTemplate={() => setShowTemplatePicker(true)}/>
-        <ProfileWorkspace profile={currentProfile} operations={operations} orientation={currentOrientation}/>
-        <OperationsPanel draft={draft} operations={operations} editingId={editingId} errors={formErrors} onDraft={(next) => { setDraft(next); if (formErrors.length) setFormErrors(validateOperation(next, currentProfile).errors) }} onSubmit={submitOperation} onEdit={(operation) => { const { id, ...values } = operation; setEditingId(id); setDraft(values); setFormErrors([]) }} onDelete={(id) => { setOperations((items) => items.filter((item) => item.id !== id)); if (editingId === id) cancelOperation() }} onMove={moveOperation} onCancel={cancelOperation}/>
-      </div>
-      <section className={`validation-bar ${validation.valid ? 'valid' : 'invalid'}`} aria-live="polite"><div><span className="state-icon">{validation.valid ? '✓' : '!'}</span><div><b>{validation.valid ? 'Готово за визуална проверка' : 'Има грешки'}</b><p id="readiness-explanation">{validation.valid ? `${operations.length} операции · Данните са валидни за симулация.` : `Коригирайте видимите грешки преди тестовия export. ${validation.errors.join(' ')}`}</p></div></div><button type="button" className="export" disabled={!validation.valid} aria-describedby="readiness-explanation" title={!validation.valid ? 'Export-ът е недостъпен, докато има грешки.' : undefined} onClick={performExport}>⇩ Експортирай тестов JSON</button></section>
-    </main>
-    <footer>FacadeFlow Demo · Phase 01 + 02A + 02B · Само визуална симулация</footer>
-    {showProductPreview && <ProductPreview product={product} project={project} profileCode={profile.code} profileSystem={profile.system} selectedComponentId={previewSelectedId} onSelectComponent={setPreviewSelectedId} onOpenComponent={(component) => openComponent(component.id)} onClose={() => setShowProductPreview(false)}/>} 
-    {showTemplatePicker && <ProductTemplatePicker selectedTemplateId={product.templateId} onSelect={selectTemplate} onClose={() => setShowTemplatePicker(false)}/>} 
-  </div>
+  return (
+    <div className="app-shell">
+      <header>
+        <div className="brand-mark">FF</div>
+        <div className="brand">
+          <h1>FacadeFlow Demo</h1>
+          <p>Визуална подготовка на операции за алуминиеви профили</p>
+        </div>
+        <div className="safety-badge">
+          <span>●</span> СИМУЛАЦИЯ — БЕЗ ВРЪЗКА С МАШИНА
+        </div>
+      </header>
+      <main>
+        <div className={`mode-indicator ${activeComponent ? 'component-mode' : ''}`}>
+          {activeComponent ? 'Детайл от изделие' : 'Самостоятелен профил'}
+        </div>
+        {activeComponent && (
+          <SelectedComponentContext
+            component={activeComponent}
+            onBackToProduct={() => setShowProductPreview(true)}
+            onStandalone={returnToStandalone}
+          />
+        )}
+        <div className="layout">
+          <ProfilePanel
+            project={project}
+            profile={profile}
+            orientation={currentOrientation}
+            product={product}
+            productTemplate={productTemplate}
+            productErrors={productErrors}
+            onProject={setProject}
+            onProfile={(next) => {
+              setProfile(next)
+              if (formErrors.length) {
+                setFormErrors(
+                  validateOperation(
+                    draft,
+                    activeComponent ? { ...next, length: activeComponent.nominalLength } : next,
+                  ).errors,
+                )
+              }
+            }}
+            onOrientation={changeOrientation}
+            onProduct={changeProduct}
+            onProductPreview={openProductPreview}
+            onChooseTemplate={() => setShowTemplatePicker(true)}
+          />
+          <ProfileWorkspace
+            profile={currentProfile}
+            operations={operations}
+            orientation={currentOrientation}
+          />
+          <OperationsPanel
+            draft={draft}
+            operations={operations}
+            editingId={editingId}
+            errors={formErrors}
+            onDraft={(next) => {
+              setDraft(next)
+              if (formErrors.length) {
+                setFormErrors(validateOperation(next, currentProfile).errors)
+              }
+            }}
+            onSubmit={submitOperation}
+            onEdit={(operation) => {
+              const { id, ...values } = operation
+              setEditingId(id)
+              setDraft(values)
+              setFormErrors([])
+            }}
+            onDelete={(id) => {
+              setOperations((items) => items.filter((item) => item.id !== id))
+              if (editingId === id) cancelOperation()
+            }}
+            onMove={moveOperation}
+            onCancel={cancelOperation}
+          />
+        </div>
+        <section
+          className={`validation-bar ${validation.valid ? 'valid' : 'invalid'}`}
+          aria-live="polite"
+        >
+          <div>
+            <span className="state-icon">{validation.valid ? '✓' : '!'}</span>
+            <div>
+              <b>{validation.valid ? 'Готово за визуална проверка' : 'Има грешки'}</b>
+              <p id="readiness-explanation">
+                {validation.valid
+                  ? `${operations.length} операции · Данните са валидни за симулация.`
+                  : `Коригирайте видимите грешки преди тестовия export. ${validation.errors.join(' ')}`}
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            className="export"
+            disabled={!validation.valid}
+            aria-describedby="readiness-explanation"
+            title={!validation.valid ? 'Export-ът е недостъпен, докато има грешки.' : undefined}
+            onClick={performExport}
+          >
+            ⇩ Експортирай тестов JSON
+          </button>
+        </section>
+      </main>
+      <footer>FacadeFlow Demo · Phase 01 + 02A + 02B · Само визуална симулация</footer>
+      {showProductPreview && (
+        <ProductPreview
+          product={product}
+          project={project}
+          profileCode={profile.code}
+          profileSystem={profile.system}
+          selectedComponentId={previewSelectedId}
+          onSelectComponent={setPreviewSelectedId}
+          onOpenComponent={(component) => openComponent(component.id)}
+          onClose={() => setShowProductPreview(false)}
+        />
+      )}
+      {showTemplatePicker && (
+        <ProductTemplatePicker
+          selectedTemplateId={product.templateId}
+          onSelect={selectTemplate}
+          onClose={() => setShowTemplatePicker(false)}
+        />
+      )}
+    </div>
+  )
 }
 
 export default App
