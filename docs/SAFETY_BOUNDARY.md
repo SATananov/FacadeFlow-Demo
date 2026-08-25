@@ -1,5 +1,11 @@
 # Граница за безопасност
 
+## Phase 04A/04B
+
+Профилният каталог е in-memory симулация без SQL, база данни, `localStorage` или IndexedDB. Размер A/B са непотвърдени неутрални стойности и не се тълкуват като ширина, дълбочина или производствен параметър.
+
+Конструкторът изчислява само правоъгълни полета и nominal spans. Няма сглобки, отнемания, ъгли, просвети, glazing/gasket deductions, machining allowances или optimization. `VERIFIED` е човешки преглед на симулация; `machineReady` остава `false`. Export-ите са само simulation JSON — без машина, backend или network.
+
 FacadeFlow Demo Phase 01 + Phase 02A–02E + Phase 03A е локален визуален прототип. Файловите export-и са единствено четими симулационни JSON файлове с `simulationOnly: true`, включително `.drawing-import.simulation.json`. Прегледът на изделието може да се отпечата само чрез стандартния диалог на браузъра.
 
 ## Изрично извън обхвата

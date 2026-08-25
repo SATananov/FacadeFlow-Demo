@@ -4,6 +4,7 @@ import './importCenter.css'
 import './help.css'
 import './contextHelp.css'
 import './localLauncher.css'
+import './customDesigner.css'
 import { OperationsPanel } from './components/OperationsPanel'
 import { ProfilePanel } from './components/ProfilePanel'
 import { ProfileWorkspace } from './components/ProfileWorkspace'
@@ -14,6 +15,9 @@ import { DrawingImportWorkspace } from './components/DrawingImportWorkspace'
 import { GuidedTour } from './components/GuidedTour'
 import { HelpCenter } from './components/HelpCenter'
 import { ContextHelp } from './components/ContextHelp'
+import { ProfileCatalogue } from './components/ProfileCatalogue'
+import { CustomProductDesigner } from './components/CustomProductDesigner'
+import { SelectedCustomComponentContext } from './components/SelectedCustomComponentContext'
 import { operationsForComponent, type ComponentOperations } from './componentOperations'
 import { exportComponentSimulation, exportSimulation } from './exportSimulation'
 import { affectedComponentIds, calculateProductComponents, productGeometrySignature } from './productCalculations'
@@ -25,6 +29,11 @@ import { defaultOrientation, defaultProfile, defaultProject, emptyOperation } fr
 import type { MachiningOperation, OperationDraft, Orientation, Profile } from './types'
 import { validateAll, validateOperation } from './validation'
 import type { CapturedDrawingProduct } from './drawingImportTypes'
+import { sampleCatalogueProfiles } from './profileCatalogueData'
+import type { ActiveProfileSelection, CatalogueProfile } from './profileCatalogueTypes'
+import { initialGeometry } from './customGeometryTree'
+import type { CustomProduct } from './customGeometryTypes'
+import { changedCustomComponentIds, generateCustomComponents, type CustomComponent } from './customComponentGeneration'
 
 function App() {
   const isLocalApplication = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
@@ -47,18 +56,27 @@ function App() {
   const [showHelp, setShowHelp] = useState(false)
   const [showTour, setShowTour] = useState(false)
   const [importPreview, setImportPreview] = useState<{ product: ProductParameters; project: string } | null>(null)
+  const [catalogueProfiles, setCatalogueProfiles] = useState<CatalogueProfile[]>(sampleCatalogueProfiles)
+  const [activeProfileSelection, setActiveProfileSelection] = useState<ActiveProfileSelection>({ FRAME: 'profile-demo-frame-01', SASH: 'profile-demo-sash-01', MULLION: 'profile-demo-mullion-01' })
+  const [showProfileCatalogue, setShowProfileCatalogue] = useState(false)
+  const [showCustomDesigner, setShowCustomDesigner] = useState(false)
+  const [activeCustomComponentId, setActiveCustomComponentId] = useState<string | null>(null)
+  const [customProduct, setCustomProduct] = useState<CustomProduct>(() => { const now = new Date().toISOString(); return { id: crypto.randomUUID(), name: 'Нестандартен прозорец 001', width: 1400, height: 1200, frameProfileId: 'profile-demo-frame-01', mullionProfileId: 'profile-demo-mullion-01', geometry: initialGeometry(), status: 'NEEDS_REVIEW', humanReviewConfirmed: false, createdAt: now, updatedAt: now, simulationOnly: true, machineReady: false } })
 
   const productTemplate = useMemo(() => getProductTemplate(product.templateId), [product.templateId])
   const productComponents = useMemo(() => calculateProductComponents(product, profile.code), [product, profile.code])
   const activeComponent = useMemo(() => productComponents.find((component) => component.id === activeComponentId) ?? null, [productComponents, activeComponentId])
-  const currentProfile = useMemo(() => activeComponent ? { ...profile, length: activeComponent.nominalLength } : profile, [activeComponent, profile])
-  const currentOrientation = activeComponent ? componentOrientations[activeComponent.id] ?? 'left' : standaloneOrientation
-  const operations = activeComponent ? operationsForComponent(componentOperations, activeComponent.id) : standaloneOperations
+  const customComponents = useMemo(() => generateCustomComponents(customProduct, catalogueProfiles), [customProduct, catalogueProfiles])
+  const activeCustomComponent = useMemo(() => customComponents.find((component) => component.id === activeCustomComponentId) ?? null, [customComponents, activeCustomComponentId])
+  const operationComponentKey = activeCustomComponent ? `custom:${customProduct.id}:${activeCustomComponent.id}` : activeComponent?.id
+  const currentProfile = useMemo(() => activeCustomComponent ? { ...profile, code: activeCustomComponent.profileCode, length: activeCustomComponent.nominalLength } : activeComponent ? { ...profile, length: activeComponent.nominalLength } : profile, [activeComponent, activeCustomComponent, profile])
+  const currentOrientation = operationComponentKey ? componentOrientations[operationComponentKey] ?? 'left' : standaloneOrientation
+  const operations = operationComponentKey ? operationsForComponent(componentOperations, operationComponentKey) : standaloneOperations
   const savedValidation = useMemo(() => validateAll(project, currentProfile, operations), [project, currentProfile, operations])
   const validation = useMemo(() => ({ valid: savedValidation.valid && formErrors.length === 0, errors: [...savedValidation.errors, ...formErrors.map((error) => `Текуща операция: ${error}`)] }), [savedValidation, formErrors])
 
   const setOperations = (updater: (items: MachiningOperation[]) => MachiningOperation[]) => {
-    if (activeComponent) setComponentOperations((all) => ({ ...all, [activeComponent.id]: updater(operationsForComponent(all, activeComponent.id)) }))
+    if (operationComponentKey) setComponentOperations((all) => ({ ...all, [operationComponentKey]: updater(operationsForComponent(all, operationComponentKey)) }))
     else setStandaloneOperations(updater)
   }
   const cancelOperation = () => { setEditingId(null); setDraft(emptyOperation); setFormErrors([]) }
@@ -110,16 +128,37 @@ function App() {
     if (result.valid) setShowProductPreview(true)
   }
   const openComponent = (componentId: string) => {
-    setActiveComponentId(componentId); setPreviewSelectedId(componentId); setShowProductPreview(false); cancelOperation()
+    setActiveCustomComponentId(null); setActiveComponentId(componentId); setPreviewSelectedId(componentId); setShowProductPreview(false); cancelOperation()
   }
-  const returnToStandalone = () => { setActiveComponentId(null); cancelOperation() }
+  const openCustomComponent = (component: CustomComponent) => { setActiveComponentId(null); setActiveCustomComponentId(component.id); setShowCustomDesigner(false); cancelOperation() }
+  const returnToStandalone = () => { setActiveComponentId(null); setActiveCustomComponentId(null); cancelOperation() }
   const changeOrientation = (orientation: Orientation) => {
-    if (activeComponent) setComponentOrientations((items) => ({ ...items, [activeComponent.id]: orientation }))
+    if (operationComponentKey) setComponentOrientations((items) => ({ ...items, [operationComponentKey]: orientation }))
     else setStandaloneOrientation(orientation)
   }
   const performExport = () => {
     if (activeComponent) exportComponentSimulation({ project, profile: currentProfile, sourceProduct: product, selectedComponent: activeComponent, localOrientation: currentOrientation, operations, validation })
-    else exportSimulation({ project, profile, orientation: standaloneOrientation, operations: standaloneOperations, validation })
+    else exportSimulation({ project, profile: activeCustomComponent ? currentProfile : profile, orientation: activeCustomComponent ? currentOrientation : standaloneOrientation, operations: activeCustomComponent ? operations : standaloneOperations, validation })
+  }
+  const commitCustomProduct = (previous: CustomProduct, next: CustomProduct): boolean => {
+    const previousComponents = generateCustomComponents(previous, catalogueProfiles), nextComponents = generateCustomComponents(next, catalogueProfiles)
+    const operationIds = Object.entries(componentOperations).filter(([key, items]) => key.startsWith(`custom:${previous.id}:`) && items.length > 0).map(([key]) => key.slice(`custom:${previous.id}:`.length))
+    const affected = changedCustomComponentIds(previousComponents, nextComponents, operationIds)
+    if (affected.length && !window.confirm(`Промяната засяга ${affected.length} детайла с операции. Само операциите на премахнатите или несъвместими детайли ще бъдат изчистени. Да продължа ли?`)) return false
+    if (affected.length) setComponentOperations((all) => Object.fromEntries(Object.entries(all).filter(([key]) => !affected.some((id) => key === `custom:${previous.id}:${id}`))))
+    if (activeCustomComponentId && !nextComponents.some((item) => item.id === activeCustomComponentId && !affected.includes(item.id))) setActiveCustomComponentId(null)
+    setCustomProduct(next)
+    return true
+  }
+  const updateCatalogue = (next: CatalogueProfile[], changedProfileId?: string): boolean => {
+    if (changedProfileId && [customProduct.frameProfileId, customProduct.mullionProfileId, ...customComponents.map((item) => item.profileId)].includes(changedProfileId)) {
+      const hasOperations = Object.entries(componentOperations).some(([key, items]) => key.startsWith(`custom:${customProduct.id}:`) && items.length > 0)
+      if (!window.confirm(`Профилът се използва от черновата${hasOperations ? ' и има свързани операции' : ''}. Промяната ще върне изделието в NEEDS_REVIEW. Да продължа ли?`)) return false
+      setCustomProduct((item) => ({ ...item, status: 'NEEDS_REVIEW', humanReviewConfirmed: false, updatedAt: new Date().toISOString() }))
+    }
+    setCatalogueProfiles(next)
+    if (changedProfileId && next.find((item) => item.id === changedProfileId)?.status === 'ARCHIVED') setActiveProfileSelection((selection) => Object.fromEntries(Object.entries(selection).filter(([, id]) => id !== changedProfileId)))
+    return true
   }
   const loadVerifiedDrawingProduct = (item: CapturedDrawingProduct): boolean => {
     if (item.status !== 'VERIFIED') return false
@@ -145,10 +184,11 @@ function App() {
         {isLocalApplication && <div className="local-application-badge">ЛОКАЛНО ПРИЛОЖЕНИЕ</div>}
         <button type="button" className="help-action" data-help-id="help-button" onClick={() => setShowHelp(true)}>Помощ</button>
         <button type="button" className="drawing-import-action" data-help-id="unified-import" onClick={() => setShowDrawingImport(true)}>Импортирай проект / чертеж</button>
+        <button type="button" className="catalogue-action" onClick={() => setShowProfileCatalogue(true)}>Каталог на профилите</button>
       </header>
       <main>
-        <div className={`mode-indicator ${activeComponent ? 'component-mode' : ''}`}>
-          {activeComponent ? 'Детайл от изделие' : 'Самостоятелен профил'}
+        <div className={`mode-indicator ${activeComponent || activeCustomComponent ? 'component-mode' : ''}`}>
+          {activeCustomComponent ? 'Детайл от нестандартно изделие' : activeComponent ? 'Детайл от изделие' : 'Самостоятелен профил'}
         </div>
         {activeComponent && (
           <SelectedComponentContext
@@ -157,6 +197,14 @@ function App() {
             onStandalone={returnToStandalone}
           />
         )}
+        {activeCustomComponent && (
+          <SelectedCustomComponentContext
+            component={activeCustomComponent}
+            onBack={() => setShowCustomDesigner(true)}
+            onStandalone={returnToStandalone}
+          />
+        )}
+        {!activeComponent && !activeCustomComponent && <section className="product-creation-choices" aria-label="Създаване на изделие"><button type="button" onClick={() => setShowTemplatePicker(true)}>Избери типова схема</button><button type="button" className="primary" onClick={() => setShowCustomDesigner(true)}>Начертай нестандартен прозорец</button></section>}
         <div className="layout">
           <ProfilePanel
             project={project}
@@ -275,6 +323,8 @@ function App() {
           onClose={() => setShowDrawingImport(false)}
         />
       )}
+      {showProfileCatalogue && <ProfileCatalogue profiles={catalogueProfiles} selection={activeProfileSelection} onProfiles={updateCatalogue} onSelection={setActiveProfileSelection} onClose={() => setShowProfileCatalogue(false)}/>}
+      {showCustomDesigner && <CustomProductDesigner initial={customProduct} profiles={catalogueProfiles} activeProfiles={activeProfileSelection} selectedComponentId={activeCustomComponentId} onCommit={commitCustomProduct} onOpenComponent={openCustomComponent} onClose={() => setShowCustomDesigner(false)}/>}
       {importPreview && (
         <ProductPreview
           product={importPreview.product}

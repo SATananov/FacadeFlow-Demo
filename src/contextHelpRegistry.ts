@@ -8,5 +8,9 @@ const entries: ContextHelpEntry[] = [
   { id: 'ocr-confidence', title: 'OCR confidence', explanation: 'Оценка на разпознаването, а не доказателство за коректност. Ниските стойности обичайно се редактират или отхвърлят.' }, { id: 'similarity', title: 'Демонстрационно сходство', explanation: 'Помощна подредба спрямо REF схеми; не е вероятност или автоматично решение.' },
   { id: 'machine-ready', title: 'machineReady: false', explanation: 'Няма технологично одобрение и не може да бъде изпратено към машина.' }, { id: 'sha256', title: 'SHA-256', explanation: 'Локален цифров отпечатък за проследимост на източника; не разкрива съдържанието му.' },
   { id: 'cad-status', title: 'DWG/DXF статус', explanation: 'Файлът е проверен безопасно само по заглавна част или структура; не е визуализиран или преобразуван.' }, { id: 'simulation-export', title: 'Симулационен export', explanation: 'Създава само тестов JSON. Не създава MECAL, LTE, XM, G-code или CNC файл.' },
+  { id: 'profile-frame', title: 'Каса', explanation: 'Неподвижната външна рамка на изделието. Избраният профил е само симулационна референция.' },
+  { id: 'profile-sash', title: 'Крило', explanation: 'Профилът за отваряемата част. Посоката LEFT/RIGHT следва експертно потвърдената визуална конвенция.' },
+  { id: 'profile-mullion', title: 'Делител', explanation: 'Профилът, който визуално разделя две полета. Съединенията и отнеманията не се изчисляват.' },
+  { id: 'profile-dimensions', title: 'Размер A и Размер B', explanation: 'Неутрални временни полета. Професионалните им имена и технологично значение предстоят за потвърждение.' },
 ]
 export const contextualHelp = Object.fromEntries(entries.map((entry) => [entry.id, entry])) as Record<string, ContextHelpEntry>
