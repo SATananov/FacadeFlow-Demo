@@ -5,6 +5,7 @@ import './help.css'
 import './contextHelp.css'
 import './localLauncher.css'
 import './customDesigner.css'
+import './threeDPreview.css'
 import { OperationsPanel } from './components/OperationsPanel'
 import { ProfilePanel } from './components/ProfilePanel'
 import { ProfileWorkspace } from './components/ProfileWorkspace'
@@ -56,6 +57,7 @@ function App() {
   const [showHelp, setShowHelp] = useState(false)
   const [showTour, setShowTour] = useState(false)
   const [importPreview, setImportPreview] = useState<{ product: ProductParameters; project: string } | null>(null)
+  const [productFromVerifiedImport, setProductFromVerifiedImport] = useState(false)
   const [catalogueProfiles, setCatalogueProfiles] = useState<CatalogueProfile[]>(sampleCatalogueProfiles)
   const [activeProfileSelection, setActiveProfileSelection] = useState<ActiveProfileSelection>({ FRAME: 'profile-demo-frame-01', SASH: 'profile-demo-sash-01', MULLION: 'profile-demo-mullion-01' })
   const [showProfileCatalogue, setShowProfileCatalogue] = useState(false)
@@ -113,6 +115,7 @@ function App() {
       if (previewSelectedId && !nextComponents.some((component) => component.id === previewSelectedId)) setPreviewSelectedId(null)
       cancelOperation()
     }
+    setProductFromVerifiedImport(false)
     setProduct(next)
     if (productErrors.length) setProductErrors(validateProduct(next).errors)
     return true
@@ -166,6 +169,7 @@ function App() {
     const loaded = changeProduct({ ...product, templateId: item.templateId, type: template.category, width: item.width, height: item.height })
     if (!loaded) return false
     setProject(item.projectReference)
+    setProductFromVerifiedImport(true)
     setShowDrawingImport(false)
     return true
   }
@@ -306,6 +310,7 @@ function App() {
           onSelectComponent={setPreviewSelectedId}
           onOpenComponent={(component) => openComponent(component.id)}
           onClose={() => setShowProductPreview(false)}
+          verifiedImport={productFromVerifiedImport}
         />
       )}
       {showTemplatePicker && (

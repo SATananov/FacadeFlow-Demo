@@ -12,5 +12,9 @@ const entries: ContextHelpEntry[] = [
   { id: 'profile-sash', title: 'Крило', explanation: 'Профилът за отваряемата част. Посоката LEFT/RIGHT следва експертно потвърдената визуална конвенция.' },
   { id: 'profile-mullion', title: 'Делител', explanation: 'Профилът, който визуално разделя две полета. Съединенията и отнеманията не се изчисляват.' },
   { id: 'profile-dimensions', title: 'Размер A и Размер B', explanation: 'Неутрални временни полета. Професионалните им имена и технологично значение предстоят за потвърждение.' },
+  { id: '3d-camera', title: '3D камера', explanation: 'Orbit, zoom, pan и фиксираните изгледи променят само гледната точка, не изделието.' },
+  { id: '3d-visibility', title: '3D видимост', explanation: 'Скрива или показва концептуални части само в текущия преглед.' },
+  { id: '3d-depth', title: 'Концептуална дълбочина', explanation: 'Временна view-only стойност. Не използва Размер A/B и не е потвърдено профилно сечение.' },
+  { id: '3d-exploded', title: 'Разглобен изглед', explanation: 'Раздалечава частите визуално. Не показва ред или технология на сглобяване.' },
 ]
 export const contextualHelp = Object.fromEntries(entries.map((entry) => [entry.id, entry])) as Record<string, ContextHelpEntry>
