@@ -2,3 +2,4 @@
 *.png -text -diff
 *.wasm -text -diff
 *.gz -text -diff
+*.ico -text -diff

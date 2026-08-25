@@ -2,6 +2,8 @@ import { useMemo, useState } from 'react'
 import './App.css'
 import './importCenter.css'
 import './help.css'
+import './contextHelp.css'
+import './localLauncher.css'
 import { OperationsPanel } from './components/OperationsPanel'
 import { ProfilePanel } from './components/ProfilePanel'
 import { ProfileWorkspace } from './components/ProfileWorkspace'
@@ -25,6 +27,7 @@ import { validateAll, validateOperation } from './validation'
 import type { CapturedDrawingProduct } from './drawingImportTypes'
 
 function App() {
+  const isLocalApplication = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
   const [project, setProject] = useState(defaultProject)
   const [profile, setProfile] = useState<Profile>(defaultProfile)
   const [standaloneOrientation, setStandaloneOrientation] = useState<Orientation>(defaultOrientation)
@@ -131,7 +134,7 @@ function App() {
   return (
     <div className="app-shell">
       <header>
-        <div className="brand-mark">FF</div>
+        <img className="nadezhda-header-logo" src="/branding/nadezhda-header.png" alt="Надежда - алуминиева и PVC дограма"/>
         <div className="brand">
           <h1>FacadeFlow Demo</h1>
           <p>Визуална подготовка на операции за алуминиеви профили</p>
@@ -139,6 +142,7 @@ function App() {
         <div className="safety-badge">
           <span>●</span> СИМУЛАЦИЯ — БЕЗ ВРЪЗКА С МАШИНА
         </div>
+        {isLocalApplication && <div className="local-application-badge">ЛОКАЛНО ПРИЛОЖЕНИЕ</div>}
         <button type="button" className="help-action" data-help-id="help-button" onClick={() => setShowHelp(true)}>Помощ</button>
         <button type="button" className="drawing-import-action" data-help-id="unified-import" onClick={() => setShowDrawingImport(true)}>Импортирай проект / чертеж</button>
       </header>

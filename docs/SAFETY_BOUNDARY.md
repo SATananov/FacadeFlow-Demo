@@ -68,3 +68,19 @@ FacadeFlow Demo Phase 01 + Phase 02A–02E + Phase 03A е локален виз�
 - Обиколката само намира елементи чрез стабилни `data-help-id`, scroll-ва и маркира; никога не задейства целта.
 - Няма persistence на completion/activity, analytics, tracking, network или автоматичен fixture import.
 - Обясненията разграничават човешкото `VERIFIED` от технологично одобрение и винаги оставят `machineReady: false`.
+
+## Phase 03E — граница на локалния launcher
+
+- Custom Node server обслужва само `dist` и bind-ва изключително към `127.0.0.1`; не е backend API и няма upload/write/mutation route.
+- Launcher-ът не инсталира dependencies, не иска administrator права и не променя firewall, execution policy или Windows startup.
+- Няма LAN/wildcard bind, online tunnel, external CDN, telemetry, analytics, log files или remote logging.
+- Localhost badge обозначава начина на стартиране, но не променя `simulationOnly`, human-review gates или `machineReady: false`.
+- Ctrl+C или затваряне на притежаващия terminal спира приложението; няма service, tray, background restart или отделен stop launcher.
+
+## Phase 03E.1 — граница на managed app window
+
+- Dedicated browser използва уникален `.facadeflow-runtime` profile, а не normal user profile; няма extensions, remote debugging или automation port.
+- Manager следи server child-а по direct IPC/process handle и browser instance-а по direct spawned process handle с уникален profile.
+- Cleanup може да спре само direct child PID-а, който manager-ът е създал; няма WMI, broad process-name или image-name termination.
+- Browser/app failure спира новия server; server failure не стартира browser. Няма shutdown HTTP endpoint.
+- Branding и Desktop shortcut не променят registry, firewall, execution policy или Windows startup и не превръщат проекта в инсталирано приложение/EXE.

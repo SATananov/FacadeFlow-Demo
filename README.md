@@ -9,7 +9,9 @@ npm install
 npm run dev
 ```
 
-Проверка: `npm run lint` и `npm run build`.
+Локална production версия: `npm run local`. Под Windows double-click върху `START_FACADEFLOW_LOCAL.cmd` отваря Nadezhda-branded dedicated Edge/Chrome app window с изолиран project-local profile. Затварянето му спира само matching server и затваря launcher terminal-а; `npm run local:serve` остава manual Ctrl+C режим. `CREATE_FACADEFLOW_DESKTOP_SHORTCUT.cmd` създава shortcut със supplied ICO. На нов компютър са необходими Node.js и еднократно ръчно `npm install`.
+
+Проверка: `npm run lint` и `npm run build`. Подробности и troubleshooting: [Локално стартиране под Windows](docs/LOCAL_WINDOWS_START_BG.md).
 
 ## Възможности
 
@@ -45,6 +47,7 @@ npm run dev
 - обща проверка на signature, extension, MIME, размер и SHA-256 преди route dispatch;
 - безопасен DWG/DXF header inspection и foundation metadata екран без CAD parsing или conversion.
 - вграден български Help Center с търсене, 12-стъпков quick start, guided tour и keyboard-accessible contextual help;
+- безопасен loopback Windows launcher и Node static server само за production `dist`, без backend API;
 
 ## Ограничения и безопасност
 
