@@ -69,7 +69,7 @@ export function DrawingSourceViewer({ source, page, onPage }: Props) {
     </div>
     {source.metadata.kind === 'PDF' && <div className="drawing-page-navigation"><button type="button" disabled={page <= 1} onClick={() => onPage(page - 1)}>← Предишна</button><label>Страница <input type="number" min="1" max={source.metadata.pageCount} value={page} onChange={(event) => onPage(Math.min(source.metadata.pageCount, Math.max(1, Number(event.target.value))))}/></label><span>от {source.metadata.pageCount}</span><button type="button" disabled={page >= source.metadata.pageCount} onClick={() => onPage(page + 1)}>Следваща →</button></div>}
     <div className={`drawing-source-stage ${fit ? 'fit' : ''}`}>
-      {source.metadata.kind === 'PDF' ? <canvas ref={canvas} aria-label={`Локално изобразена PDF страница ${page}`}/> : <img src={source.objectUrl} alt={`Импортирана техническа скица ${source.metadata.fileName}`} style={{ width: `${zoom * 100}%` }}/>} 
+      {source.metadata.kind === 'PDF' ? <canvas ref={canvas} aria-label={`Локално изобразена PDF страница ${page}`}/> : <img src={source.objectUrl} alt={`Импортирана техническа скица ${source.metadata.fileName}`} style={{ width: `${zoom * 100}%` }}/>}
     </div>
     {error && <p className="field-error" role="alert">{error}</p>}
     <p className="immutable-note">Оригиналът е само за преглед и не се променя.</p>
