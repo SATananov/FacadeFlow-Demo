@@ -31,3 +31,40 @@ FacadeFlow Demo Phase 01 + Phase 02A–02E + Phase 03A е локален виз�
 - Не се извършва OCR, AI анализ, автоматично измерване, извличане на мащаб, автоматичен избор на схема/профил или PDF-to-machine преобразуване.
 - Само човешки проверен запис със статус `VERIFIED` може да бъде зареден в продуктовия workflow. Промяна на размер или схема връща статуса към `NEEDS_REVIEW`.
 - Import export-ът съдържа метаданни, hash и ръчно въведени записи, но не съдържа оригиналния PDF/образ. Той е маркиран с `machineReady: false` и `requiresHumanApproval: true`.
+
+## Phase 03B — граница на OCR предложенията
+
+- OCR се изпълнява локално с пакетирани Tesseract.js worker, baseline WASM core и English trained data. Няма CDN, external AI/OCR API или backend endpoint.
+- OCR cache е изключен (`cacheMethod: none`); source, crop, jobs и audit trail не се пазят в `localStorage` или `IndexedDB`.
+- OCR разпознава English/Latin текст и числа. Кирилицата не е поддържана в Phase 03B и това ограничение е видимо за потребителя.
+- Суровият OCR текст остава непроменено evidence. Нормализацията и parser предложенията се показват отделно.
+- Нито едно предложение не се приема или прилага автоматично. Изискват се единично приемане, избор на целево поле и българско потвърждение със стара и нова стойност.
+- OCR няма целеви достъп до template ID, category, profile system/code, component operations, machine settings или verification status.
+- Промяна на ширина или височина на VERIFIED чернова използва съществуващата защита и връща `NEEDS_REVIEW`.
+- OCR evidence се добавя само като optional section в `.drawing-import.simulation.json`, маркиран с `ocrAutomaticallyApplied: false`, `machineReady: false` и `requiresHumanApproval: true`.
+
+## Phase 03C — граница на комбинирания анализ
+
+- Комбинираният анализ работи само върху изрично потвърдена локална crop зона и не променя оригиналния source.
+- Geometry ranking използва детерминирани coarse image features и typed REF-01–REF-17 геометрия. Не използва trained geometry model, cloud AI или външна референция.
+- „Демонстрационно сходство“ не е вероятност, класификация или автоматично решение.
+- OCR bounding boxes, dimension orientation и parser стойности са проследими предложения. Не се извличат мащаб или милиметри от pixels.
+- Нито схема, нито размер се приемат автоматично. Прилагането изисква решения за предложенията и финално човешко потвърждение по оригинала.
+- Profile system/code, component operations и machine settings не са target fields на комбинирания анализ.
+- Optional combined export evidence остава в `.drawing-import.simulation.json` с `automaticallyApplied: false`, `trainedGeometryModelUsed: false`, `machineReady: false` и `requiresHumanApproval: true`.
+
+## Phase 03D Foundation — граница на единния импортен център
+
+- Всички маршрути четат избрания файл локално и създават само in-memory source session с `simulationOnly: true`, `machineReady: false` и `requiresHumanApproval: true`.
+- Signature, extension, MIME, size и SHA-256 се проверяват преди route dispatch; името на файла никога не е единствено основание за доверие.
+- IMAGE/PDF използват съществуващите локални Phase 03A–03C потоци.
+- DWG/DXF са ограничени до header/signature metadata. Няма CAD entity parsing, render, conversion, shell execution, external iframe, cloud upload или online converter.
+- CSV/XLSX и FacadeFlow simulation JSON са foundation inspection маршрути без product creation, column mapping или session restore.
+- Import center не създава операции, не избира реални профили и не променя machine readiness.
+
+## Phase 03D.1 — граница на помощта
+
+- Help Center, guided tour и contextual popovers са read-only UI слой без достъп до project/product/profile/operation setters.
+- Обиколката само намира елементи чрез стабилни `data-help-id`, scroll-ва и маркира; никога не задейства целта.
+- Няма persistence на completion/activity, analytics, tracking, network или автоматичен fixture import.
+- Обясненията разграничават човешкото `VERIFIED` от технологично одобрение и винаги оставят `machineReady: false`.

@@ -1,0 +1,19 @@
+{
+  "schemaVersion": "demo-1",
+  "project": "FacadeFlow demo input pack",
+  "products": [
+    {
+      "product_ref": "DEMO-W01",
+      "template_id": "REF-04",
+      "category": "WINDOW",
+      "width_mm": 1400,
+      "height_mm": 1200,
+      "quantity": 1,
+      "status": "NEEDS_REVIEW",
+      "simulation_only": true
+    }
+  ],
+  "simulationOnly": true,
+  "machineReady": false,
+  "requiresHumanApproval": true
+}

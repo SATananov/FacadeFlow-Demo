@@ -1,0 +1,2 @@
+﻿product_ref,template_id,category,width_mm,height_mm,quantity,status,simulation_only
+DEMO-W01,REF-04,WINDOW,1400,1200,1,NEEDS_REVIEW,True

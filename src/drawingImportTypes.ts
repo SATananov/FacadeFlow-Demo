@@ -37,6 +37,12 @@ export interface CapturedDrawingProduct extends DrawingProductDraft {
   sourceSha256: string
   createdAt: string
   updatedAt: string
+  recognitionDerived?: boolean
+  automaticallyPopulated?: boolean
+  humanVerified?: boolean
+  machineReady?: false
+  simulationOnly?: true
+  sourceCrop?: { x: number; y: number; width: number; height: number }
 }
 
 export interface DrawingImportValidation {

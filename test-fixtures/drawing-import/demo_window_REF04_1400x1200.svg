@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1800" height="1500" viewBox="0 0 1800 1500">
+<rect width="1800" height="1500" fill="white"/><g fill="#e4f3f7" stroke="#41555c" stroke-width="8">
+<rect x="220" y="220" width="1360" height="980"/><rect x="245" y="245" width="1310" height="930" fill="none" stroke="#789197" stroke-width="3"/>
+<line x1="900" y1="245" x2="900" y2="1175"/></g><g fill="none" stroke="#ee681e" stroke-width="5">
+<path d="M245 245 L900 710 L245 1175"/><path d="M1555 245 L900 710 L1555 1175"/></g>
+<g stroke="#3c4b50" stroke-width="3"><line x1="220" y1="130" x2="1580" y2="130"/><line x1="220" y1="105" x2="220" y2="155"/><line x1="1580" y1="105" x2="1580" y2="155"/><line x1="1665" y1="220" x2="1665" y2="1200"/><line x1="1640" y1="220" x2="1690" y2="220"/><line x1="1640" y1="1200" x2="1690" y2="1200"/></g>
+<g font-family="Arial" font-size="34" fill="#142025"><text x="900" y="100" text-anchor="middle">1400 mm</text><text x="1695" y="710">1200 mm</text><text x="220" y="1280">DEMO-W01 | REF-04 | QTY 1</text><text x="220" y="1350" fill="#b43719">SIMULATION ONLY - NOT FOR PRODUCTION</text></g></svg>

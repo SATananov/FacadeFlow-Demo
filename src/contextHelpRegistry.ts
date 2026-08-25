@@ -1,0 +1,12 @@
+import type { ContextHelpEntry } from './helpTypes'
+const entries: ContextHelpEntry[] = [
+  { id: 'orientation', title: 'Ориентация', explanation: 'Определя дали X координатата започва от левия или десния край на профила.' },
+  { id: 'x', title: 'X', explanation: 'Позиция по дължината на профила спрямо избраното начало.' }, { id: 'y', title: 'Y', explanation: 'Напречна позиция в рамките на ширината на профила.' }, { id: 'z', title: 'Z', explanation: 'Демонстрационна референция за инструмент или дълбочина; не е машинна ос.' },
+  { id: 'diameter', title: 'Диаметър', explanation: 'Размер на демонстрационната пробивна операция.' }, { id: 'depth', title: 'Дълбочина', explanation: 'Демонстрационно навлизане на операцията; изисква технологична проверка.' },
+  { id: 'template', title: 'Схема', explanation: 'REF визуална концепция на изделието, която трябва да се сравни с оригинала.' }, { id: 'source-page', title: 'Страница на източника', explanation: 'Страницата, от която е въведен или предложен конкретният запис.' },
+  { id: 'draft', title: 'DRAFT', explanation: 'Чернова — записът все още се попълва.' }, { id: 'needs-review', title: 'NEEDS_REVIEW', explanation: 'Изисква проверка — данните са въведени или предложени, но не са потвърдени.' }, { id: 'verified', title: 'VERIFIED', explanation: 'Проверено от човек — може да се зареди в работния процес, но не е готово за машина.' },
+  { id: 'ocr-confidence', title: 'OCR confidence', explanation: 'Оценка на разпознаването, а не доказателство за коректност. Ниските стойности обичайно се редактират или отхвърлят.' }, { id: 'similarity', title: 'Демонстрационно сходство', explanation: 'Помощна подредба спрямо REF схеми; не е вероятност или автоматично решение.' },
+  { id: 'machine-ready', title: 'machineReady: false', explanation: 'Няма технологично одобрение и не може да бъде изпратено към машина.' }, { id: 'sha256', title: 'SHA-256', explanation: 'Локален цифров отпечатък за проследимост на източника; не разкрива съдържанието му.' },
+  { id: 'cad-status', title: 'DWG/DXF статус', explanation: 'Файлът е проверен безопасно само по заглавна част или структура; не е визуализиран или преобразуван.' }, { id: 'simulation-export', title: 'Симулационен export', explanation: 'Създава само тестов JSON. Не създава MECAL, LTE, XM, G-code или CNC файл.' },
+]
+export const contextualHelp = Object.fromEntries(entries.map((entry) => [entry.id, entry])) as Record<string, ContextHelpEntry>

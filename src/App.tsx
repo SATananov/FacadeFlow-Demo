@@ -1,5 +1,7 @@
 import { useMemo, useState } from 'react'
 import './App.css'
+import './importCenter.css'
+import './help.css'
 import { OperationsPanel } from './components/OperationsPanel'
 import { ProfilePanel } from './components/ProfilePanel'
 import { ProfileWorkspace } from './components/ProfileWorkspace'
@@ -7,6 +9,9 @@ import { ProductPreview } from './components/ProductPreview'
 import { ProductTemplatePicker } from './components/ProductTemplatePicker'
 import { SelectedComponentContext } from './components/SelectedComponentContext'
 import { DrawingImportWorkspace } from './components/DrawingImportWorkspace'
+import { GuidedTour } from './components/GuidedTour'
+import { HelpCenter } from './components/HelpCenter'
+import { ContextHelp } from './components/ContextHelp'
 import { operationsForComponent, type ComponentOperations } from './componentOperations'
 import { exportComponentSimulation, exportSimulation } from './exportSimulation'
 import { affectedComponentIds, calculateProductComponents, productGeometrySignature } from './productCalculations'
@@ -36,6 +41,8 @@ function App() {
   const [showProductPreview, setShowProductPreview] = useState(false)
   const [showTemplatePicker, setShowTemplatePicker] = useState(false)
   const [showDrawingImport, setShowDrawingImport] = useState(false)
+  const [showHelp, setShowHelp] = useState(false)
+  const [showTour, setShowTour] = useState(false)
   const [importPreview, setImportPreview] = useState<{ product: ProductParameters; project: string } | null>(null)
 
   const productTemplate = useMemo(() => getProductTemplate(product.templateId), [product.templateId])
@@ -132,7 +139,8 @@ function App() {
         <div className="safety-badge">
           <span>●</span> СИМУЛАЦИЯ — БЕЗ ВРЪЗКА С МАШИНА
         </div>
-        <button type="button" className="drawing-import-action" onClick={() => setShowDrawingImport(true)}>Импортирай техническа скица</button>
+        <button type="button" className="help-action" data-help-id="help-button" onClick={() => setShowHelp(true)}>Помощ</button>
+        <button type="button" className="drawing-import-action" data-help-id="unified-import" onClick={() => setShowDrawingImport(true)}>Импортирай проект / чертеж</button>
       </header>
       <main>
         <div className={`mode-indicator ${activeComponent ? 'component-mode' : ''}`}>
@@ -208,6 +216,7 @@ function App() {
         </div>
         <section
           className={`validation-bar ${validation.valid ? 'valid' : 'invalid'}`}
+          data-help-id="validation-status"
           aria-live="polite"
         >
           <div>
@@ -224,13 +233,14 @@ function App() {
           <button
             type="button"
             className="export"
+            data-help-id="simulation-export"
             disabled={!validation.valid}
             aria-describedby="readiness-explanation"
             title={!validation.valid ? 'Export-ът е недостъпен, докато има грешки.' : undefined}
             onClick={performExport}
           >
             ⇩ Експортирай тестов JSON
-          </button>
+          </button><ContextHelp helpId="simulation-export"/><ContextHelp helpId="draft"/><ContextHelp helpId="needs-review"/><ContextHelp helpId="verified"/><ContextHelp helpId="machine-ready"/>
         </section>
       </main>
       <footer>FacadeFlow Demo · Phase 01 + 02A + 02B · Само визуална симулация</footer>
@@ -272,6 +282,15 @@ function App() {
           onOpenComponent={() => undefined}
           onClose={() => setImportPreview(null)}
         />
+      )}
+      {showHelp && (
+        <HelpCenter
+          onClose={() => setShowHelp(false)}
+          onStartTour={() => { setShowHelp(false); setShowTour(true) }}
+        />
+      )}
+      {showTour && (
+        <GuidedTour onClose={() => setShowTour(false)}/>
       )}
     </div>
   )

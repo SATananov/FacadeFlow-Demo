@@ -1,4 +1,4 @@
-# FacadeFlow Demo — Phase 01 + Phase 02A–02E + Phase 03A
+# FacadeFlow Demo — Phase 01 + Phase 02A–02E + Phase 03A–03D Foundation
 
 Безопасен визуален прототип за подготовка на операции върху един алуминиев профил. Позволява примерни размери, позициониране на пробивания и фрезования и визуална проверка на реда им.
 
@@ -35,6 +35,16 @@ npm run dev
 - ръчно заснемане, проверка, филтриране и дублиране на изделия с проследимост към източника;
 - зареждане във workflow само на записи със статус `VERIFIED`;
 - локален `.drawing-import.simulation.json` export без оригиналния файл.
+- избор на зона върху образ или PDF страница и локално assisted OCR чрез Tesseract.js;
+- суров и нормализиран OCR текст, confidence, типизирани размерни предложения и in-memory audit trail;
+- изрично приемане, целево поле и човешко потвърждение преди прилагане на предложение.
+- отделен режим „Избери изделие с размерите“ за комбиниран локален review пакет;
+- top-three REF предложения чрез детерминирано сравнение на aspect ratio, секции, делители и coarse edge features;
+- OCR box traceability, предложения за общи размери/количество/референция и финален human-confirmation gate.
+- единен локален импортен център с предварителен избор на IMAGE, PDF, CAD, TABULAR или FacadeFlow simulation маршрут;
+- обща проверка на signature, extension, MIME, размер и SHA-256 преди route dispatch;
+- безопасен DWG/DXF header inspection и foundation metadata екран без CAD parsing или conversion.
+- вграден български Help Center с търсене, 12-стъпков quick start, guided tour и keyboard-accessible contextual help;
 
 ## Ограничения и безопасност
 
@@ -48,4 +58,10 @@ Phase 02E пресъздава референтните концепции па�
 
 Phase 03A обработва избрания PDF или образ само в паметта на браузъра. Файлът не се качва и не се записва в `localStorage` или `IndexedDB`. Няма OCR, AI разпознаване, автоматично измерване, извличане на мащаб, DXF/DWG parsing или автоматичен избор на профил. Потребителят въвежда всички продуктови данни ръчно. Вградените PDF действия, връзки, скриптове и прикачени файлове не се изпълняват.
 
-JSON export-ът е означен с `simulationOnly: true`. Вижте [границата за безопасност](docs/SAFETY_BOUNDARY.md), [Phase 01](docs/PHASE_01_ACCEPTANCE.md), [Phase 02A](docs/PHASE_02A_ACCEPTANCE.md), [Phase 02B](docs/PHASE_02B_ACCEPTANCE.md), [Phase 02C](docs/PHASE_02C_ACCEPTANCE.md), [Phase 02D](docs/PHASE_02D_ACCEPTANCE.md), [Phase 02E](docs/PHASE_02E_ACCEPTANCE.md) и [Phase 03A](docs/PHASE_03A_ACCEPTANCE.md).
+Phase 03B добавя само подпомагащи OCR предложения. Tesseract worker, baseline WASM core и English trained data са локални assets; cache е изключен и няма CDN или външна OCR услуга. Поддържат се English/Latin текст и числа. Българският trained-data пакет не е включен в тази фаза. OCR резултатът е недоверено доказателство: никога не се прилага автоматично и не избира схема, категория, профил или производствени настройки.
+
+Phase 03C комбинира потвърдена crop зона на изделие, размерни линии и означения. Сравнението с REF-01–REF-17 използва само съществуващата типизирана демонстрационна геометрия и прости explainable features; не се използва trained geometry model. Сходството не е вероятност. Схема и размери се прилагат само след отделни решения и checkbox „Проверих схемата и размерите по оригиналния чертеж.“
+
+След ръчно стартирания Phase 03C анализ може да се създаде автоматично попълнена, но непроверена editable чернова. Тя винаги е `NEEDS_REVIEW`, не създава операции и не се зарежда в component workflow преди отделната проверка на схема и всички размери. Автоматично откриване на множество изделия върху цяла страница остава извън тази фаза.
+
+JSON export-ът е означен с `simulationOnly: true`. Вижте [границата за безопасност](docs/SAFETY_BOUNDARY.md), [Phase 03D](docs/PHASE_03D_ACCEPTANCE.md), [Phase 03D.1 Help](docs/PHASE_03D_1_HELP_ACCEPTANCE.md), [ръководството](docs/USER_GUIDE_BG.md) и [матрицата на форматите](docs/IMPORT_FORMAT_MATRIX.md).
