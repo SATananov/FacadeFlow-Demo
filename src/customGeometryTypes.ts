@@ -29,6 +29,7 @@ export interface CustomProduct {
   width: number
   height: number
   frameProfileId: string
+  frameCreated: boolean
   mullionProfileId?: string
   geometry: CustomGeometryNode
   status: CustomReviewStatus
@@ -40,4 +41,3 @@ export interface CustomProduct {
 }
 
 export interface GeometryRect { x: number; y: number; width: number; height: number }
-

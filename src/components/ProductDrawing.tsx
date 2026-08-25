@@ -3,10 +3,13 @@ import { OpeningSymbol } from './OpeningSymbol'
 import { SlidingSymbol } from './SlidingSymbol'
 import { fieldComponentPrefix } from '../productCalculations'
 import { getJunctionPanelFraction } from '../productTemplates'
+import type { DimensionAnnotation, DimensionVisibility } from '../dimensionTypes'
+import { defaultDimensionVisibility } from '../dimensionTypes'
+import { ProductDimensions2D } from './ProductDimensions2D'
 
-interface Props { product: ProductParameters; template: ProductTemplate; selectedComponentId: string | null; onSelectComponent: (componentId: string) => void }
+interface Props { product: ProductParameters; template: ProductTemplate; selectedComponentId: string | null; onSelectComponent: (componentId: string) => void; annotations?: DimensionAnnotation[]; dimensionVisibility?: DimensionVisibility }
 
-export function ProductDrawing({ product, template, selectedComponentId, onSelectComponent }: Props) {
+export function ProductDrawing({ product, template, selectedComponentId, onSelectComponent, annotations = [], dimensionVisibility = defaultDimensionVisibility }: Props) {
   const maxWidth = 560, maxHeight = 390
   const scale = Math.min(maxWidth / product.width, maxHeight / product.height)
   const width = product.width * scale, height = product.height * scale
@@ -20,8 +23,6 @@ export function ProductDrawing({ product, template, selectedComponentId, onSelec
   }
   return <svg className="product-drawing" viewBox="0 0 800 580" role="img" aria-label={`Пропорционална демонстрационна визуализация, схема ${template.displayNumber} ${template.name}`}>
     <defs><marker id="product-arrow" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto-start-reverse"><path d="M8 0L0 4L8 8" fill="#607078" /></marker></defs>
-    <line x1={x} y1="42" x2={x + width} y2="42" className="product-dimension" markerStart="url(#product-arrow)" markerEnd="url(#product-arrow)"/><line x1={x} y1="55" x2={x} y2={y} className="product-guide"/><line x1={x + width} y1="55" x2={x + width} y2={y} className="product-guide"/><text x={x + width / 2} y="29" className="product-dimension-label">{product.width} mm</text>
-    <line x1="75" y1={y} x2="75" y2={y + height} className="product-dimension" markerStart="url(#product-arrow)" markerEnd="url(#product-arrow)"/><line x1="88" y1={y} x2={x} y2={y} className="product-guide"/><line x1="88" y1={y + height} x2={x} y2={y + height} className="product-guide"/><text x="53" y={y + height / 2} className="product-dimension-label vertical">{product.height} mm</text>
     <rect x={x} y={y} width={width} height={height} className="product-frame"/><rect x={innerX} y={innerY} width={innerWidth} height={innerHeight} className="product-glass"/>
     {template.fields.map((field) => {
       const fx = innerX + field.x * innerWidth + 4, fy = innerY + field.y * innerHeight + 4, fw = field.width * innerWidth - 8, fh = field.height * innerHeight - 8
@@ -36,5 +37,6 @@ export function ProductDrawing({ product, template, selectedComponentId, onSelec
     {selectableLine('FRAME-TOP-01', 'горен профил на рамката', x, y, x + width, y)}{selectableLine('FRAME-BOTTOM-01', 'долен профил на рамката', x, y + height, x + width, y + height)}{selectableLine('FRAME-LEFT-01', 'ляв профил на рамката', x, y, x, y + height)}{selectableLine('FRAME-RIGHT-01', 'десен профил на рамката', x + width, y, x + width, y + height)}
     <text x={x + width / 2} y={y - 12} className="product-part-label">Горен профил</text><text x={x + width / 2} y={y + height + 22} className="product-part-label">Долен профил</text><text x={x - 12} y={y + height / 2} className="product-part-label side" textAnchor="middle">Ляв профил</text><text x={x + width + 12} y={y + height / 2} className="product-part-label side" textAnchor="middle">Десен профил</text>
     {template.slidingSymbols.filter((symbol) => symbol.notation === 'JUNCTION_BIDIRECTIONAL').map((symbol) => { const centerX = innerX + symbol.x * innerWidth, centerY = innerY + symbol.y * innerHeight; return <SlidingSymbol key={symbol.id} centerX={centerX} centerY={centerY} panelWidth={getJunctionPanelFraction(template, symbol.x) * innerWidth} availableWidth={Math.min(centerX - innerX, innerX + innerWidth - centerX) * 2} availableHeight={innerHeight} drawingScale={2.2} notation={symbol.notation}/> })}
+    <ProductDimensions2D annotations={annotations} visibility={dimensionVisibility} project={(point) => ({ x: x + point.x * scale, y: y + point.y * scale })}/>
   </svg>
 }

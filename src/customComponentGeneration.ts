@@ -35,6 +35,7 @@ function nestedComponents(node: CustomGeometryNode, bounds: GeometryRect, produc
 }
 
 export function generateCustomComponents(product: CustomProduct, profiles: CatalogueProfile[]): CustomComponent[] {
+  if (!product.frameCreated) return []
   const common = { role: 'FRAME' as const, profileId: product.frameProfileId, profileCode: profileCode(profiles, product.frameProfileId), sourcePath: 'frame-root', calculationStatus: 'PROVISIONAL' as const, requiresExpertFormula: true as const }
   return [
     { ...common, id: 'FRAME-TOP-01', label: 'Горен профил', nominalLength: product.width, orientation: 'horizontal' },

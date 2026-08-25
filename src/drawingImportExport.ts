@@ -2,6 +2,7 @@ import type { CapturedDrawingProduct, DrawingImportValidation, DrawingSourceMeta
 import type { OcrAuditEntry, OcrJob } from './ocrTypes'
 import type { CombinedAnalysisJob, CombinedAuditEntry } from './combinedAnalysisTypes'
 import type { RecognitionDerivedDraft } from './combinedProvisionalDraft'
+import { templateReferenceToOrderedModel } from './structuredProductWorkflow'
 
 interface Input {
   source: DrawingSourceMetadata
@@ -22,6 +23,7 @@ export function exportDrawingImportSimulation({ source, products, validation, oc
     requiresHumanApproval: true,
     source,
     capturedProducts: products,
+    orderedStructuredModels: products.map((product) => ({ productId: product.id, model: templateReferenceToOrderedModel(product.templateId, product.width, product.height, product.status === 'VERIFIED') })),
     reviewStatuses: products.map(({ id, status }) => ({ id, status })),
     validation,
     ...(ocrJobs.length ? { ocr: { ocrAssisted: true, ocrAutomaticallyApplied: false, simulationOnly: true, machineReady: false, requiresHumanApproval: true, jobs: ocrJobs, applicationAuditTrail: ocrAudit } } : {}),

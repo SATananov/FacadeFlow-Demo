@@ -10,6 +10,10 @@
 
 3D е концептуална проекция само от structured product data. `conceptualDepthMm` не произлиза от Размер A/B. Няма точни сечения, hardware модел, производствена геометрия или 3D production export. Three.js ресурсите са в локалния bundle; няма CDN/cloud viewer. Scene metadata е `conceptualOnly: true`, `productionGeometryApproved: false`, `machineReady: false`.
 
+## Phase 04D
+
+2D/3D annotations са един view-only слой от project geometry. Няма production deductions, tolerances или exact section. OCR/CAD/manual dimension evidence пази immutable source traceability; само individually accepted и human-confirmed values участват. Unresolved/conflicting стойности не се прилагат и `machineReady` остава `false`.
+
 FacadeFlow Demo Phase 01 + Phase 02A–02E + Phase 03A е локален визуален прототип. Файловите export-и са единствено четими симулационни JSON файлове с `simulationOnly: true`, включително `.drawing-import.simulation.json`. Прегледът на изделието може да се отпечата само чрез стандартния диалог на браузъра.
 
 ## Изрично извън обхвата

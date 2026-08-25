@@ -1,4 +1,5 @@
 import type { ProductType } from './productTypes'
+import type { ImportedDimensionEvidence } from './dimensionTypes'
 
 export type DrawingFileKind = 'PDF' | 'PNG' | 'JPEG'
 export type DrawingReviewStatus = 'DRAFT' | 'NEEDS_REVIEW' | 'VERIFIED'
@@ -43,6 +44,7 @@ export interface CapturedDrawingProduct extends DrawingProductDraft {
   machineReady?: false
   simulationOnly?: true
   sourceCrop?: { x: number; y: number; width: number; height: number }
+  dimensionEvidence?: ImportedDimensionEvidence[]
 }
 
 export interface DrawingImportValidation {

@@ -4,8 +4,11 @@ import type { CustomProduct } from './customGeometryTypes'
 import type { CatalogueProfile } from './profileCatalogueTypes'
 import { barNode, CONCEPTUAL_GLASS_DEPTH_MM, createScene } from './threeDSceneBuilder'
 import type { Component3DNode, Product3DScene } from './threeDTypes'
+import { customToOrderedModel } from './structuredProductWorkflow'
 
 export function customProductTo3DScene(product: CustomProduct, profiles: CatalogueProfile[], conceptualDepthMm: number): Product3DScene {
+  const orderedModel = customToOrderedModel(product)
+  if (!orderedModel.humanReviewed) throw new Error('Концептуалният 3D преглед изисква човешка проверка на структурирания модел.')
   const frameFace = Math.max(20, Math.min(product.width, product.height) * .045), dividerFace = frameFace * .7, sashFace = frameFace * .55
   const components = generateCustomComponents(product, profiles), byId = new Map(components.map((item) => [item.id, item]))
   const nodes: Component3DNode[] = [

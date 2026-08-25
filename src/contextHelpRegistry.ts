@@ -16,5 +16,9 @@ const entries: ContextHelpEntry[] = [
   { id: '3d-visibility', title: '3D видимост', explanation: 'Скрива или показва концептуални части само в текущия преглед.' },
   { id: '3d-depth', title: 'Концептуална дълбочина', explanation: 'Временна view-only стойност. Не използва Размер A/B и не е потвърдено профилно сечение.' },
   { id: '3d-exploded', title: 'Разглобен изглед', explanation: 'Раздалечава частите визуално. Не показва ред или технология на сглобяване.' },
+  { id: 'dimension-annotations', title: 'Размерни означения', explanation: 'Показват проектни или геометрично изведени стойности. Производствени отнемания и допуски не са приложени.' },
+  { id: 'overall-dimensions', title: 'Общи размери', explanation: 'Ширина и височина от текущия структуриран продукт или човешки потвърден import evidence.' },
+  { id: 'field-dimensions', title: 'Размери на полета', explanation: 'Детерминистично изведени от текущата REF или custom split геометрия.' },
+  { id: 'divider-dimensions', title: 'Позиции на делители', explanation: 'Проектни позиции спрямо началото на изделието, без производствени отнемания.' },
 ]
 export const contextualHelp = Object.fromEntries(entries.map((entry) => [entry.id, entry])) as Record<string, ContextHelpEntry>

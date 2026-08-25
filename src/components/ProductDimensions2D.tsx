@@ -1,0 +1,5 @@
+import type { DimensionAnnotation, DimensionPoint, DimensionVisibility } from '../dimensionTypes'
+import { DimensionLine2D } from './DimensionLine2D'
+interface Props { annotations: DimensionAnnotation[]; visibility: DimensionVisibility; project: (point: DimensionPoint) => { x: number; y: number } }
+const shown = (item: DimensionAnnotation, value: DimensionVisibility) => value.all && (item.type.startsWith('OVERALL_') ? value.overall : item.type.startsWith('FIELD_') ? value.fields : item.type.includes('DIVIDER') ? value.dividers : item.type === 'COMPONENT_NOMINAL_LENGTH' ? value.selectedComponent : false)
+export function ProductDimensions2D({ annotations, visibility, project }: Props) { return <g className="product-dimensions-2d"><defs><marker id="technical-dimension-arrow" markerWidth="7" markerHeight="7" refX="3.5" refY="3.5" orient="auto-start-reverse"><path d="M7 0L0 3.5L7 7"/></marker></defs>{annotations.filter((item) => item.axis !== 'Z' && shown(item, visibility)).map((item) => <DimensionLine2D key={item.id} annotation={item} project={project}/>)}</g> }

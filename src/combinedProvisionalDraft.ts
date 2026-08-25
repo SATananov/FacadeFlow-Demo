@@ -29,7 +29,7 @@ export interface RecognitionDerivedDraft {
   unresolvedCandidateIds: string[]
 }
 
-const candidateFor = (job: CombinedAnalysisJob, type: CombinedCandidate['type']) => job.candidates.find((candidate) => candidate.type === type)
+const candidateFor = (job: CombinedAnalysisJob, type: CombinedCandidate['type']) => job.candidates.find((candidate) => candidate.type === type && candidate.status === 'ACCEPTED')
 const numeric = (candidate?: CombinedCandidate) => { const value = Number(candidate?.normalizedValue.replace(',', '.')); return Number.isFinite(value) && value >= ocrLimits.minimumDimension && value <= ocrLimits.maximumDimension ? value : null }
 
 export function generateProvisionalDraft(job: CombinedAnalysisJob, sourceFileName: string): RecognitionDerivedDraft {

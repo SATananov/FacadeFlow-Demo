@@ -1,0 +1,20 @@
+import type { CombinedAnalysisJob, CombinedCandidateType } from './combinedAnalysisTypes'
+import type { RecognitionDerivedDraft } from './combinedProvisionalDraft'
+import type { DimensionType, ImportedDimensionEvidence } from './dimensionTypes'
+import type { CapturedDrawingProduct, DrawingProductDraft } from './drawingImportTypes'
+
+const dimensionType = (type: CombinedCandidateType): DimensionType | null => type === 'OVERALL_WIDTH' ? 'OVERALL_WIDTH' : type === 'OVERALL_HEIGHT' ? 'OVERALL_HEIGHT' : type === 'SECTION_WIDTH' ? 'FIELD_WIDTH' : type === 'SECTION_HEIGHT' ? 'FIELD_HEIGHT' : type === 'GENERIC_DIMENSION' ? 'FIELD_WIDTH' : null
+export function evidenceFromCombinedAnalysis(job: CombinedAnalysisJob, draft: RecognitionDerivedDraft): ImportedDimensionEvidence[] {
+  const now = new Date().toISOString(), evidence = job.candidates.flatMap((candidate): ImportedDimensionEvidence[] => { const type = dimensionType(candidate.type); if (!type) return []; const numeric = Number(candidate.normalizedValue.replace(',', '.')), accepted = candidate.status === 'ACCEPTED' && Number.isFinite(numeric) && numeric > 0; return [{ id: `DIM-EVIDENCE-${candidate.id}`, type, rawValue: candidate.rawSourceText, ...(accepted ? { confirmedValue: numeric } : {}), unit: 'MM', origin: 'OCR_DERIVED', decision: candidate.status === 'ACCEPTED' ? 'ACCEPTED' : candidate.status === 'REJECTED' ? 'REJECTED' : 'UNRESOLVED', confidence: Math.min(candidate.ocrConfidence, candidate.parserConfidence), sourceFileName: draft.sourceFileName, sourceSha256: draft.sourceSha256, sourcePage: candidate.sourcePage, sourceCrop: candidate.sourceBox ?? draft.sourceCrop, createdAt: candidate.createdAt, updatedAt: now, humanConfirmed: accepted, machineReady: false }] })
+  const addManual = (type: 'OVERALL_WIDTH' | 'OVERALL_HEIGHT', value: number | null) => { if (value === null) return; const accepted = [...evidence].reverse().find((item) => item.type === type && item.decision === 'ACCEPTED'); if (accepted?.confirmedValue === value) return; evidence.push({ id: `DIM-EVIDENCE-MANUAL-${type}-${draft.id}`, type, rawValue: String(value), confirmedValue: value, unit: 'MM', origin: 'MANUALLY_ENTERED', decision: 'ACCEPTED', sourceFileName: draft.sourceFileName, sourceSha256: draft.sourceSha256, sourcePage: draft.sourcePage, sourceCrop: draft.sourceCrop, createdAt: now, updatedAt: now, humanConfirmed: true, machineReady: false }) }
+  addManual('OVERALL_WIDTH', draft.width); addManual('OVERALL_HEIGHT', draft.height)
+  return evidence
+}
+
+export function evidenceAfterManualEdit(item: CapturedDrawingProduct, next: DrawingProductDraft): ImportedDimensionEvidence[] {
+  const evidence = [...(item.dimensionEvidence ?? [])], now = new Date().toISOString()
+  const update = (type: 'OVERALL_WIDTH' | 'OVERALL_HEIGHT', previous: number, value: number) => { if (previous === value) return; evidence.push({ id: `DIM-EVIDENCE-MANUAL-${type}-${crypto.randomUUID()}`, type, rawValue: String(value), confirmedValue: value, unit: 'MM', origin: 'MANUALLY_ENTERED', decision: 'ACCEPTED', sourceFileName: item.sourceFileName, sourceSha256: item.sourceSha256, sourcePage: item.sourcePage, sourceCrop: item.sourceCrop, createdAt: now, updatedAt: now, humanConfirmed: true, machineReady: false }) }
+  update('OVERALL_WIDTH', item.width, next.width); update('OVERALL_HEIGHT', item.height, next.height)
+  return evidence
+}
+export function evidenceForManualCapture(draft: DrawingProductDraft, source: { fileName: string; sha256: string }): ImportedDimensionEvidence[] { const now = new Date().toISOString(); return ([['OVERALL_WIDTH', draft.width], ['OVERALL_HEIGHT', draft.height]] as const).map(([type, value]) => ({ id: `DIM-EVIDENCE-MANUAL-${type}-${crypto.randomUUID()}`, type, rawValue: String(value), confirmedValue: value, unit: 'MM', origin: 'MANUALLY_ENTERED', decision: 'ACCEPTED', sourceFileName: source.fileName, sourceSha256: source.sha256, sourcePage: draft.sourcePage, createdAt: now, updatedAt: now, humanConfirmed: true, machineReady: false })) }

@@ -6,6 +6,7 @@ import './contextHelp.css'
 import './localLauncher.css'
 import './customDesigner.css'
 import './threeDPreview.css'
+import './dimensions.css'
 import { OperationsPanel } from './components/OperationsPanel'
 import { ProfilePanel } from './components/ProfilePanel'
 import { ProfileWorkspace } from './components/ProfileWorkspace'
@@ -35,6 +36,7 @@ import type { ActiveProfileSelection, CatalogueProfile } from './profileCatalogu
 import { initialGeometry } from './customGeometryTree'
 import type { CustomProduct } from './customGeometryTypes'
 import { changedCustomComponentIds, generateCustomComponents, type CustomComponent } from './customComponentGeneration'
+import type { ImportedDimensionEvidence } from './dimensionTypes'
 
 function App() {
   const isLocalApplication = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
@@ -56,14 +58,15 @@ function App() {
   const [showDrawingImport, setShowDrawingImport] = useState(false)
   const [showHelp, setShowHelp] = useState(false)
   const [showTour, setShowTour] = useState(false)
-  const [importPreview, setImportPreview] = useState<{ product: ProductParameters; project: string } | null>(null)
+  const [importPreview, setImportPreview] = useState<{ product: ProductParameters; project: string; verified: boolean; evidence: ImportedDimensionEvidence[] } | null>(null)
   const [productFromVerifiedImport, setProductFromVerifiedImport] = useState(false)
+  const [importedDimensionEvidence, setImportedDimensionEvidence] = useState<ImportedDimensionEvidence[]>([])
   const [catalogueProfiles, setCatalogueProfiles] = useState<CatalogueProfile[]>(sampleCatalogueProfiles)
   const [activeProfileSelection, setActiveProfileSelection] = useState<ActiveProfileSelection>({ FRAME: 'profile-demo-frame-01', SASH: 'profile-demo-sash-01', MULLION: 'profile-demo-mullion-01' })
   const [showProfileCatalogue, setShowProfileCatalogue] = useState(false)
   const [showCustomDesigner, setShowCustomDesigner] = useState(false)
   const [activeCustomComponentId, setActiveCustomComponentId] = useState<string | null>(null)
-  const [customProduct, setCustomProduct] = useState<CustomProduct>(() => { const now = new Date().toISOString(); return { id: crypto.randomUUID(), name: 'Нестандартен прозорец 001', width: 1400, height: 1200, frameProfileId: 'profile-demo-frame-01', mullionProfileId: 'profile-demo-mullion-01', geometry: initialGeometry(), status: 'NEEDS_REVIEW', humanReviewConfirmed: false, createdAt: now, updatedAt: now, simulationOnly: true, machineReady: false } })
+  const [customProduct, setCustomProduct] = useState<CustomProduct>(() => { const now = new Date().toISOString(); return { id: crypto.randomUUID(), name: 'Нестандартен прозорец 001', width: 1400, height: 1200, frameProfileId: 'profile-demo-frame-01', frameCreated: false, mullionProfileId: 'profile-demo-mullion-01', geometry: initialGeometry(), status: 'DRAFT', humanReviewConfirmed: false, createdAt: now, updatedAt: now, simulationOnly: true, machineReady: false } })
 
   const productTemplate = useMemo(() => getProductTemplate(product.templateId), [product.templateId])
   const productComponents = useMemo(() => calculateProductComponents(product, profile.code), [product, profile.code])
@@ -116,6 +119,7 @@ function App() {
       cancelOperation()
     }
     setProductFromVerifiedImport(false)
+    setImportedDimensionEvidence([])
     setProduct(next)
     if (productErrors.length) setProductErrors(validateProduct(next).errors)
     return true
@@ -170,6 +174,7 @@ function App() {
     if (!loaded) return false
     setProject(item.projectReference)
     setProductFromVerifiedImport(true)
+    setImportedDimensionEvidence(item.dimensionEvidence ?? [])
     setShowDrawingImport(false)
     return true
   }
@@ -311,6 +316,7 @@ function App() {
           onOpenComponent={(component) => openComponent(component.id)}
           onClose={() => setShowProductPreview(false)}
           verifiedImport={productFromVerifiedImport}
+          importedDimensionEvidence={importedDimensionEvidence}
         />
       )}
       {showTemplatePicker && (
@@ -323,7 +329,7 @@ function App() {
       {showDrawingImport && (
         <DrawingImportWorkspace
           baseProduct={product}
-          onPreview={(previewProduct, previewProject) => setImportPreview({ product: previewProduct, project: previewProject })}
+          onPreview={(previewProduct, previewProject) => setImportPreview({ product: previewProduct, project: previewProject, verified: false, evidence: [] })}
           onLoadVerified={loadVerifiedDrawingProduct}
           onClose={() => setShowDrawingImport(false)}
         />
@@ -340,6 +346,9 @@ function App() {
           onSelectComponent={() => undefined}
           onOpenComponent={() => undefined}
           onClose={() => setImportPreview(null)}
+          importedSource
+          verifiedImport={importPreview.verified}
+          importedDimensionEvidence={importPreview.evidence}
         />
       )}
       {showHelp && (

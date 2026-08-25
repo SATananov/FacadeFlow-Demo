@@ -1,6 +1,7 @@
 import type { MachiningOperation, Orientation, Profile, ValidationResult } from './types'
 import type { ProductComponent, ProductParameters } from './productTypes'
 import { getProductTemplate } from './productTemplates'
+import { templateToOrderedModel } from './structuredProductWorkflow'
 interface ExportInput { project: string; profile: Profile; orientation: Orientation; operations: MachiningOperation[]; validation: ValidationResult }
 export function exportSimulation(input: ExportInput): void {
   const payload = { schemaVersion: '1.0', simulationOnly: true, ...input, generatedAt: new Date().toISOString() }
@@ -29,6 +30,7 @@ export function exportComponentSimulation(input: ComponentExportInput): void {
     simulationOnly: true,
     project: input.project,
     sourceProduct: input.sourceProduct,
+    orderedStructuredModel: templateToOrderedModel(input.sourceProduct),
     templateId: template.id,
     referenceNumber: template.displayNumber,
     category: template.libraryCategory,
@@ -42,6 +44,11 @@ export function exportComponentSimulation(input: ComponentExportInput): void {
     conceptualOnly: true,
     productionGeometryApproved: false,
     machineReady: false,
+    dimensionAnnotationsAvailable: true,
+    measurementMode: 'PROJECT_GEOMETRY',
+    productionDeductionsApplied: false,
+    manufacturingToleranceApplied: false,
+    exactProfileSectionApplied: false,
     selectedComponent: input.selectedComponent,
     selectedComponentNominalLength: input.selectedComponent.nominalLength,
     profile: input.profile,

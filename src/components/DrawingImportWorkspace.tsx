@@ -26,6 +26,7 @@ import { inspectImportFile } from '../importInspection'
 import { dispatchInspectedSource } from '../importRouteDispatch'
 import { createSourceSession } from '../sourceSession'
 import { ContextHelp } from './ContextHelp'
+import { evidenceAfterManualEdit, evidenceForManualCapture, evidenceFromCombinedAnalysis } from '../importedDimensionEvidence'
 
 interface Props {
   baseProduct: ProductParameters
@@ -127,10 +128,10 @@ export function DrawingImportWorkspace({ baseProduct, onPreview, onLoadVerified,
     setErrors(result.errors)
     if (!result.valid) return
     const now = new Date().toISOString()
-    if (editingId) setProducts((items) => items.map((item) => item.id === editingId ? { ...item, ...draft, updatedAt: now } : item))
+    if (editingId) setProducts((items) => items.map((item) => item.id === editingId ? { ...item, ...draft, dimensionEvidence: evidenceAfterManualEdit(item, draft), updatedAt: now } : item))
     else {
       const id = crypto.randomUUID()
-      setProducts((items) => [...items, { ...draft, id, sourceFileName: source.metadata.fileName, sourceSha256: source.metadata.sha256, createdAt: now, updatedAt: now }])
+      setProducts((items) => [...items, { ...draft, id, sourceFileName: source.metadata.fileName, sourceSha256: source.metadata.sha256, dimensionEvidence: evidenceForManualCapture(draft, source.metadata), createdAt: now, updatedAt: now }])
       setSourceSession((session) => session ? { ...session, linkedDraftIds: [...session.linkedDraftIds, id] } : session)
     }
     setDraft(blankDraft(page)); setEditingId(null); setErrors([])
@@ -201,7 +202,7 @@ export function DrawingImportWorkspace({ baseProduct, onPreview, onLoadVerified,
   const verifyProvisionalDraft = (verified: RecognitionDerivedDraft) => {
     if (!source) return
     const template = getProductTemplate(verified.templateId)
-    const record: CapturedDrawingProduct = { id: verified.id, projectReference: verified.projectReference, sourcePage: verified.sourcePage, productReference: verified.productReference, productCategory: template.category, templateId: verified.templateId, width: verified.width ?? 0, height: verified.height ?? 0, quantity: verified.quantity, notes: 'Автоматично генерирана чернова, потвърдена от човек.', drawingPosition: `Crop X ${Math.round(verified.sourceCrop.x)}, Y ${Math.round(verified.sourceCrop.y)}`, status: 'VERIFIED', sourceFileName: verified.sourceFileName, sourceSha256: verified.sourceSha256, createdAt: verified.createdAt, updatedAt: verified.updatedAt, recognitionDerived: true, automaticallyPopulated: true, humanVerified: true, machineReady: false, simulationOnly: true, sourceCrop: verified.sourceCrop }
+    const record: CapturedDrawingProduct = { id: verified.id, projectReference: verified.projectReference, sourcePage: verified.sourcePage, productReference: verified.productReference, productCategory: template.category, templateId: verified.templateId, width: verified.width ?? 0, height: verified.height ?? 0, quantity: verified.quantity, notes: 'Автоматично генерирана чернова, потвърдена от човек.', drawingPosition: `Crop X ${Math.round(verified.sourceCrop.x)}, Y ${Math.round(verified.sourceCrop.y)}`, status: 'VERIFIED', sourceFileName: verified.sourceFileName, sourceSha256: verified.sourceSha256, createdAt: verified.createdAt, updatedAt: verified.updatedAt, recognitionDerived: true, automaticallyPopulated: true, humanVerified: true, machineReady: false, simulationOnly: true, sourceCrop: verified.sourceCrop, dimensionEvidence: combinedJob ? evidenceFromCombinedAnalysis(combinedJob, verified) : [] }
     if (!onLoadVerified(record)) return
     setProducts((items) => [...items.filter((item) => item.id !== record.id), record])
     setSourceSession((session) => session && !session.linkedDraftIds.includes(record.id) ? { ...session, linkedDraftIds: [...session.linkedDraftIds, record.id] } : session)

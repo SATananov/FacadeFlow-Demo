@@ -3,9 +3,12 @@ import type { ProductParameters } from './productTypes'
 import { getProductTemplate } from './productTemplates'
 import { barNode, CONCEPTUAL_GLASS_DEPTH_MM, createScene } from './threeDSceneBuilder'
 import type { Component3DNode, Product3DScene } from './threeDTypes'
+import { templateToOrderedModel } from './structuredProductWorkflow'
 
 export function templateProductTo3DScene(product: ProductParameters, profileCode: string, conceptualDepthMm: number, verifiedImport = false): Product3DScene {
+  const orderedModel = templateToOrderedModel(product)
   const template = getProductTemplate(product.templateId), components = calculateProductComponents(product, profileCode), byId = new Map(components.map((item) => [item.id, item]))
+  if (!orderedModel.frame.exists) throw new Error('Шаблонът изисква валидни общи размери преди структуриране.')
   const face = product.frameFaceWidth, innerWidth = product.width - face * 2, innerHeight = product.height - face * 2, sashFace = face * .55
   const nodes: Component3DNode[] = [barNode('FRAME-TOP-01', 'FRAME', 'frame-root', profileCode, product.width, face, conceptualDepthMm, 0, product.height / 2 - face / 2), barNode('FRAME-BOTTOM-01', 'FRAME', 'frame-root', profileCode, product.width, face, conceptualDepthMm, 0, -product.height / 2 + face / 2), barNode('FRAME-LEFT-01', 'FRAME', 'frame-root', profileCode, face, product.height, conceptualDepthMm, -product.width / 2 + face / 2, 0), barNode('FRAME-RIGHT-01', 'FRAME', 'frame-root', profileCode, face, product.height, conceptualDepthMm, product.width / 2 - face / 2, 0)]
   template.dividers.forEach((divider) => { const x1 = -innerWidth / 2 + divider.x1 * innerWidth, x2 = -innerWidth / 2 + divider.x2 * innerWidth, y1 = innerHeight / 2 - divider.y1 * innerHeight, y2 = innerHeight / 2 - divider.y2 * innerHeight; nodes.push(divider.orientation === 'vertical' ? barNode(divider.id, 'DIVIDER', divider.id, profileCode, product.mullionWidth, Math.abs(y2 - y1), conceptualDepthMm * .9, x1, (y1 + y2) / 2) : barNode(divider.id, 'DIVIDER', divider.id, profileCode, Math.abs(x2 - x1), product.mullionWidth * .55, conceptualDepthMm * .9, (x1 + x2) / 2, y1)) })

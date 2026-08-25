@@ -1,0 +1,9 @@
+export type DimensionType = 'OVERALL_WIDTH' | 'OVERALL_HEIGHT' | 'FIELD_WIDTH' | 'FIELD_HEIGHT' | 'VERTICAL_DIVIDER_POSITION' | 'HORIZONTAL_DIVIDER_POSITION' | 'COMPONENT_NOMINAL_LENGTH' | 'CONCEPTUAL_DEPTH'
+export type DimensionAxis = 'X' | 'Y' | 'Z'
+export type DimensionOrigin = 'PROJECT_ENTERED' | 'GEOMETRY_DERIVED' | 'CONCEPTUAL' | 'OCR_DERIVED' | 'CAD_DERIVED' | 'MANUALLY_ENTERED'
+export type DimensionEvidenceDecision = 'UNRESOLVED' | 'ACCEPTED' | 'REJECTED'
+export interface DimensionPoint { x: number; y: number; z: number }
+export interface DimensionAnnotation { id: string; type: DimensionType; value: number; unit: 'MM'; sourceGeometryId: string; startPoint: DimensionPoint; endPoint: DimensionPoint; labelPosition: DimensionPoint; axis: DimensionAxis; visible: boolean; confidenceStatus: 'CONFIRMED' | 'DERIVED' | 'CONCEPTUAL' | 'UNRESOLVED'; origin: DimensionOrigin; productionApproved: false; machineReady: false; measurementMode: 'PROJECT_GEOMETRY'; productionDeductionsApplied: false; manufacturingToleranceApplied: false; exactProfileSectionApplied: false; conceptualOnly?: true; evidenceId?: string }
+export interface DimensionVisibility { all: boolean; overall: boolean; fields: boolean; dividers: boolean; selectedComponent: boolean; conceptualDepth: boolean }
+export const defaultDimensionVisibility: DimensionVisibility = { all: true, overall: true, fields: true, dividers: true, selectedComponent: true, conceptualDepth: true }
+export interface ImportedDimensionEvidence { id: string; type: DimensionType; rawValue: string; confirmedValue?: number; unit: 'MM'; origin: 'OCR_DERIVED' | 'CAD_DERIVED' | 'MANUALLY_ENTERED'; decision: DimensionEvidenceDecision; confidence?: number; sourceFileName: string; sourceSha256: string; sourcePage?: number; sourceCrop?: { x: number; y: number; width: number; height: number }; cadEntityReference?: string; createdAt: string; updatedAt: string; humanConfirmed: boolean; machineReady: false }
