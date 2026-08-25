@@ -1,4 +1,4 @@
-# FacadeFlow Demo — Phase 01 + Phase 02A–02E
+# FacadeFlow Demo — Phase 01 + Phase 02A–02E + Phase 03A
 
 Безопасен визуален прототип за подготовка на операции върху един алуминиев профил. Позволява примерни размери, позициониране на пробивания и фрезования и визуална проверка на реда им.
 
@@ -30,6 +30,11 @@ npm run dev
 - референтно извлечен каталог от 17 параметрични схеми в пет категории;
 - отделна безопасна нотация за демонстрационни посоки на плъзгане;
 - изрично прилагане на препоръчителни демонстрационни размери без автоматична подмяна.
+- локален import workspace за PDF, PNG и JPG/JPEG технически скици;
+- безопасен PDF преглед, навигация по страници, zoom и локален SHA-256;
+- ръчно заснемане, проверка, филтриране и дублиране на изделия с проследимост към източника;
+- зареждане във workflow само на записи със статус `VERIFIED`;
+- локален `.drawing-import.simulation.json` export без оригиналния файл.
 
 ## Ограничения и безопасност
 
@@ -41,4 +46,6 @@ Phase 02A/02B/02C използва само опростена демонстр�
 
 Phase 02E пресъздава референтните концепции параметрично, без да вгражда или разпространява външното растерно изображение. Стрелките при плъзгащите конструкции не потвърждават обков, релси или производствена конфигурация.
 
-JSON export-ът е означен с `simulationOnly: true`. Вижте [границата за безопасност](docs/SAFETY_BOUNDARY.md), [Phase 01](docs/PHASE_01_ACCEPTANCE.md), [Phase 02A](docs/PHASE_02A_ACCEPTANCE.md), [Phase 02B](docs/PHASE_02B_ACCEPTANCE.md), [Phase 02C](docs/PHASE_02C_ACCEPTANCE.md), [Phase 02D](docs/PHASE_02D_ACCEPTANCE.md) и [Phase 02E](docs/PHASE_02E_ACCEPTANCE.md).
+Phase 03A обработва избрания PDF или образ само в паметта на браузъра. Файлът не се качва и не се записва в `localStorage` или `IndexedDB`. Няма OCR, AI разпознаване, автоматично измерване, извличане на мащаб, DXF/DWG parsing или автоматичен избор на профил. Потребителят въвежда всички продуктови данни ръчно. Вградените PDF действия, връзки, скриптове и прикачени файлове не се изпълняват.
+
+JSON export-ът е означен с `simulationOnly: true`. Вижте [границата за безопасност](docs/SAFETY_BOUNDARY.md), [Phase 01](docs/PHASE_01_ACCEPTANCE.md), [Phase 02A](docs/PHASE_02A_ACCEPTANCE.md), [Phase 02B](docs/PHASE_02B_ACCEPTANCE.md), [Phase 02C](docs/PHASE_02C_ACCEPTANCE.md), [Phase 02D](docs/PHASE_02D_ACCEPTANCE.md), [Phase 02E](docs/PHASE_02E_ACCEPTANCE.md) и [Phase 03A](docs/PHASE_03A_ACCEPTANCE.md).

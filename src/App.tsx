@@ -6,6 +6,7 @@ import { ProfileWorkspace } from './components/ProfileWorkspace'
 import { ProductPreview } from './components/ProductPreview'
 import { ProductTemplatePicker } from './components/ProductTemplatePicker'
 import { SelectedComponentContext } from './components/SelectedComponentContext'
+import { DrawingImportWorkspace } from './components/DrawingImportWorkspace'
 import { operationsForComponent, type ComponentOperations } from './componentOperations'
 import { exportComponentSimulation, exportSimulation } from './exportSimulation'
 import { affectedComponentIds, calculateProductComponents, productGeometrySignature } from './productCalculations'
@@ -16,6 +17,7 @@ import { validateProduct } from './productValidation'
 import { defaultOrientation, defaultProfile, defaultProject, emptyOperation } from './sampleData'
 import type { MachiningOperation, OperationDraft, Orientation, Profile } from './types'
 import { validateAll, validateOperation } from './validation'
+import type { CapturedDrawingProduct } from './drawingImportTypes'
 
 function App() {
   const [project, setProject] = useState(defaultProject)
@@ -33,6 +35,8 @@ function App() {
   const [productErrors, setProductErrors] = useState<string[]>([])
   const [showProductPreview, setShowProductPreview] = useState(false)
   const [showTemplatePicker, setShowTemplatePicker] = useState(false)
+  const [showDrawingImport, setShowDrawingImport] = useState(false)
+  const [importPreview, setImportPreview] = useState<{ product: ProductParameters; project: string } | null>(null)
 
   const productTemplate = useMemo(() => getProductTemplate(product.templateId), [product.templateId])
   const productComponents = useMemo(() => calculateProductComponents(product, profile.code), [product, profile.code])
@@ -107,6 +111,15 @@ function App() {
     if (activeComponent) exportComponentSimulation({ project, profile: currentProfile, sourceProduct: product, selectedComponent: activeComponent, localOrientation: currentOrientation, operations, validation })
     else exportSimulation({ project, profile, orientation: standaloneOrientation, operations: standaloneOperations, validation })
   }
+  const loadVerifiedDrawingProduct = (item: CapturedDrawingProduct): boolean => {
+    if (item.status !== 'VERIFIED') return false
+    const template = getProductTemplate(item.templateId)
+    const loaded = changeProduct({ ...product, templateId: item.templateId, type: template.category, width: item.width, height: item.height })
+    if (!loaded) return false
+    setProject(item.projectReference)
+    setShowDrawingImport(false)
+    return true
+  }
 
   return (
     <div className="app-shell">
@@ -119,6 +132,7 @@ function App() {
         <div className="safety-badge">
           <span>●</span> СИМУЛАЦИЯ — БЕЗ ВРЪЗКА С МАШИНА
         </div>
+        <button type="button" className="drawing-import-action" onClick={() => setShowDrawingImport(true)}>Импортирай техническа скица</button>
       </header>
       <main>
         <div className={`mode-indicator ${activeComponent ? 'component-mode' : ''}`}>
@@ -237,6 +251,26 @@ function App() {
           selectedTemplateId={product.templateId}
           onSelect={selectTemplate}
           onClose={() => setShowTemplatePicker(false)}
+        />
+      )}
+      {showDrawingImport && (
+        <DrawingImportWorkspace
+          baseProduct={product}
+          onPreview={(previewProduct, previewProject) => setImportPreview({ product: previewProduct, project: previewProject })}
+          onLoadVerified={loadVerifiedDrawingProduct}
+          onClose={() => setShowDrawingImport(false)}
+        />
+      )}
+      {importPreview && (
+        <ProductPreview
+          product={importPreview.product}
+          project={importPreview.project || 'Чернова от скица'}
+          profileCode={profile.code}
+          profileSystem={profile.system}
+          selectedComponentId={null}
+          onSelectComponent={() => undefined}
+          onOpenComponent={() => undefined}
+          onClose={() => setImportPreview(null)}
         />
       )}
     </div>
