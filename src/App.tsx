@@ -155,6 +155,11 @@ function App() {
             onProduct={changeProduct}
             onProductPreview={openProductPreview}
             onChooseTemplate={() => setShowTemplatePicker(true)}
+            onApplyRecommendedDimensions={() => changeProduct({
+              ...product,
+              width: productTemplate.recommendedWidth,
+              height: productTemplate.recommendedHeight,
+            })}
           />
           <ProfileWorkspace
             profile={currentProfile}

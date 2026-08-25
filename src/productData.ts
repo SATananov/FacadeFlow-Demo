@@ -1,7 +1,7 @@
 import type { ProductParameters } from './productTypes'
 
 export const defaultProduct: ProductParameters = {
-  templateId: 'WINDOW-01',
+  templateId: 'REF-01',
   type: 'fixed',
   width: 1400,
   height: 1200,

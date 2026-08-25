@@ -1,7 +1,11 @@
 export type ProductType = 'fixed' | 'single' | 'double' | 'mixed' | 'triple' | 'four-field'
 export type OpeningDirection = 'left' | 'right'
-export type ProductFieldState = 'fixed' | 'opening'
-export type OpeningNotation = 'FIXED' | 'SIDE_TRIANGLE_LEFT' | 'SIDE_TRIANGLE_RIGHT' | 'TILT_PLACEHOLDER' | 'TILT_TURN_PLACEHOLDER'
+export type ConfirmedOpeningNotation = 'LEFT_OPENING' | 'RIGHT_OPENING'
+export type ProductFieldState = 'fixed' | 'opening' | 'sliding'
+export type OpeningNotation = 'FIXED' | 'SIDE_TRIANGLE_LEFT' | 'SIDE_TRIANGLE_RIGHT' | 'TILT_PLACEHOLDER' | 'TILT_TURN_PLACEHOLDER' | 'SLIDING_LEFT' | 'SLIDING_RIGHT' | 'SLIDING_BIDIRECTIONAL' | 'JUNCTION_BIDIRECTIONAL' | 'JUNCTION_OPPOSED_STACKED'
+export type TemplateCategory = 'WINDOWS' | 'BALCONY_DOORS' | 'SLIDING' | 'SINGLE_DOORS' | 'DOUBLE_DOORS'
+
+export interface NormalizedRect { x: number; y: number; width: number; height: number }
 
 export interface TemplateField {
   id: string
@@ -13,6 +17,9 @@ export interface TemplateField {
   state: ProductFieldState
   openingNotation: OpeningNotation
   openingDirection?: OpeningDirection
+  directionConfirmed?: boolean
+  confirmedOpeningNotation?: ConfirmedOpeningNotation
+  symbolBounds?: NormalizedRect
 }
 
 export interface TemplateDivider {
@@ -24,14 +31,26 @@ export interface TemplateDivider {
   y2: number
 }
 
+export interface TemplateSlidingSymbol {
+  id: string
+  x: number
+  y: number
+  notation: 'JUNCTION_BIDIRECTIONAL' | 'JUNCTION_OPPOSED_STACKED'
+}
+
 export interface ProductTemplate {
   id: string
   displayNumber: string
   name: string
   description: string
   category: ProductType
+  libraryCategory: TemplateCategory
   fields: TemplateField[]
   dividers: TemplateDivider[]
+  slidingSymbols: TemplateSlidingSymbol[]
+  recommendedWidth: number
+  recommendedHeight: number
+  referenceDerived: true
   simulationOnly: true
 }
 
@@ -61,5 +80,10 @@ export interface ProductComponent {
   suggestedRightAngle: number
   orientation: 'horizontal' | 'vertical'
   sourceProductType: ProductType
+  sourceTemplateId: string
   label: string
+  openingDirection?: OpeningDirection
+  openingNotation?: OpeningNotation
+  directionConfirmed?: boolean
+  confirmedOpeningNotation?: ConfirmedOpeningNotation
 }

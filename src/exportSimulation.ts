@@ -1,5 +1,6 @@
 import type { MachiningOperation, Orientation, Profile, ValidationResult } from './types'
 import type { ProductComponent, ProductParameters } from './productTypes'
+import { getProductTemplate } from './productTemplates'
 interface ExportInput { project: string; profile: Profile; orientation: Orientation; operations: MachiningOperation[]; validation: ValidationResult }
 export function exportSimulation(input: ExportInput): void {
   const payload = { schemaVersion: '1.0', simulationOnly: true, ...input, generatedAt: new Date().toISOString() }
@@ -22,11 +23,20 @@ interface ComponentExportInput {
 }
 
 export function exportComponentSimulation(input: ComponentExportInput): void {
+  const template = getProductTemplate(input.sourceProduct.templateId)
   const payload = {
     schemaVersion: '2.0',
     simulationOnly: true,
     project: input.project,
     sourceProduct: input.sourceProduct,
+    templateId: template.id,
+    referenceNumber: template.displayNumber,
+    category: template.libraryCategory,
+    fieldLayout: template.fields,
+    notationTypes: [...template.fields.map((field) => field.openingNotation), ...template.slidingSymbols.map((symbol) => symbol.notation)],
+    confirmedOpeningNotations: template.fields.flatMap((field) => field.confirmedOpeningNotation ? [field.confirmedOpeningNotation] : []),
+    referenceDerived: true,
+    requiresHumanApproval: true,
     selectedComponent: input.selectedComponent,
     selectedComponentNominalLength: input.selectedComponent.nominalLength,
     profile: input.profile,
