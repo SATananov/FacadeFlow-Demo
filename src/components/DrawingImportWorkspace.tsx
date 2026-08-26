@@ -27,6 +27,7 @@ import { dispatchInspectedSource } from '../importRouteDispatch'
 import { createSourceSession } from '../sourceSession'
 import { ContextHelp } from './ContextHelp'
 import { evidenceAfterManualEdit, evidenceForManualCapture, evidenceFromCombinedAnalysis } from '../importedDimensionEvidence'
+import { SkyGlazingImportWorkspace } from './SkyGlazingImportWorkspace'
 
 interface Props {
   baseProduct: ProductParameters
@@ -211,7 +212,7 @@ export function DrawingImportWorkspace({ baseProduct, onPreview, onLoadVerified,
 
   return <div className="preview-overlay drawing-import-overlay" role="presentation"><section ref={modal} className="drawing-import-modal" data-help-id="import-workspace" role="dialog" aria-modal="true" aria-labelledby="drawing-import-title" aria-describedby="drawing-import-safety">
     <header className="drawing-import-header"><div><span className="preview-badge">СИМУЛАЦИЯ · ЛОКАЛНА ОБРАБОТКА</span><h2 id="drawing-import-title">Избери източник на проекта</h2><p id="drawing-import-safety">Файлът остава в паметта на браузъра. Няма сървърно качване, автоматично производствено тълкуване или машинен export.</p></div><button type="button" className="preview-close" aria-label="Затвори импортния център" onClick={onClose}>×</button></header>
-    {!selectedRoute ? <ImportFormatChooser onSelect={setSelectedRoute}/> : foundationSession ? <FoundationSourceInspection session={foundationSession} onClear={clearSource} onBack={backToFormatChoice}/> : !source ? <section className="drawing-file-start">
+    {!selectedRoute ? <ImportFormatChooser onSelect={setSelectedRoute}/> : selectedRoute === 'SKYGLAZING' ? <SkyGlazingImportWorkspace onBack={backToFormatChoice}/> : foundationSession ? <FoundationSourceInspection session={foundationSession} onClear={clearSource} onBack={backToFormatChoice}/> : !source ? <section className="drawing-file-start">
       <div className="selected-import-route"><span className="route-badge">{formatCardFor(selectedRoute).badge}</span><div><b>{formatCardFor(selectedRoute).title}</b><p>{formatCardFor(selectedRoute).description}</p></div><button type="button" onClick={backToFormatChoice}>Назад към избор на формат</button></div>
       <div className="drawing-limits"><label>Максимален размер (MB)<input type="number" min="1" max="100" value={Math.round(limits.maximumFileBytes / 1024 / 1024)} onChange={(event) => setLimits({ ...limits, maximumFileBytes: Number(event.target.value) * 1024 * 1024 })}/></label>{selectedRoute === 'PDF' && <label>Максимум PDF страници<input type="number" min="1" max="500" value={limits.maximumPdfPages} onChange={(event) => setLimits({ ...limits, maximumPdfPages: Number(event.target.value) })}/></label>}</div>
       <div className="drawing-drop-zone" onDragOver={(event) => event.preventDefault()} onDrop={(event) => { event.preventDefault(); void acceptFile(event.dataTransfer.files[0]) }}><p><b>Пуснете файл за избрания маршрут тук</b></p><p>или изберете локален файл. Съдържанието не се изпълнява и не се изпраща по мрежа.</p><input ref={fileInput} type="file" accept={formatCardFor(selectedRoute).accept} onChange={(event) => void acceptFile(event.target.files?.[0])}/>{busy && <p aria-live="polite">Проверка на формат, подпис и локално SHA-256 хеширане…</p>}</div>{fileError && <p className="field-error" role="alert">{fileError}</p>}

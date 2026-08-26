@@ -1,5 +1,5 @@
-export type ImportRoute = 'IMAGE' | 'PDF' | 'CAD' | 'TABULAR' | 'SIMULATION'
-export type DetectedImportFormat = 'PNG' | 'JPEG' | 'PDF' | 'DWG' | 'DXF' | 'CSV' | 'XLSX' | 'FACADEFLOW_SIMULATION_JSON' | 'UNKNOWN'
+export type ImportRoute = 'IMAGE' | 'PDF' | 'SKYGLAZING' | 'CAD' | 'TABULAR' | 'SIMULATION'
+export type DetectedImportFormat = 'PNG' | 'JPEG' | 'PDF' | 'SKYGLAZING_XML' | 'LTE' | 'DWG' | 'DXF' | 'CSV' | 'XLSX' | 'FACADEFLOW_SIMULATION_JSON' | 'UNKNOWN'
 export type ImportSupportStatus = 'SUPPORTED' | 'SUPPORTED_FOR_VIEW_ONLY' | 'FUTURE_SUPPORT' | 'REJECTED' | 'FORMAT_MISMATCH'
 
 export interface ImportFormatCardDefinition { route: ImportRoute; title: string; formats: string[]; description: string; status?: string; accept: string; badge: string }

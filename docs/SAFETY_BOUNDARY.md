@@ -98,3 +98,14 @@ FacadeFlow Demo Phase 01 + Phase 02A–02E + Phase 03A е локален виз�
 - Cleanup може да спре само direct child PID-а, който manager-ът е създал; няма WMI, broad process-name или image-name termination.
 - Browser/app failure спира новия server; server failure не стартира browser. Няма shutdown HTTP endpoint.
 - Branding и Desktop shortcut не променят registry, firewall, execution policy или Windows startup и не превръщат проекта в инсталирано приложение/EXE.
+
+## Phase 05A — SkyGlazing XML/LTE read-only граница
+
+- XML и LTE се четат само след изричен локален избор и остават като immutable bytes/evidence в паметта на текущата browser сесия.
+- XML parsing е inert: `DOCTYPE`/`ENTITY` се отхвърлят, няма external resolution, script/link execution, HTML injection или външна XML библиотека.
+- LTE има само наблюдавани profile/raw-length/barcode ranges. Всички други fixed-width диапазони остават `UNRESOLVED` до експертно потвърждение.
+- XML ↔ LTE matching е авторитетно само за точно trim-нато barcode presence. Не се извеждат length/angle/machining конфликти.
+- XML Work записите никога не създават операции; данните не се зареждат в product/component workflow.
+- DWG остава signature/header-only. Няма entity parsing, render, conversion или предположение, че DWG принадлежи към избраната XML/LTE двойка.
+- Няма XML/LTE/DWG edit или export. Всички модели са `simulationOnly: true`, `machineReady: false`.
+- Реалните evidence файлове са защитени чрез `local-samples/` и никога не влизат в Git, `public/` или `dist`.

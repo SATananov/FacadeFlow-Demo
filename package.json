@@ -10,7 +10,8 @@
     "preview": "vite preview",
     "local:serve": "node scripts/local-server.mjs",
     "local": "npm run build && npm run local:serve",
-    "local:app": "npm run build && node scripts/windows-local-app.mjs"
+    "local:app": "npm run build && node scripts/windows-local-app.mjs",
+    "test:phase05a": "vite build --ssr tests/phase05a.test.ts --outDir .facadeflow-runtime/phase05a-tests --emptyOutDir && node --test .facadeflow-runtime/phase05a-tests/phase05a.test.js"
   },
   "dependencies": {
     "@react-three/fiber": "^9.7.0",

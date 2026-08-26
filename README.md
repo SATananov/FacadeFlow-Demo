@@ -1,4 +1,4 @@
-# FacadeFlow Demo — Phase 01 + Phase 02A–02E + Phase 03A–03E.1 + Phase 04A/04B Foundation
+# FacadeFlow Demo — Phase 01–05A · локална симулация
 
 ## Профилен каталог и нестандартен прозорец
 
@@ -84,3 +84,9 @@ Phase 03C комбинира потвърдена crop зона на издел�
 JSON export-ът е означен с `simulationOnly: true`. Вижте [границата за безопасност](docs/SAFETY_BOUNDARY.md), [Phase 03D](docs/PHASE_03D_ACCEPTANCE.md), [Phase 03D.1 Help](docs/PHASE_03D_1_HELP_ACCEPTANCE.md), [ръководството](docs/USER_GUIDE_BG.md) и [матрицата на форматите](docs/IMPORT_FORMAT_MATRIX.md).
 
 Конструкторът за нестандартно изделие следва експертно потвърден ред: валидни общи размери, създаване на външна каса, делители, отделно създадени крила, посоки само върху тези крила, човешка проверка и едва след нея концептуален 3D преглед. REF шаблоните и проверените импорти се представят чрез същия структуриран модел. Това не добавя производствени формули или машинна готовност.
+
+## Phase 05A — SkyGlazing read-only проверка
+
+Unified import center поддържа изрично избрани локални SkyGlazing XML и LTE файлове за inert структурна проверка и barcode-only сравнение. XML с DOCTYPE/ENTITY се отхвърля. LTE fixed-width полетата извън наблюдаваните tokens остават `UNRESOLVED`. DWG продължава да бъде само signature/header inspection.
+
+Източниците остават in-memory с SHA-256 provenance, `simulationOnly: true` и `machineReady: false`. Няма XML/LTE/DWG export, автоматично създаване на изделия или операции, backend, upload, network request или machine communication. Реалните evidence файлове в `local-samples/` са private и игнорирани от Git. Вижте [Phase 05A acceptance](docs/PHASE_05A_SKYGLAZING_READ_ONLY_ACCEPTANCE.md).
