@@ -106,6 +106,7 @@ FacadeFlow Demo Phase 01 + Phase 02A–02E + Phase 03A е локален виз�
 - LTE има само наблюдавани profile/raw-length/barcode ranges. Всички други fixed-width диапазони остават `UNRESOLVED` до експертно потвърждение.
 - XML ↔ LTE matching е авторитетно само за точно trim-нато barcode presence. Не се извеждат length/angle/machining конфликти.
 - XML Work записите никога не създават операции; данните не се зареждат в product/component workflow.
-- DWG остава signature/header-only. Няма entity parsing, render, conversion или предположение, че DWG принадлежи към избраната XML/LTE двойка.
+- Phase 05B разрешава локално read-only DWG decoding/rendering само за вътрешна evaluation среда чрез изолиран GPL LibreDWG worker. Външно разпространение не е одобрено. Няма edit, conversion, export или предположение, че DWG принадлежи към избраната XML/LTE двойка.
+- Приблизителният DWG text режим е само canvas display heuristic за вътрешна четимост. Той използва доказани видими LINE/polyline рамки, живее в React memory и не променя source evidence, decoder entities, imports, XML/LTE comparison, изделия, компоненти, операции или export. `APPROXIMATE_FIELD` не е DWG truth или производствена готовност; source-faithful режимът остава достъпен и Layout1 остава BLOCKED.
 - Няма XML/LTE/DWG edit или export. Всички модели са `simulationOnly: true`, `machineReady: false`.
 - Реалните evidence файлове са защитени чрез `local-samples/` и никога не влизат в Git, `public/` или `dist`.
