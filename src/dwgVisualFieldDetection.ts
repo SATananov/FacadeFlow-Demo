@@ -6,6 +6,7 @@ export interface DwgVisualField { id: string; bounds: DwgBounds; sectionId: stri
 export interface DwgApproximateTextAssignment { entityIndex: number; mode: 'APPROXIMATE_FIELD'; fieldBounds: DwgBounds; innerBounds: DwgBounds; confidence: 'HIGH'; reason: string; sourceEntities: DwgVisualField['sourceEntities']; simulationOnly: true; machineReady: false; internalEvaluationOnly: true }
 export interface DwgVisualTextSummary { sourceWidthTexts: number; approximateContainedTexts: number; unresolvedTexts: number }
 export const resolveDwgTextDisplayMode = (enabled: boolean, assignment?: DwgApproximateTextAssignment) => enabled && assignment ? 'APPROXIMATE_FIELD' as const : 'SOURCE' as const
+export function calculateDwgInnerFieldBounds(field: DwgBounds, textHeight: number): DwgBounds { const padding = Math.min(textHeight * DWG_VISUAL_FIELD_RULES.paddingTextHeightFactor, Math.min(field.maxX - field.minX, field.maxY - field.minY) * DWG_VISUAL_FIELD_RULES.paddingFieldFactor); return { minX: field.minX + padding, minY: field.minY + padding, maxX: field.maxX - padding, maxY: field.maxY - padding } }
 
 const area = (bounds: DwgBounds) => (bounds.maxX - bounds.minX) * (bounds.maxY - bounds.minY)
 const sameBounds = (a: DwgBounds, b: DwgBounds, tolerance: number) => Math.abs(a.minX - b.minX) <= tolerance && Math.abs(a.minY - b.minY) <= tolerance && Math.abs(a.maxX - b.maxX) <= tolerance && Math.abs(a.maxY - b.maxY) <= tolerance
@@ -54,7 +55,7 @@ export function detectDwgVisualFields(entities: readonly DwgDrawableEntity[], se
       if (bottom && top && left && right) candidates.push({ bounds: { minX, minY, maxX, maxY }, sectionId: section.sectionId, indices: [...new Set([...bottom, ...top, ...left, ...right])].sort((a, b) => a - b) })
     }
   }
-  const ordered = candidates.sort((a, b) => area(a.bounds) - area(b.bounds) || a.sectionId.localeCompare(b.sectionId) || a.indices[0]! - b.indices[0]!)
+  const ordered = candidates.filter((candidate) => !sections.some((section) => section.sectionId === candidate.sectionId && sameBounds(candidate.bounds, section.bounds, duplicateTolerance))).sort((a, b) => area(a.bounds) - area(b.bounds) || a.sectionId.localeCompare(b.sectionId) || a.indices[0]! - b.indices[0]!)
   return ordered.filter((candidate, index) => !ordered.slice(0, index).some((other) => candidate.sectionId === other.sectionId && sameBounds(candidate.bounds, other.bounds, duplicateTolerance))).map((candidate, index) => ({ id: `visual-field-${String(index + 1).padStart(4, '0')}`, bounds: { ...candidate.bounds }, sectionId: candidate.sectionId, sourceEntities: Object.freeze(candidate.indices.map((sourceIndex) => Object.freeze({ sourceIndex, handle: entities[sourceIndex]?.handle ?? '' }))), confidence: 'HIGH', reason: 'Затворено правоъгълно поле с непрекъснато доказани source edges.' }))
 }
 
@@ -70,8 +71,7 @@ export function deriveDwgApproximateTextAssignments(entities: readonly DwgDrawab
     const matches = fields.filter((field) => field.sectionId === section.sectionId && containsStrictly(field.bounds, entity.position.x, entity.position.y, tolerance) && field.bounds.maxX - field.bounds.minX >= entity.height * DWG_VISUAL_FIELD_RULES.minimumTextHeightFactor && field.bounds.maxY - field.bounds.minY >= entity.height * DWG_VISUAL_FIELD_RULES.minimumTextHeightFactor && !sameBounds(field.bounds, section.bounds, tolerance))
     if (!matches.length) { unresolvedTexts += 1; return }
     const field = [...matches].sort((a, b) => area(a.bounds) - area(b.bounds) || a.id.localeCompare(b.id))[0]!
-    const padding = Math.min(entity.height * DWG_VISUAL_FIELD_RULES.paddingTextHeightFactor, Math.min(field.bounds.maxX - field.bounds.minX, field.bounds.maxY - field.bounds.minY) * DWG_VISUAL_FIELD_RULES.paddingFieldFactor)
-    assignments.set(entityIndex, { entityIndex, mode: 'APPROXIMATE_FIELD', fieldBounds: { ...field.bounds }, innerBounds: { minX: field.bounds.minX + padding, minY: field.bounds.minY + padding, maxX: field.bounds.maxX - padding, maxY: field.bounds.maxY - padding }, confidence: 'HIGH', reason: field.reason, sourceEntities: field.sourceEntities, simulationOnly: true, machineReady: false, internalEvaluationOnly: true })
+    assignments.set(entityIndex, { entityIndex, mode: 'APPROXIMATE_FIELD', fieldBounds: { ...field.bounds }, innerBounds: calculateDwgInnerFieldBounds(field.bounds, entity.height), confidence: 'HIGH', reason: field.reason, sourceEntities: field.sourceEntities, simulationOnly: true, machineReady: false, internalEvaluationOnly: true })
   })
   return { assignments, summary: { sourceWidthTexts, approximateContainedTexts: assignments.size, unresolvedTexts } satisfies DwgVisualTextSummary }
 }

@@ -46,7 +46,7 @@ Font metric fidelity не може да бъде гарантирана без �
 
 Phase 05B.3 е **PARTIAL** спрямо Autodesk text layout: source-width wrapping и доказаните относителни run metrics са приложени, но записите без положителен `rectWidth`, vertical columns и оригиналните font metrics не се измислят. Видим текст без доказана source ширина остава отчетено ограничение, а не се прикрива с cell clipping.
 
-## Phase 05B.4 — отделен приблизителен визуален режим
+## Phase 05B.5 — отделен приблизителен визуален режим
 
 - [x] Source-faithful режимът остава достъпен и не променя decoder output, `rawText`, entities, insertion points, source bounds или stable IDs.
 - [x] „Подреди текстовете визуално“ е включено по подразбиране само в React memory и е означено с „Приблизителен изглед“.
@@ -62,4 +62,20 @@ Phase 05B.3 е **PARTIAL** спрямо Autodesk text layout: source-width wrapp
 - [x] При layer toggle detector-ът се преизчислява само от видимите edges; скрит доказващ edge премахва assignment детерминистично.
 - [x] Layout1 остава disabled/BLOCKED; GPL интеграцията остава INTERNAL EVALUATION ONLY.
 
-Реалният игнориран runtime gate откри 2 287 visual fields, 428 high-confidence assignments и 520 unresolved no-width MTEXT записа. В първата секция 47 от 91 no-width записа са assigned, 44 са unresolved; 3 от 10 дълги no-width записа имат доказано поле. Главният наблюдаван overflow не е доказуемо коригиран и gate-ът не е отслабен — Phase 05B.4 остава **PARTIAL**.
+Реалният игнориран runtime gate откри 2 287 visual fields, 428 high-confidence assignments и 520 unresolved no-width MTEXT записа. В първата секция 47 от 91 no-width записа са assigned, 44 са unresolved; 3 от 10 дълги no-width записа имат доказано поле. Главният наблюдаван overflow не е доказуемо коригиран и gate-ът не е отслабен — Phase 05B.5 остава **PARTIAL**.
+
+## Phase 05B.6 — ръчно потвърдена визуална корекция
+
+- [x] Режимът „Коригирай текст визуално“ се активира изрично и следва `IDLE → SELECT_TEXT → SELECT_FIELD → applied`.
+- [x] Изборът на MTEXT използва същия видим layout bounding box като canvas renderer-а; при застъпване приоритетът е deterministic: unresolved no-width, по-малка площ, entity index.
+- [x] Само доказано вътрешно поле от активната секция може да бъде target. Outer section frame, скрито, невалидно, stale или чуждо поле се отхвърля.
+- [x] Ръчният assignment се създава само от явен човешки избор и съдържа `MANUAL_APPROXIMATE_FIELD`, `humanConfirmed: true`, `simulationOnly: true`, `machineReady: false` и `internalEvaluationOnly: true`.
+- [x] Ръчният assignment има display приоритет над automatic assignment само за същия entity и само при включен приблизителен режим.
+- [x] Source-faithful режимът остава непроменен. Изключване на приблизителния режим връща source renderer-а, а повторно включване възстановява session assignment-а.
+- [x] Undo е LIFO; отделен assignment може да се премахне; clear изисква потвърждение. Clear/reload/new file унищожава session state-а.
+- [x] Escape първо отменя незавършената field стъпка, втори Escape излиза от correction mode, а section Escape се възстановява след излизането.
+- [x] Click избира само в correction mode; drag остава pan, wheel остава zoom. Enter/exit/select/apply/undo не reset-ват viewport-а.
+- [x] Скриване на text/field evidence layer прави assignment-а временно inactive. Той се връща само ако същите derived ID и evidence отново са валидни.
+- [x] Session assignment-ите не влизат в localStorage, IndexedDB, cookies, filesystem, URL, import/export, product/component/operation models или decoder output.
+- [x] Има keyboard списъци за избор на текст и поле, Bulgarian live status, видима стъпка, warning и различими без reliance само на цвят selection/target outlines.
+- [x] Layout1 остава BLOCKED; режимът остава browser-only, read-only и INTERNAL EVALUATION ONLY.
