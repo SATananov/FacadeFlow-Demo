@@ -12,7 +12,8 @@
     "local": "npm run build && npm run local:serve",
     "local:app": "npm run build && node scripts/windows-local-app.mjs",
     "test:phase05a": "vite build --ssr tests/phase05a.test.ts --outDir .facadeflow-runtime/phase05a-tests --emptyOutDir && node --test .facadeflow-runtime/phase05a-tests/phase05a.test.js",
-    "test:phase05b": "vite build --ssr tests/phase05b.test.ts --outDir .facadeflow-runtime/phase05b-tests --emptyOutDir && node --test .facadeflow-runtime/phase05b-tests/phase05b.test.js"
+    "test:phase05b": "vite build --ssr tests/phase05b.test.ts --outDir .facadeflow-runtime/phase05b-tests --emptyOutDir && node --test .facadeflow-runtime/phase05b-tests/phase05b.test.js",
+    "test:phase06a": "vite build --ssr tests/phase06a.test.ts --outDir .facadeflow-runtime/phase06a-tests --emptyOutDir && node --test .facadeflow-runtime/phase06a-tests/phase06a.test.js"
   },
   "dependencies": {
     "@mlightcad/libredwg-web": "0.7.10",
