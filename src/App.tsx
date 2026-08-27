@@ -340,7 +340,12 @@ function App() {
         />
       )}
       {showProfileCatalogue && <ProfileCatalogue profiles={catalogueProfiles} selection={activeProfileSelection} onProfiles={updateCatalogue} onSelection={setActiveProfileSelection} onClose={() => setShowProfileCatalogue(false)}/>}
-      {showDetailDrafting && <DetailDraftingPlaceholder onClose={() => setShowDetailDrafting(false)}/>}
+      {showDetailDrafting && (
+        <DetailDraftingPlaceholder
+          onClose={() => setShowDetailDrafting(false)}
+          onOpenImportCenter={() => { setShowDetailDrafting(false); setShowDrawingImport(true) }}
+        />
+      )}
       {showCustomDesigner && <CustomProductDesigner initial={customProduct} profiles={catalogueProfiles} activeProfiles={activeProfileSelection} selectedComponentId={activeCustomComponentId} onCommit={commitCustomProduct} onOpenComponent={openCustomComponent} onClose={() => setShowCustomDesigner(false)}/>}
       {importPreview && (
         <ProductPreview
