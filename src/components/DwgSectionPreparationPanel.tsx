@@ -5,10 +5,11 @@ interface Props {
   state: DwgSectionPreparationState
   onPrevious: () => void
   onCompleteStep: () => void
+  onStartDraft: () => void
   onClose: () => void
 }
 
-export function DwgSectionPreparationPanel({ sectionNumber, state, onPrevious, onCompleteStep, onClose }: Props) {
+export function DwgSectionPreparationPanel({ sectionNumber, state, onPrevious, onCompleteStep, onStartDraft, onClose }: Props) {
   const step = DWG_PREPARATION_STEPS[state.activeStep]!, complete = isDwgPreparationComplete(state), stepDone = state.completed.includes(step.id)
   return <section className="dwg-preparation" aria-labelledby="dwg-preparation-title">
     <header>
@@ -23,6 +24,6 @@ export function DwgSectionPreparationPanel({ sectionNumber, state, onPrevious, o
       <button type="button" disabled={state.activeStep === 0} onClick={onPrevious}>Назад</button>
       <button type="button" className="primary-action" disabled={complete && stepDone} onClick={onCompleteStep}>{state.activeStep === DWG_PREPARATION_STEPS.length - 1 ? 'Потвърди прегледа' : 'Проверено · продължи'}</button>
     </div>
-    {complete && <p className="dwg-preparation-complete" role="status"><b>Прегледът е завършен.</b> Не е създадено изделие и няма производствено одобрение или export.</p>}
+    {complete && <div className="dwg-preparation-complete" role="status"><span><b>Прегледът е завършен.</b> Може да подготвите отделна simulation-only чернова.</span><button type="button" onClick={onStartDraft}>Подготви чернова</button></div>}
   </section>
 }

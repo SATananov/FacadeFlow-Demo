@@ -9,6 +9,8 @@ import './threeDPreview.css'
 import './dimensions.css'
 import './skyGlazing.css'
 import './dwgViewer.css'
+import './detailDrafting.css'
+import './headerNavigation.css'
 import { OperationsPanel } from './components/OperationsPanel'
 import { ProfilePanel } from './components/ProfilePanel'
 import { ProfileWorkspace } from './components/ProfileWorkspace'
@@ -21,6 +23,7 @@ import { HelpCenter } from './components/HelpCenter'
 import { ContextHelp } from './components/ContextHelp'
 import { ProfileCatalogue } from './components/ProfileCatalogue'
 import { CustomProductDesigner } from './components/CustomProductDesigner'
+import { DetailDraftingPlaceholder } from './components/DetailDraftingPlaceholder'
 import { SelectedCustomComponentContext } from './components/SelectedCustomComponentContext'
 import { operationsForComponent, type ComponentOperations } from './componentOperations'
 import { exportComponentSimulation, exportSimulation } from './exportSimulation'
@@ -66,6 +69,7 @@ function App() {
   const [catalogueProfiles, setCatalogueProfiles] = useState<CatalogueProfile[]>(sampleCatalogueProfiles)
   const [activeProfileSelection, setActiveProfileSelection] = useState<ActiveProfileSelection>({ FRAME: 'profile-demo-frame-01', SASH: 'profile-demo-sash-01', MULLION: 'profile-demo-mullion-01' })
   const [showProfileCatalogue, setShowProfileCatalogue] = useState(false)
+  const [showDetailDrafting, setShowDetailDrafting] = useState(false)
   const [showCustomDesigner, setShowCustomDesigner] = useState(false)
   const [activeCustomComponentId, setActiveCustomComponentId] = useState<string | null>(null)
   const [customProduct, setCustomProduct] = useState<CustomProduct>(() => { const now = new Date().toISOString(); return { id: crypto.randomUUID(), name: 'Нестандартен прозорец 001', width: 1400, height: 1200, frameProfileId: 'profile-demo-frame-01', frameCreated: false, mullionProfileId: 'profile-demo-mullion-01', geometry: initialGeometry(), status: 'DRAFT', humanReviewConfirmed: false, createdAt: now, updatedAt: now, simulationOnly: true, machineReady: false } })
@@ -183,7 +187,7 @@ function App() {
 
   return (
     <div className="app-shell">
-      <header>
+      <header className="app-header">
         <img className="nadezhda-header-logo" src="/branding/nadezhda-header.png" alt="Надежда - алуминиева и PVC дограма"/>
         <div className="brand">
           <h1>FacadeFlow Demo</h1>
@@ -193,9 +197,7 @@ function App() {
           <span>●</span> СИМУЛАЦИЯ — БЕЗ ВРЪЗКА С МАШИНА
         </div>
         {isLocalApplication && <div className="local-application-badge">ЛОКАЛНО ПРИЛОЖЕНИЕ</div>}
-        <button type="button" className="help-action" data-help-id="help-button" onClick={() => setShowHelp(true)}>Помощ</button>
-        <button type="button" className="drawing-import-action" data-help-id="unified-import" onClick={() => setShowDrawingImport(true)}>Импортирай проект / чертеж</button>
-        <button type="button" className="catalogue-action" onClick={() => setShowProfileCatalogue(true)}>Каталог на профилите</button>
+        <nav className="app-header-actions" aria-label="Основни действия"><button type="button" className="help-action" data-help-id="help-button" onClick={() => setShowHelp(true)}>Помощ</button><button type="button" className="drawing-import-action" data-help-id="unified-import" onClick={() => setShowDrawingImport(true)}>Импортирай проект / чертеж</button><button type="button" className="catalogue-action" onClick={() => setShowProfileCatalogue(true)}>Каталог на профилите</button><button type="button" className="detail-drafting-action" onClick={() => setShowDetailDrafting(true)}>Чертане на детайл</button></nav>
       </header>
       <main>
         <div className={`mode-indicator ${activeComponent || activeCustomComponent ? 'component-mode' : ''}`}>
@@ -337,6 +339,7 @@ function App() {
         />
       )}
       {showProfileCatalogue && <ProfileCatalogue profiles={catalogueProfiles} selection={activeProfileSelection} onProfiles={updateCatalogue} onSelection={setActiveProfileSelection} onClose={() => setShowProfileCatalogue(false)}/>}
+      {showDetailDrafting && <DetailDraftingPlaceholder onClose={() => setShowDetailDrafting(false)}/>}
       {showCustomDesigner && <CustomProductDesigner initial={customProduct} profiles={catalogueProfiles} activeProfiles={activeProfileSelection} selectedComponentId={activeCustomComponentId} onCommit={commitCustomProduct} onOpenComponent={openCustomComponent} onClose={() => setShowCustomDesigner(false)}/>}
       {importPreview && (
         <ProductPreview
