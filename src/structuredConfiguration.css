@@ -33,4 +33,7 @@
 .hybrid-wizard-actions, .hybrid-review-actions { display: flex; justify-content: space-between; gap: 10px; margin-top: 24px; }
 .hybrid-wizard-actions button:only-child { margin-left: auto; }
 .hybrid-catalogue-action { margin-bottom: 12px; }
+.hybrid-wizard-actions button:disabled { opacity: .45; border-color: #aab6b9; background: #dce2e4; color: #59696e; cursor: not-allowed; box-shadow: none; }
+.composer-unassigned { fill: #8a4a25 !important; font-size: 11px !important; }
+.composer-hardware.selected { stroke: #e87329; stroke-width: 3; }
 @media (max-width: 800px) { .hybrid-step-indicator, .hybrid-configuration-grid, .hybrid-field-grid, .hybrid-role-selectors { grid-template-columns: 1fr; } }

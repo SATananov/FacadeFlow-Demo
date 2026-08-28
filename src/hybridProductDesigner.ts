@@ -26,6 +26,8 @@ export interface HybridProductDesignerSession {
 }
 
 export const HYBRID_SELECTABLE_CATEGORIES: readonly HybridProductCategory[] = Object.freeze(['WINDOW', 'DOOR'])
+export const PRODUCT_NAME_SUGGESTIONS = Object.freeze(['Фиксиран прозорец', 'Еднокрилен прозорец', 'Двукрилен прозорец', 'Трикрилен прозорец', 'Прозорец с горен фикс', 'Прозорец с долен фикс'])
+export const PRODUCT_SIZE_PRESETS = Object.freeze([{ id: '600x600', width: '600', height: '600', label: '600 × 600 mm' }, { id: '900x1200', width: '900', height: '1200', label: '900 × 1200 mm' }, { id: '1200x1200', width: '1200', height: '1200', label: '1200 × 1200 mm' }, { id: '1400x1200', width: '1400', height: '1200', label: '1400 × 1200 mm' }, { id: '1800x1400', width: '1800', height: '1400', label: '1800 × 1400 mm' }])
 export const HYBRID_FUTURE_CAPABILITIES: HybridFutureCapabilities = Object.freeze({ structuredConfigurationAvailable: false, sketchUnderlayAvailable: false, semanticGeometryAvailable: false, synchronized2D3DAvailable: false, parametricCorrectionAvailable: false, freeDrawingAvailable: false })
 const activeProfiles = (profiles: CatalogueProfile[]) => profiles.filter((profile) => profile.status !== 'ARCHIVED')
 const isPositiveFiniteText = (value: string) => value.trim() !== '' && Number.isFinite(Number(value)) && Number(value) > 0
@@ -36,7 +38,7 @@ export function createStructuredConfiguration(productCategory: 'WINDOW' | 'DOOR'
   return { productCategory, productName: '', overallWidth: '', overallHeight: '', profileSystem: '', frameProfileId: '', sashProfileId: '', mullionProfileId: '', thresholdStatus: productCategory === 'DOOR' ? 'UNRESOLVED' : 'NOT_APPLICABLE', validationErrors: [], humanReviewChecked: false, status: 'EMPTY', wizardStep: 1, sessionOnly: true, simulationOnly: true, machineReady: false, geometryCreated: false, exportAvailable: false }
 }
 export function maximumAccessibleConfigurationStep(configuration: StructuredProfileConfiguration, profiles: CatalogueProfile[]): StructuredConfigurationStep {
-  if (!isPositiveFiniteText(configuration.overallWidth) || !isPositiveFiniteText(configuration.overallHeight)) return 2
+  if (!configuration.productName.trim() || !isPositiveFiniteText(configuration.overallWidth) || !isPositiveFiniteText(configuration.overallHeight)) return 2
   if (!configuration.profileSystem || !deriveActiveProfileSystems(profiles).includes(configuration.profileSystem)) return 3
   const frameValid = compatibleProfiles(profiles, configuration.profileSystem, 'FRAME').some((profile) => profile.id === configuration.frameProfileId)
   const sashValid = !configuration.sashProfileId || compatibleProfiles(profiles, configuration.profileSystem, 'SASH').some((profile) => profile.id === configuration.sashProfileId)
@@ -48,6 +50,7 @@ export function moveStructuredConfigurationStep(configuration: StructuredProfile
 }
 export function validateStructuredConfiguration(configuration: StructuredProfileConfiguration, profiles: CatalogueProfile[]): string[] {
   const errors: string[] = []
+  if (!configuration.productName.trim()) errors.push('Въведете име на изделието.')
   if (!isPositiveFiniteText(configuration.overallWidth)) errors.push('Въведете положителна крайна обща ширина.')
   if (!isPositiveFiniteText(configuration.overallHeight)) errors.push('Въведете положителна крайна обща височина.')
   if (!configuration.profileSystem) errors.push('Изберете профилна система.')
@@ -92,3 +95,4 @@ export function createHybridProductDesignerSession(id = 'hybrid-product-session'
 export function selectHybridCreationRoute(session: HybridProductDesignerSession, route: HybridCreationRoute): HybridProductDesignerSession { const workflowStep: HybridWorkflowStep = route === 'STANDARD' ? 'STANDARD_CATEGORY' : route === 'SKETCH_ASSISTED' ? 'SKETCH_ROUTE' : 'NON_STANDARD_VIEWPORT'; return { ...session, creationRoute: route, productCategory: null, workflowStep, configuration: route === 'STANDARD' ? session.configuration : null, sourceReferenceStatus: route === 'SKETCH_ASSISTED' ? 'ROUTE_SELECTED' : 'NONE', geometryEntityCount: 0 } }
 export function selectHybridStandardCategory(session: HybridProductDesignerSession, category: HybridProductCategory, profiles: CatalogueProfile[] = []): HybridProductDesignerSession { if (session.creationRoute !== 'STANDARD' || !HYBRID_SELECTABLE_CATEGORIES.includes(category)) return session; const productCategory = category as 'WINDOW' | 'DOOR'; const configuration = session.configuration ? changeStructuredCategory(session.configuration, productCategory, profiles) : createStructuredConfiguration(productCategory); return { ...session, productCategory: category, workflowStep: 'STANDARD_DRAFT', configuration, geometryEntityCount: 0 } }
 export function returnToHybridDesignerStart(session: HybridProductDesignerSession): HybridProductDesignerSession { return createHybridProductDesignerSession(session.id) }
+export const canOpenVisualComposer = (configuration: StructuredProfileConfiguration): boolean => configuration.productCategory === 'WINDOW' && configuration.thresholdStatus === 'NOT_APPLICABLE' && configuration.status === 'HUMAN_CONFIRMED'
