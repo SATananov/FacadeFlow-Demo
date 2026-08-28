@@ -12,6 +12,7 @@ import './dwgViewer.css'
 import './detailDrafting.css'
 import './detailDraftViewport.css'
 import './headerNavigation.css'
+import './structuredConfiguration.css'
 import { OperationsPanel } from './components/OperationsPanel'
 import { ProfilePanel } from './components/ProfilePanel'
 import { ProfileWorkspace } from './components/ProfileWorkspace'
@@ -198,7 +199,7 @@ function App() {
           <span>●</span> СИМУЛАЦИЯ — БЕЗ ВРЪЗКА С МАШИНА
         </div>
         {isLocalApplication && <div className="local-application-badge">ЛОКАЛНО ПРИЛОЖЕНИЕ</div>}
-        <nav className="app-header-actions" aria-label="Основни действия"><button type="button" className="help-action" data-help-id="help-button" onClick={() => setShowHelp(true)}>Помощ</button><button type="button" className="drawing-import-action" data-help-id="unified-import" onClick={() => setShowDrawingImport(true)}>Импортирай проект / чертеж</button><button type="button" className="catalogue-action" onClick={() => setShowProfileCatalogue(true)}>Каталог на профилите</button><button type="button" className="detail-drafting-action" onClick={() => setShowDetailDrafting(true)}>Чертане на детайл</button></nav>
+        <nav className="app-header-actions" aria-label="Основни действия"><button type="button" className="help-action" data-help-id="help-button" onClick={() => setShowHelp(true)}>Помощ</button><button type="button" className="drawing-import-action" data-help-id="unified-import" onClick={() => setShowDrawingImport(true)}>Импортирай проект / чертеж</button><button type="button" className="catalogue-action" onClick={() => setShowProfileCatalogue(true)}>Каталог на профилите</button><button type="button" className="detail-drafting-action" onClick={() => setShowDetailDrafting(true)}>Конструктор на изделие</button></nav>
       </header>
       <main>
         <div className={`mode-indicator ${activeComponent || activeCustomComponent ? 'component-mode' : ''}`}>
@@ -342,8 +343,10 @@ function App() {
       {showProfileCatalogue && <ProfileCatalogue profiles={catalogueProfiles} selection={activeProfileSelection} onProfiles={updateCatalogue} onSelection={setActiveProfileSelection} onClose={() => setShowProfileCatalogue(false)}/>}
       {showDetailDrafting && (
         <DetailDraftingPlaceholder
+          profiles={catalogueProfiles}
           onClose={() => setShowDetailDrafting(false)}
           onOpenImportCenter={() => { setShowDetailDrafting(false); setShowDrawingImport(true) }}
+          onOpenProfileCatalogue={() => setShowProfileCatalogue(true)}
         />
       )}
       {showCustomDesigner && <CustomProductDesigner initial={customProduct} profiles={catalogueProfiles} activeProfiles={activeProfileSelection} selectedComponentId={activeCustomComponentId} onCommit={commitCustomProduct} onOpenComponent={openCustomComponent} onClose={() => setShowCustomDesigner(false)}/>}

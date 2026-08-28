@@ -1,0 +1,63 @@
+import { compatibleProfiles, confirmStructuredConfiguration, deriveActiveProfileSystems, maximumAccessibleConfigurationStep, moveStructuredConfigurationStep, reconcileStructuredConfiguration, selectHybridStandardCategory, updateStructuredConfiguration, type HybridProductDesignerSession, type StructuredConfigurationStep, type StructuredProfileConfiguration } from '../hybridProductDesigner'
+import type { CatalogueProfile, ProfileRole } from '../profileCatalogueTypes'
+
+interface Props { session: HybridProductDesignerSession; profiles: CatalogueProfile[]; onSession: (updater: (current: HybridProductDesignerSession) => HybridProductDesignerSession) => void; onOpenProfileCatalogue: () => void }
+const labels = ['Тип изделие', 'Размери', 'Профилна система', 'Профили', 'Проверка'] as const
+
+export function StructuredConfigurationWizard({ session, profiles, onSession, onOpenProfileCatalogue }: Props) {
+  if (!session.configuration) return null
+  const configuration = reconcileStructuredConfiguration(session.configuration, profiles)
+  const update = (patch: Parameters<typeof updateStructuredConfiguration>[1]) => onSession((current) => ({ ...current, configuration: updateStructuredConfiguration(configuration, patch, profiles) }))
+  const move = (step: StructuredConfigurationStep) => onSession((current) => ({ ...current, configuration: moveStructuredConfigurationStep(configuration, step, profiles) }))
+  const confirm = () => onSession((current) => ({ ...current, configuration: confirmStructuredConfiguration(configuration, profiles) }))
+  return <main className="hybrid-screen hybrid-configuration"><div className="hybrid-screen-heading"><h3>Конфигурация на изделието</h3><p>Семантична подготовка само за текущата сесия — без създаване на геометрия или компоненти.</p></div><StepIndicator configuration={configuration} profiles={profiles} onMove={move}/><section className="hybrid-wizard-panel">
+    {configuration.wizardStep === 1 && <ProductTypeStep configuration={configuration} profiles={profiles} onSession={onSession} onNext={() => move(2)}/>} 
+    {configuration.wizardStep === 2 && <DimensionsStep configuration={configuration} onUpdate={update} onBack={() => move(1)} onNext={() => move(3)}/>} 
+    {configuration.wizardStep === 3 && <SystemStep configuration={configuration} profiles={profiles} onUpdate={update} onBack={() => move(2)} onNext={() => move(4)}/>} 
+    {configuration.wizardStep === 4 && <ProfilesStep configuration={configuration} profiles={profiles} onUpdate={update} onOpenProfileCatalogue={onOpenProfileCatalogue} onBack={() => move(3)} onNext={() => move(5)}/>} 
+    {configuration.wizardStep === 5 && <ReviewStep configuration={configuration} profiles={profiles} onUpdate={update} onConfirm={confirm} onBack={() => move(4)}/>} 
+  </section></main>
+}
+
+function StepIndicator({ configuration, profiles, onMove }: { configuration: StructuredProfileConfiguration; profiles: CatalogueProfile[]; onMove: (step: StructuredConfigurationStep) => void }) {
+  const maximum = maximumAccessibleConfigurationStep(configuration, profiles)
+  return <ol className="hybrid-step-indicator" aria-label="Стъпки на конфигурацията">{labels.map((label, index) => { const step = (index + 1) as StructuredConfigurationStep; return <li key={label} className={configuration.wizardStep === step ? 'active' : step < configuration.wizardStep ? 'complete' : ''}><button type="button" aria-current={configuration.wizardStep === step ? 'step' : undefined} disabled={step > maximum} onClick={() => onMove(step)}><b>{step}</b><span>{label}</span></button></li> })}</ol>
+}
+
+function ProductTypeStep({ configuration, profiles, onSession, onNext }: { configuration: StructuredProfileConfiguration; profiles: CatalogueProfile[]; onSession: Props['onSession']; onNext: () => void }) {
+  const change = (category: 'WINDOW' | 'DOOR') => onSession((current) => selectHybridStandardCategory({ ...current, configuration }, category, profiles))
+  return <><h4>1. Тип изделие</h4><fieldset className="hybrid-type-choice"><legend>Изберете категория</legend><label><input type="radio" name="hybrid-category" checked={configuration.productCategory === 'WINDOW'} onChange={() => change('WINDOW')}/> Прозорец</label><label><input type="radio" name="hybrid-category" checked={configuration.productCategory === 'DOOR'} onChange={() => change('DOOR')}/> Врата</label></fieldset><Actions onNext={onNext}/></>
+}
+
+const validDimensions = (configuration: StructuredProfileConfiguration) => configuration.overallWidth.trim() !== '' && Number.isFinite(Number(configuration.overallWidth)) && Number(configuration.overallWidth) > 0 && configuration.overallHeight.trim() !== '' && Number.isFinite(Number(configuration.overallHeight)) && Number(configuration.overallHeight) > 0
+function DimensionsStep({ configuration, onUpdate, onBack, onNext }: StepProps) {
+  const valid = validDimensions(configuration)
+  return <><h4>2. Размери</h4><div className="hybrid-field-grid"><label>Име на изделието<input value={configuration.productName} onChange={(event) => onUpdate({ productName: event.target.value })}/></label><label>Обща ширина (mm)<input inputMode="decimal" value={configuration.overallWidth} onChange={(event) => onUpdate({ overallWidth: event.target.value })}/></label><label>Обща височина (mm)<input inputMode="decimal" value={configuration.overallHeight} onChange={(event) => onUpdate({ overallHeight: event.target.value })}/></label></div><p className="hybrid-dimension-warning">Общи проектни размери — не са размери за рязане.</p>{!valid && <p className="hybrid-unresolved" role="alert">Въведете положителни крайни обща ширина и обща височина.</p>}<Actions onBack={onBack} onNext={onNext} nextDisabled={!valid}/></>
+}
+
+function SystemStep({ configuration, profiles, onUpdate, onBack, onNext }: StepProps & { profiles: CatalogueProfile[] }) {
+  const systems = deriveActiveProfileSystems(profiles), valid = systems.includes(configuration.profileSystem)
+  return <><h4>3. Профилна система</h4><label>Профилна система<select value={configuration.profileSystem} onChange={(event) => onUpdate({ profileSystem: event.target.value })}><option value="">Изберете система</option>{systems.map((system) => <option key={system}>{system}</option>)}</select></label>{systems.length === 0 && <p className="hybrid-unresolved" role="status">Няма активна профилна система в текущия каталог.</p>}{configuration.profileSystem === 'DEMO SYSTEM' && <p className="hybrid-demo-note">DEMO SYSTEM съдържа само примерни данни, не реални каталожни стойности.</p>}{!valid && systems.length > 0 && <p className="hybrid-unresolved">Не е избрана профилна система.</p>}<Actions onBack={onBack} onNext={onNext} nextDisabled={!valid}/></>
+}
+
+function ProfilesStep({ configuration, profiles, onUpdate, onOpenProfileCatalogue, onBack, onNext }: StepProps & { profiles: CatalogueProfile[]; onOpenProfileCatalogue: () => void }) {
+  const frameValid = compatibleProfiles(profiles, configuration.profileSystem, 'FRAME').some(({ id }) => id === configuration.frameProfileId)
+  return <><h4>4. Профили</h4><button type="button" className="primary-button hybrid-catalogue-action" onClick={onOpenProfileCatalogue}>Отвори каталога на профилите</button><div className="hybrid-role-selectors"><RoleSelect label="Каса" role="FRAME" required configuration={configuration} profiles={profiles} onChange={onUpdate}/><RoleSelect label="Крило" role="SASH" configuration={configuration} profiles={profiles} onChange={onUpdate}/><RoleSelect label="Делител" role="MULLION" configuration={configuration} profiles={profiles} onChange={onUpdate}/></div><p>Избраните профили подготвят конфигурацията. Геометрия и компоненти не се създават автоматично.</p>{!frameValid && <p className="hybrid-unresolved" role="alert">Изберете активен и съвместим профил за каса.</p>}<Actions onBack={onBack} onNext={onNext} nextDisabled={!frameValid}/></>
+}
+
+function RoleSelect({ label, role, required = false, configuration, profiles, onChange }: { label: string; role: ProfileRole; required?: boolean; configuration: StructuredProfileConfiguration; profiles: CatalogueProfile[]; onChange: StepProps['onUpdate'] }) {
+  const options = compatibleProfiles(profiles, configuration.profileSystem, role), key = role === 'FRAME' ? 'frameProfileId' : role === 'SASH' ? 'sashProfileId' : 'mullionProfileId'
+  return <label>{label}{required ? ' *' : ' (по избор)'}<select value={configuration[key]} onChange={(event) => onChange({ [key]: event.target.value })}><option value="">{options.length ? 'Не е избрано' : 'Няма съвместим активен профил'}</option>{options.map((profile) => <option key={profile.id} value={profile.id}>{profile.code} — {profile.nameBg}</option>)}</select>{options.length === 0 && <small>Неразрешена роля за избраната система.</small>}</label>
+}
+
+function ReviewStep({ configuration, profiles, onUpdate, onConfirm, onBack }: { configuration: StructuredProfileConfiguration; profiles: CatalogueProfile[]; onUpdate: StepProps['onUpdate']; onConfirm: () => void; onBack: () => void }) {
+  return <><h4>5. Проверка</h4><Summary configuration={configuration} profiles={profiles}/><div className={configuration.thresholdStatus === 'UNRESOLVED' ? 'hybrid-unresolved' : 'hybrid-neutral-status'}><b>Праг</b><span>{configuration.thresholdStatus === 'UNRESOLVED' ? 'НЕРАЗРЕШЕНО — няма потвърдена роля и профил в текущия каталог' : 'Не е приложимо за прозорец'}</span></div><p className="hybrid-dimension-warning">Проверете внимателно въведените размери. Приложението не прилага ограничения на производител.</p>{configuration.validationErrors.length > 0 && <div className="inline-errors" role="alert"><b>Конфигурацията изисква внимание:</b><ul>{configuration.validationErrors.map((error) => <li key={error}>{error}</li>)}</ul></div>}<label className="hybrid-review-check"><input type="checkbox" checked={configuration.humanReviewChecked} onChange={(event) => onUpdate({ humanReviewChecked: event.target.checked })}/> Проверих размерите, системата и избраните профили.</label><div className="hybrid-review-actions"><button type="button" onClick={onBack}>Назад</button><button type="button" className="primary-button" onClick={onConfirm}>Потвърди симулационната конфигурация</button></div><p className="hybrid-confirmation-result" aria-live="polite">{configuration.status === 'HUMAN_CONFIRMED' ? 'Конфигурацията е потвърдена от човек като симулационна чернова.' : configuration.productCategory === 'DOOR' ? 'Потвърждението е блокирано до добавяне на потвърден праг.' : 'Конфигурацията очаква човешка проверка.'}</p></>
+}
+
+function Summary({ configuration, profiles }: { configuration: StructuredProfileConfiguration; profiles: CatalogueProfile[] }) {
+  const profileLabel = (id: string) => { const profile = profiles.find((item) => item.id === id); return profile ? `${profile.code} — ${profile.nameBg}` : 'Не е избрано' }, status = configuration.status === 'EMPTY' ? 'Празна' : configuration.status === 'NEEDS_REVIEW' ? 'Нуждае се от проверка' : 'Потвърдена от човек'
+  return <aside className="hybrid-configuration-summary"><h4>Обобщение на изделието</h4><dl><dt>Категория</dt><dd>{configuration.productCategory === 'WINDOW' ? 'Прозорец' : 'Врата'}</dd><dt>Име</dt><dd>{configuration.productName || 'Не е избрано'}</dd><dt>Общи размери</dt><dd>{configuration.overallWidth || 'Не е избрано'} × {configuration.overallHeight || 'Не е избрано'} mm</dd><dt>Система</dt><dd>{configuration.profileSystem || 'Не е избрано'}</dd><dt>Каса</dt><dd>{profileLabel(configuration.frameProfileId)}</dd><dt>Крило</dt><dd>{profileLabel(configuration.sashProfileId)}</dd><dt>Делител</dt><dd>{profileLabel(configuration.mullionProfileId)}</dd><dt>Праг</dt><dd>{configuration.thresholdStatus === 'UNRESOLVED' ? 'Неразрешен' : 'Не е приложимо'}</dd><dt>Преглед</dt><dd>{status}</dd><dt>Само симулация</dt><dd>Да</dd><dt>Готово за машина</dt><dd>Не</dd></dl><p>Не са създадени геометрия, полета, компоненти, количества или операции.</p></aside>
+}
+
+interface StepProps { configuration: StructuredProfileConfiguration; onUpdate: (patch: Parameters<typeof updateStructuredConfiguration>[1]) => void; onBack: () => void; onNext: () => void }
+function Actions({ onBack, onNext, nextDisabled = false }: { onBack?: () => void; onNext: () => void; nextDisabled?: boolean }) { return <div className="hybrid-wizard-actions">{onBack && <button type="button" onClick={onBack}>Назад</button>}<button type="button" className="primary-button" disabled={nextDisabled} onClick={onNext}>Продължи</button></div> }
