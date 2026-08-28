@@ -1,0 +1,31 @@
+.composer-library-section { margin-bottom: 7px; border: 1px solid #b8c7ca; border-radius: 4px; overflow: hidden; }
+.composer-library-section > button { display: flex; justify-content: space-between; width: 100%; min-height: 42px; padding: 10px; border: 0; background: #edf3f4; font-weight: 800; text-align: left; }
+.composer-library-section > div { display: grid; gap: 6px; padding: 8px; }
+.composer-library-section > div > button { min-height: 38px; border: 1px solid #b8c7ca; background: #fff; text-align: left; }
+.composer-library-section > div > button.selected { border-color: #087b91; box-shadow: inset 4px 0 #087b91; background: #e3f3f5; }
+.template-card-list { display: grid !important; gap: 9px !important; }
+.composer-template-card { display: grid; gap: 5px; padding: 7px; border: 1px solid #bdcacc; background: #fff; }
+.composer-template-card button { min-height: 36px; }
+.composer-template-thumb { min-width: 0 !important; width: 100% !important; height: 68px; background: #f5f9f9 !important; border: 0 !important; }
+.composer-template-thumb rect { fill: #e8f4f5; stroke: #415861; stroke-width: 2; }
+.composer-template-thumb > rect:first-child { fill: #d1dcde; stroke-width: 4; }
+.composer-color-control { display: grid !important; gap: 5px !important; margin: 0 !important; }
+.composer-color-control select, .composer-color-control input { min-width: 0; width: 100%; }
+.composer-demo-note, .composer-disabled-reason { display: block; padding: 7px; color: #7b4917; background: #fff3dc; font-size: 10px; }
+.composer-handle { fill: #0c6677; stroke: #fff; stroke-width: 2; cursor: grab; }
+.composer-hinge { fill: #2f4148; stroke: #2f4148; stroke-width: 2; cursor: grab; }
+.composer-handle.selected, .composer-hinge.selected { stroke: #e87329; stroke-width: 4; }
+.composer-hardware-drag { cursor: grab; }
+.composer-hardware-drag:focus { outline: none; }
+.composer-hardware-drag:focus .composer-hardware-hit { stroke: #087b91; stroke-width: 2; }
+.composer-hardware-drag.dragging { cursor: grabbing; }
+.composer-hardware-hit { fill: transparent; stroke: transparent; pointer-events: all; touch-action: none; }
+.selected-component { display: grid; gap: 7px; padding: 8px; border: 1px solid #93abb1; background: #f6f9f9; }
+.field-summary { padding: 6px; border-left: 3px solid #9bb1b6; font-size: 10px; }
+.visual-properties h5 { margin: 12px 0 7px; }
+.visual-properties output { font-weight: 900; }
+.visual-library > .primary-button { margin-top: 8px; min-height: 42px; }
+.visual-library > .primary-button:disabled { opacity: .45; cursor: not-allowed; }
+@media (max-width: 1150px) { .visual-composer-layout { grid-template-columns: 220px minmax(0, 1fr) 235px; } }
+@media (max-width: 950px) { .visual-composer-stage svg { min-width: 0; } .visual-library, .visual-properties { max-height: none; } .composer-library-section > button, .composer-library-section > div > button { min-height: 44px; } }
+@media (max-width: 600px) { .visual-composer-stage { padding: 8px; } .visual-composer-header, .visual-composer-warning { padding-inline: 10px; } .visual-composer-layout { width: 100%; } }
