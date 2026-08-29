@@ -13,6 +13,7 @@ import { defaultDimensionVisibility } from '../dimensionTypes'
 import { CustomCoordinateGrid } from './CustomCoordinateGrid'
 import { OpeningSymbol } from './OpeningSymbol'
 import { ProductDimensions2D } from './ProductDimensions2D'
+import { CustomSnapMarker } from './CustomSnapMarker'
 
 interface Props {
   product: CustomProduct
@@ -24,9 +25,12 @@ interface Props {
   gridVisible?: boolean
   gridStep?: CustomGridStep
   onCursorCoordinates?: (coordinates: ModelCoordinates | null) => void
+  snapPoint?: ModelCoordinates | null
+  snappingEnabled?: boolean
+  zoom?: number
 }
 
-export function CustomProductDrawing({ product, selectedFieldId, onSelectField, large = false, annotations = [], dimensionVisibility = defaultDimensionVisibility, gridVisible = false, gridStep = 50, onCursorCoordinates }: Props) {
+export function CustomProductDrawing({ product, selectedFieldId, onSelectField, large = false, annotations = [], dimensionVisibility = defaultDimensionVisibility, gridVisible = false, gridStep = 50, onCursorCoordinates, snapPoint = null, snappingEnabled = false, zoom = 1 }: Props) {
   const { width: viewWidth, height: viewHeight } = CUSTOM_DRAWING_VIEW
   const transform = getCustomDrawingTransform(Math.max(product.width, 1), Math.max(product.height, 1))
   const { scale, width, height, ox, oy } = transform
@@ -57,5 +61,6 @@ export function CustomProductDrawing({ product, selectedFieldId, onSelectField, 
     </g>)}
     {splits.map(({ node, rect }) => node.kind === 'SPLIT' && <g key={node.id}>{node.orientation === 'VERTICAL' ? <line x1={rect.x + node.position * scale} y1={rect.y} x2={rect.x + node.position * scale} y2={rect.y + rect.height} className="custom-divider"/> : <line x1={rect.x} y1={rect.y + node.position * scale} x2={rect.x + rect.width} y2={rect.y + node.position * scale} className="custom-divider"/>}<text x={node.orientation === 'VERTICAL' ? rect.x + node.position * scale + 7 : rect.x + 7} y={node.orientation === 'VERTICAL' ? rect.y + 17 : rect.y + node.position * scale - 7} className="custom-divider-label">{Math.round(node.position)} mm</text></g>)}
     <ProductDimensions2D annotations={annotations} visibility={dimensionVisibility} project={(point) => ({ x: ox + point.x * scale, y: oy + point.y * scale })}/>
+    {snappingEnabled && snapPoint && <CustomSnapMarker point={snapPoint} transform={transform} zoom={zoom}/>}
   </svg>
 }

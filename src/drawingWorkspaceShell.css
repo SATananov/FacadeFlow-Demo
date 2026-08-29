@@ -35,6 +35,9 @@
 .drawing-workspace-toolbar .custom-grid-controls label { display: inline-flex; align-items: center; gap: 5px; min-height: 32px; white-space: nowrap; }
 .drawing-workspace-toolbar .custom-grid-controls select { min-height: 32px; }
 .custom-cursor-coordinates { min-width: 185px; padding: 5px 8px; border-radius: 4px; background: var(--ff-surface-primary); color: var(--ff-text-primary); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.custom-snap-mode { padding: 4px 7px; border: 1px solid #087b91; border-radius: 999px; color: #075f70; font-size: 11px; font-weight: 800; }
+.custom-snap-marker circle { fill: rgba(255,255,255,.82); stroke: #00889b; stroke-width: 2; vector-effect: non-scaling-stroke; }
+.custom-snap-marker path { fill: none; stroke: #00889b; stroke-width: 1.5; vector-effect: non-scaling-stroke; }
 .custom-coordinate-grid-minor-line { fill: none; stroke: #8ca0aa; stroke-width: .45; opacity: .3; }
 .custom-coordinate-grid-major-line { fill: none; stroke: #647780; stroke-width: .85; opacity: .55; }
 .custom-coordinate-axis { stroke: #2f5f73; stroke-width: 1.4; }

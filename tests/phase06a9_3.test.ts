@@ -59,7 +59,7 @@ test('grid is a bounded non-interactive SVG viewport layer below product geometr
 })
 
 test('toolbar controls are accessible, wrapping, and view-only', () => {
-  assert.match(designerSource, /aria-label="Координатна мрежа"/)
+  assert.match(designerSource, /aria-label="Координатна мрежа(?: и прихващане)?"/)
   assert.match(designerSource, /aria-live="polite"/)
   assert.match(designerSource, /useState\(true\).*DEFAULT_CUSTOM_GRID_STEP/)
   assert.match(cssSource, /\.custom-grid-controls[^}]*flex-wrap:\s*wrap/s)
@@ -71,7 +71,7 @@ test('pointer conversion uses the SVG screen matrix without snapping or geometry
   assert.match(drawingSource, /getScreenCTM\(\)/)
   assert.match(drawingSource, /matrix\.inverse\(\)/)
   assert.match(drawingSource, /Math\.round\(coordinates\.x\)/)
-  assert.doesNotMatch(drawingSource, /snap|Math\.round\([^)]*\/\s*gridStep/)
+  assert.doesNotMatch(drawingSource, /Math\.round\([^)]*\/\s*gridStep/)
   assert.doesNotMatch(gridSource, /projectGeometry|updateGeometryNode|splitField/)
 })
 
