@@ -12,7 +12,7 @@
 
 Заключени стойности: `sessionOnly: true`, `simulationOnly: true`, `machineReady: false`, `internalEvaluationOnly: true`, `productionApproved: false`, `sourceImmutable: true`, `geometryCreated: false`, `exportAvailable: false`, `dwgWriteAvailable: false`, `machineConnectivityAvailable: false`.
 
-Session state не влиза в localStorage, IndexedDB, cookies, URL, filesystem, backend/network service или съществуващите product/component/operation exports. Затварянето unmount-ва workspace-а и изчиства сесията.
+Session state не влиза в localStorage, IndexedDB, cookies, URL, filesystem, backend/network service или съществуващите product/component/operation exports. Затварянето пази текущата съвместима чернова само в паметта на приложението; „Начало на конструктора“ или презареждане създава чиста сесия.
 
 ## Бъдеща архитектура — не е реализирана
 

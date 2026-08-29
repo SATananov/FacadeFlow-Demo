@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent, type WheelEvent as ReactWheelEvent } from 'react'
 import { createDetailDraftDocument, DETAIL_DRAFT_INITIAL_VIEWPORT, DETAIL_DRAFT_VIEWPORT_LIMITS, fitDetailDraftViewport, panDetailDraftViewport, zoomDetailDraftViewport } from '../detailDraftViewport'
-import { createHybridProductDesignerSession, HYBRID_SELECTABLE_CATEGORIES, returnToHybridDesignerStart, selectHybridCreationRoute, selectHybridStandardCategory, type HybridCreationRoute, type HybridProductCategory, type HybridProductDesignerSession } from '../hybridProductDesigner'
+import { HYBRID_SELECTABLE_CATEGORIES, returnToHybridDesignerStart, selectHybridCreationRoute, selectHybridStandardCategory, type HybridCreationRoute, type HybridProductCategory, type HybridProductDesignerSession } from '../hybridProductDesigner'
 import type { CatalogueProfile } from '../profileCatalogueTypes'
 import { StructuredConfigurationWizard } from './StructuredConfigurationWizard'
 
-interface Props { profiles: CatalogueProfile[]; onClose: () => void; onOpenImportCenter: () => void; onOpenProfileCatalogue: () => void }
+interface Props { session: HybridProductDesignerSession; profiles: CatalogueProfile[]; onSession: (updater: (current: HybridProductDesignerSession) => HybridProductDesignerSession) => void; onClose: () => void; onOpenImportCenter: () => void; onOpenProfileCatalogue: () => void }
 const plannedTools = ['Линия', 'Полилиния', 'Правоъгълник', 'Окръжност', 'Дъга']
 const routeCards: Array<{ route: HybridCreationRoute; title: string; description: string }> = [
   { route: 'STANDARD', title: 'Стандартно изделие', description: 'Започнете от структурирана схема за прозорец, врата, плъзгаща система или фасаден модул.' },
@@ -16,18 +16,17 @@ const categoryCards: Array<{ category: HybridProductCategory; title: string }> =
 ]
 const sketchSteps = ['Избор на страница и зона', 'Потвърждение на мащаб', 'Заключен фонов слой', 'Предложен контур', 'Човешка корекция', 'Проверка', '2D / 3D']
 
-export function DetailDraftingPlaceholder({ profiles, onClose, onOpenImportCenter, onOpenProfileCatalogue }: Props) {
-  const [session, setSession] = useState<HybridProductDesignerSession>(() => createHybridProductDesignerSession(crypto.randomUUID()))
-  const goStart = () => setSession((current) => returnToHybridDesignerStart(current))
-  const goBack = () => session.workflowStep === 'STANDARD_DRAFT' ? setSession((current) => selectHybridCreationRoute(current, 'STANDARD')) : goStart()
+export function DetailDraftingPlaceholder({ session, profiles, onSession, onClose, onOpenImportCenter, onOpenProfileCatalogue }: Props) {
+  const goStart = () => onSession((current) => returnToHybridDesignerStart(current))
+  const goBack = () => session.workflowStep === 'STANDARD_DRAFT' ? onSession((current) => selectHybridCreationRoute(current, 'STANDARD')) : goStart()
   return <section className="detail-drafting" role="dialog" aria-modal="true" aria-labelledby="detail-drafting-title">
     <header className="detail-drafting-header"><div><span>ФАЗА 06A.3 · СТРУКТУРИРАНА КОНФИГУРАЦИЯ</span><h2 id="detail-drafting-title">Конструктор на изделие</h2><p>Един семантичен модел само за текущата сесия · без автоматична геометрия и без производствен изход.</p></div><button type="button" onClick={onClose}>Назад към FacadeFlow</button></header>
     <div className="detail-drafting-safety">Безопасна визуална подготовка: източниците остават непроменими, геометрия не се създава, записът на DWG и машинните формати са блокирани.</div>
     <nav className="hybrid-breadcrumb" aria-label="Стъпки на конструктора"><b>Начало на конструктора</b>{session.creationRoute && <><span aria-hidden="true">›</span><span>{routeCards.find((card) => card.route === session.creationRoute)?.title}</span></>}{session.productCategory && <><span aria-hidden="true">›</span><span>{categoryCards.find((card) => card.category === session.productCategory)?.title}</span></>}</nav>
     {session.workflowStep !== 'DESIGNER_START' && <div className="hybrid-navigation"><button type="button" onClick={goBack}>Назад</button><button type="button" onClick={goStart}>Начало на конструктора</button></div>}
-    {session.workflowStep === 'DESIGNER_START' && <RouteSelection onSelect={(route) => setSession((current) => selectHybridCreationRoute(current, route))}/>}
-    {session.workflowStep === 'STANDARD_CATEGORY' && <StandardCategories onSelect={(category) => setSession((current) => selectHybridStandardCategory(current, category, profiles))}/>}
-    {session.workflowStep === 'STANDARD_DRAFT' && <StandardDraft session={session} profiles={profiles} onSession={setSession} onOpenProfileCatalogue={onOpenProfileCatalogue}/>}
+    {session.workflowStep === 'DESIGNER_START' && <RouteSelection onSelect={(route) => onSession((current) => selectHybridCreationRoute(current, route))}/>}
+    {session.workflowStep === 'STANDARD_CATEGORY' && <StandardCategories onSelect={(category) => onSession((current) => selectHybridStandardCategory(current, category, profiles))}/>}
+    {session.workflowStep === 'STANDARD_DRAFT' && <StandardDraft session={session} profiles={profiles} onSession={onSession} onClose={onClose} onOpenProfileCatalogue={onOpenProfileCatalogue}/>}
     {session.workflowStep === 'SKETCH_ROUTE' && <SketchRoute onOpenImportCenter={onOpenImportCenter}/>}
     {session.workflowStep === 'NON_STANDARD_VIEWPORT' && <DetailViewportFoundation/>}
   </section>
@@ -41,8 +40,8 @@ function StandardCategories({ onSelect }: { onSelect: (category: HybridProductCa
   return <main className="hybrid-screen"><div className="hybrid-screen-heading"><h3>Категория на стандартното изделие</h3><p>Изборът създава само празна семантична чернова за категорията — без размери, профили, полета или операции.</p></div><div className="hybrid-category-grid">{categoryCards.map((card) => { const selectable = HYBRID_SELECTABLE_CATEGORIES.includes(card.category); return <button type="button" key={card.category} disabled={!selectable} onClick={() => onSelect(card.category)}><strong>{card.title}</strong><span>{selectable ? 'Достъпна основа' : 'Предстои'}</span></button> })}</div></main>
 }
 
-function StandardDraft({ session, profiles, onSession, onOpenProfileCatalogue }: { session: HybridProductDesignerSession; profiles: CatalogueProfile[]; onSession: (updater: (current: HybridProductDesignerSession) => HybridProductDesignerSession) => void; onOpenProfileCatalogue: () => void }) {
-  return <StructuredConfigurationWizard session={session} profiles={profiles} onSession={onSession} onOpenProfileCatalogue={onOpenProfileCatalogue}/>
+function StandardDraft({ session, profiles, onSession, onClose, onOpenProfileCatalogue }: { session: HybridProductDesignerSession; profiles: CatalogueProfile[]; onSession: (updater: (current: HybridProductDesignerSession) => HybridProductDesignerSession) => void; onClose: () => void; onOpenProfileCatalogue: () => void }) {
+  return <StructuredConfigurationWizard session={session} profiles={profiles} onSession={onSession} onCloseFacadeFlow={onClose} onOpenProfileCatalogue={onOpenProfileCatalogue}/>
 }
 
 function SketchRoute({ onOpenImportCenter }: { onOpenImportCenter: () => void }) {

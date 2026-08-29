@@ -2,6 +2,9 @@ import type { ProductParameters } from './productTypes'
 
 export const defaultProduct: ProductParameters = {
   templateId: 'REF-01',
+  productCategory: 'WINDOW',
+  productName: 'Фиксиран прозорец',
+  dimensionSource: 'WINDOW_DEMO_PRESET',
   type: 'fixed',
   width: 1400,
   height: 1200,

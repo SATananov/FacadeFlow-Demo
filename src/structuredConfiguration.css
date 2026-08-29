@@ -37,3 +37,7 @@
 .composer-unassigned { fill: #8a4a25 !important; font-size: 11px !important; }
 .composer-hardware.selected { stroke: #e87329; stroke-width: 3; }
 @media (max-width: 800px) { .hybrid-step-indicator, .hybrid-configuration-grid, .hybrid-field-grid, .hybrid-role-selectors { grid-template-columns: 1fr; } }
+.product-context-card > div { display: grid; gap: .2rem; }
+.product-context-card > div > span { color: var(--muted); font-size: .86rem; }
+.standalone-profile-boundary { margin: 1rem 0 0; padding: .8rem; border: 1px solid #88aaa9; border-radius: 8px; background: #eef7f6; color: #294846; line-height: 1.45; }
+.product-empty-placeholder { display: grid; gap: .25rem; margin: .75rem 0; padding: .85rem; border: 1px dashed #779a99; border-radius: 8px; background: #f4f8f8; color: #345554; }

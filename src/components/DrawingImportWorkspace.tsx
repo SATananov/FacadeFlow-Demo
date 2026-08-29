@@ -40,7 +40,7 @@ interface Props {
 const statusLabels: Record<DrawingReviewStatus, string> = { DRAFT: 'Чернова', NEEDS_REVIEW: 'Изисква проверка', VERIFIED: 'Проверено' }
 const productCategoryLabels: Record<ProductType, string> = { fixed: 'Фиксирано', single: 'Еднокрилно', double: 'Двукрилно', mixed: 'Смесено', triple: 'Триполно', 'four-field': 'Четириполно' }
 const blankDraft = (page = 1): DrawingProductDraft => ({ projectReference: '', sourcePage: page, productReference: '', productCategory: 'fixed', templateId: 'REF-01', width: 1400, height: 1200, quantity: 1, notes: '', drawingPosition: '', status: 'DRAFT' })
-const toProduct = (draft: DrawingProductDraft, base: ProductParameters): ProductParameters => ({ ...base, templateId: draft.templateId, type: getProductTemplate(draft.templateId).category, width: draft.width, height: draft.height })
+const toProduct = (draft: DrawingProductDraft, base: ProductParameters): ProductParameters => { const template = getProductTemplate(draft.templateId); return { ...base, templateId: draft.templateId, productCategory: template.productCategory, productName: draft.productReference || template.name, dimensionSource: 'USER_ENTERED', type: template.category, width: draft.width, height: draft.height } }
 
 export function DrawingImportWorkspace({ baseProduct, onPreview, onLoadVerified, onClose }: Props) {
   const modal = useRef<HTMLElement>(null)

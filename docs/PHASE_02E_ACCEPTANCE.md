@@ -68,3 +68,11 @@
 - [x] `npm run lint`
 - [x] `npm run build`
 - [x] `git diff --check`
+# Legacy category и размери
+
+- Всеки `REF-01`–`REF-17` има explicit typed категория `WINDOW`, `DOOR` или `COMBINED`.
+- Директен избор на template от друга категория изчиства старите category-specific DEMO размери.
+- Празен product draft не създава drawing или симулационен компонентен списък.
+- DEMO размерите се прилагат само чрез „Приложи примерни размери“ и пазят typed source marker.
+- Ръчно въведените размери остават `USER_ENTERED`; необичайна door пропорция показва само предупреждение.
+- Standalone profile length/cross-section не споделят state с product overall width/height.

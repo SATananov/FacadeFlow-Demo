@@ -2,6 +2,7 @@ import type { ProductComponent, ProductParameters, ProductTemplate, TemplateFiel
 import { getProductTemplate } from './productTemplates'
 
 export function calculateProductComponents(product: ProductParameters, profileCode: string): ProductComponent[] {
+  if (!Number.isFinite(product.width) || product.width <= 0 || !Number.isFinite(product.height) || product.height <= 0) return []
   const template = getProductTemplate(product.templateId)
   const innerHeight = product.height - product.frameFaceWidth * 2
   const innerWidth = product.width - product.frameFaceWidth * 2
@@ -35,7 +36,7 @@ export function fieldComponentPrefix(template: ProductTemplate, field: TemplateF
 }
 
 export function productGeometrySignature(product: ProductParameters): string {
-  return [product.templateId, product.width, product.height, product.frameFaceWidth, product.mullionWidth].join('|')
+  return [product.productCategory, product.templateId, product.width, product.height, product.frameFaceWidth, product.mullionWidth].join('|')
 }
 
 export function affectedComponentIds(previous: ProductComponent[], next: ProductComponent[], idsWithOperations: string[]): string[] {

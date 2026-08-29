@@ -33,6 +33,10 @@ const WINDOW_SIZE_SUGGESTIONS: readonly ProductSizeSuggestion[] = Object.freeze(
 const DOOR_SIZE_SUGGESTIONS: readonly ProductSizeSuggestion[] = Object.freeze([{ id: '900x2000', width: '900', height: '2000', label: '900 × 2000 mm' }, { id: '1000x2100', width: '1000', height: '2100', label: '1000 × 2100 mm' }, { id: '1200x2100', width: '1200', height: '2100', label: '1200 × 2100 mm' }, { id: '1600x2100', width: '1600', height: '2100', label: '1600 × 2100 mm' }])
 export const getProductNameSuggestions = (category: StructuredProfileConfiguration['productCategory']): readonly string[] => category === 'DOOR' ? DOOR_NAME_SUGGESTIONS : WINDOW_NAME_SUGGESTIONS
 export const getProductSizeSuggestions = (category: StructuredProfileConfiguration['productCategory']): readonly ProductSizeSuggestion[] => category === 'DOOR' ? DOOR_SIZE_SUGGESTIONS : WINDOW_SIZE_SUGGESTIONS
+export const hasUnusualDemonstrationalDoorProportion = (width: string | number, height: string | number): boolean => {
+  const numericWidth = Number(width), numericHeight = Number(height)
+  return Number.isFinite(numericWidth) && Number.isFinite(numericHeight) && numericWidth > 0 && numericHeight > 0 && numericWidth >= numericHeight
+}
 /** @deprecated Използвайте category-aware pure selector. */
 export const PRODUCT_NAME_SUGGESTIONS = WINDOW_NAME_SUGGESTIONS
 /** @deprecated Използвайте category-aware pure selector. */
@@ -90,9 +94,9 @@ export function reconcileStructuredConfiguration(configuration: StructuredProfil
   const wizardStep = Math.min(next.wizardStep, maximumAccessibleConfigurationStep(next, profiles)) as StructuredConfigurationStep
   return { ...next, wizardStep, validationErrors: validateStructuredConfiguration(next, profiles) }
 }
-export function changeStructuredCategory(configuration: StructuredProfileConfiguration, productCategory: 'WINDOW' | 'DOOR', profiles: CatalogueProfile[]): StructuredProfileConfiguration {
-  const next = { ...configuration, productCategory, thresholdStatus: productCategory === 'DOOR' ? 'UNRESOLVED' as const : 'NOT_APPLICABLE' as const, humanReviewChecked: false, status: semanticStatus(configuration) }
-  return { ...next, validationErrors: validateStructuredConfiguration(next, profiles) }
+export function changeStructuredCategory(configuration: StructuredProfileConfiguration, productCategory: 'WINDOW' | 'DOOR', _profiles: CatalogueProfile[]): StructuredProfileConfiguration {
+  if (configuration.productCategory === productCategory) return configuration
+  return createStructuredConfiguration(productCategory)
 }
 export function confirmStructuredConfiguration(configuration: StructuredProfileConfiguration, profiles: CatalogueProfile[]): StructuredProfileConfiguration {
   const validationErrors = validateStructuredConfiguration(configuration, profiles)

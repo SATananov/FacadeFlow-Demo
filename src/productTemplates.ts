@@ -1,4 +1,4 @@
-import type { OpeningDirection, ProductTemplate, TemplateCategory, TemplateDivider, TemplateField, TemplateSlidingSymbol } from './productTypes'
+import type { OpeningDirection, ProductCategory, ProductTemplate, TemplateCategory, TemplateDivider, TemplateField, TemplateSlidingSymbol } from './productTypes'
 
 const fixed = (id: string, componentKey: string, x: number, width: number, y = 0, height = 1): TemplateField => ({ id, componentKey, x, y, width, height, state: 'fixed', openingNotation: 'FIXED' })
 const opening = (id: string, componentKey: string, x: number, width: number, notation: 'SIDE_TRIANGLE_LEFT' | 'SIDE_TRIANGLE_RIGHT', y = 0, height = 1, symbolHeight = height, openingDirection: OpeningDirection = notation === 'SIDE_TRIANGLE_LEFT' ? 'left' : 'right', directionConfirmed = false): TemplateField => ({ id, componentKey, x, y, width, height, state: 'opening', openingNotation: notation, openingDirection, directionConfirmed, confirmedOpeningNotation: directionConfirmed ? openingDirection === 'right' ? 'RIGHT_OPENING' : 'LEFT_OPENING' : undefined, symbolBounds: { x, y, width, height: symbolHeight } })
@@ -6,7 +6,12 @@ const slidingPanel = (id: string, componentKey: string, x: number, width: number
 const verticals = (count: number): TemplateDivider[] => Array.from({ length: count - 1 }, (_, index) => { const position = (index + 1) / count; return { id: `MULLION-V-${String(index + 1).padStart(2, '0')}`, orientation: 'vertical', x1: position, y1: 0, x2: position, y2: 1 } })
 const lowerDivider = (id: string, x1 = 0, x2 = 1): TemplateDivider => ({ id, orientation: 'horizontal', x1, y1: .72, x2, y2: .72 })
 const dimensions: Record<TemplateCategory, [number, number]> = { WINDOWS: [1400, 1200], BALCONY_DOORS: [900, 2100], SLIDING: [2400, 2100], SINGLE_DOORS: [900, 2100], DOUBLE_DOORS: [1600, 2100] }
-const make = (id: string, displayNumber: string, name: string, description: string, libraryCategory: TemplateCategory, category: ProductTemplate['category'], fields: TemplateField[], dividers: TemplateDivider[], slidingSymbols: TemplateSlidingSymbol[] = []): ProductTemplate => ({ id, displayNumber, name, description, libraryCategory, category, fields, dividers, slidingSymbols, recommendedWidth: dimensions[libraryCategory][0], recommendedHeight: dimensions[libraryCategory][1], referenceDerived: true, simulationOnly: true })
+type ReferenceTemplateId = `REF-${'01'|'02'|'03'|'04'|'05'|'06'|'07'|'08'|'09'|'10'|'11'|'12'|'13'|'14'|'15'|'16'|'17'}`
+export const PRODUCT_CATEGORY_BY_TEMPLATE: Readonly<Record<ReferenceTemplateId, ProductCategory>> = Object.freeze({
+  'REF-01':'WINDOW','REF-02':'WINDOW','REF-03':'WINDOW','REF-04':'WINDOW','REF-05':'WINDOW','REF-06':'WINDOW','REF-07':'WINDOW','REF-08':'WINDOW','REF-09':'WINDOW',
+  'REF-10':'DOOR','REF-11':'DOOR','REF-12':'COMBINED','REF-13':'COMBINED','REF-14':'DOOR','REF-15':'DOOR','REF-16':'DOOR','REF-17':'DOOR',
+})
+const make = (id: ReferenceTemplateId, displayNumber: string, name: string, description: string, libraryCategory: TemplateCategory, category: ProductTemplate['category'], fields: TemplateField[], dividers: TemplateDivider[], slidingSymbols: TemplateSlidingSymbol[] = []): ProductTemplate => ({ id, displayNumber, name, description, libraryCategory, productCategory: PRODUCT_CATEGORY_BY_TEMPLATE[id], category, fields, dividers, slidingSymbols, recommendedWidth: dimensions[libraryCategory][0], recommendedHeight: dimensions[libraryCategory][1], referenceDerived: true, simulationOnly: true })
 
 export const productTemplates: ProductTemplate[] = [
   make('REF-01', '01', 'Фиксиран прозорец', 'Едно фиксирано поле.', 'WINDOWS', 'fixed', [fixed('FIELD-01', 'FIXED', 0, 1)], []),

@@ -4,6 +4,8 @@ export type ConfirmedOpeningNotation = 'LEFT_OPENING' | 'RIGHT_OPENING'
 export type ProductFieldState = 'fixed' | 'opening' | 'sliding'
 export type OpeningNotation = 'FIXED' | 'SIDE_TRIANGLE_LEFT' | 'SIDE_TRIANGLE_RIGHT' | 'TILT_PLACEHOLDER' | 'TILT_TURN_PLACEHOLDER' | 'SLIDING_LEFT' | 'SLIDING_RIGHT' | 'SLIDING_BIDIRECTIONAL' | 'JUNCTION_BIDIRECTIONAL' | 'JUNCTION_OPPOSED_STACKED'
 export type TemplateCategory = 'WINDOWS' | 'BALCONY_DOORS' | 'SLIDING' | 'SINGLE_DOORS' | 'DOUBLE_DOORS'
+export type ProductCategory = 'WINDOW' | 'DOOR' | 'COMBINED'
+export type ProductDimensionSource = 'EMPTY' | 'USER_ENTERED' | 'WINDOW_DEMO_PRESET' | 'DOOR_DEMO_PRESET' | 'COMBINED_DEMO_PRESET'
 
 export interface NormalizedRect { x: number; y: number; width: number; height: number }
 
@@ -45,6 +47,7 @@ export interface ProductTemplate {
   description: string
   category: ProductType
   libraryCategory: TemplateCategory
+  productCategory: ProductCategory
   fields: TemplateField[]
   dividers: TemplateDivider[]
   slidingSymbols: TemplateSlidingSymbol[]
@@ -56,6 +59,9 @@ export interface ProductTemplate {
 
 export interface ProductParameters {
   templateId: string
+  productCategory: ProductCategory
+  productName: string
+  dimensionSource: ProductDimensionSource
   type: ProductType
   width: number
   height: number

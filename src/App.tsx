@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import './App.css'
 import './importCenter.css'
 import './help.css'
@@ -45,6 +45,8 @@ import { initialGeometry } from './customGeometryTree'
 import type { CustomProduct } from './customGeometryTypes'
 import { changedCustomComponentIds, generateCustomComponents, type CustomComponent } from './customComponentGeneration'
 import type { ImportedDimensionEvidence } from './dimensionTypes'
+import { createHybridProductDesignerSession, type HybridProductDesignerSession } from './hybridProductDesigner'
+import { applyLegacyDemoDimensions, selectLegacyProductTemplate } from './legacyProductTransition'
 
 function App() {
   const isLocalApplication = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
@@ -73,9 +75,23 @@ function App() {
   const [activeProfileSelection, setActiveProfileSelection] = useState<ActiveProfileSelection>({ FRAME: 'profile-demo-frame-01', SASH: 'profile-demo-sash-01', MULLION: 'profile-demo-mullion-01' })
   const [showProfileCatalogue, setShowProfileCatalogue] = useState(false)
   const [showDetailDrafting, setShowDetailDrafting] = useState(false)
+  const [hybridSession, setHybridSession] = useState<HybridProductDesignerSession>(() => createHybridProductDesignerSession(crypto.randomUUID()))
+  const hybridSessionRef = useRef(hybridSession)
   const [showCustomDesigner, setShowCustomDesigner] = useState(false)
   const [activeCustomComponentId, setActiveCustomComponentId] = useState<string | null>(null)
   const [customProduct, setCustomProduct] = useState<CustomProduct>(() => { const now = new Date().toISOString(); return { id: crypto.randomUUID(), name: 'Нестандартен прозорец 001', width: 1400, height: 1200, frameProfileId: 'profile-demo-frame-01', frameCreated: false, mullionProfileId: 'profile-demo-mullion-01', geometry: initialGeometry(), status: 'DRAFT', humanReviewConfirmed: false, createdAt: now, updatedAt: now, simulationOnly: true, machineReady: false } })
+
+  const updateHybridSession = (updater: (current: HybridProductDesignerSession) => HybridProductDesignerSession) => {
+    const previous = hybridSessionRef.current, next = updater(previous)
+    hybridSessionRef.current = next
+    setHybridSession(next)
+    if (next.productCategory && next.productCategory !== previous.productCategory) {
+      setShowProductPreview(false)
+      setShowTemplatePicker(false)
+      setActiveComponentId(null)
+      setPreviewSelectedId(null)
+    }
+  }
 
   const productTemplate = useMemo(() => getProductTemplate(product.templateId), [product.templateId])
   const productComponents = useMemo(() => calculateProductComponents(product, profile.code), [product, profile.code])
@@ -134,9 +150,14 @@ function App() {
     return true
   }
   const selectTemplate = (template: ProductTemplate) => {
-    const firstOpening = template.fields.find((field) => field.state === 'opening')
-    const changed = changeProduct({ ...product, templateId: template.id, type: template.category, openingDirection: firstOpening?.openingDirection ?? 'left' })
-    if (changed) setShowTemplatePicker(false)
+    const transaction = selectLegacyProductTemplate(product, template)
+    const changed = changeProduct(transaction.product)
+    if (!changed) return
+    setShowProductPreview(false)
+    setActiveComponentId(null)
+    setPreviewSelectedId(null)
+    cancelOperation()
+    setShowTemplatePicker(false)
   }
   const openProductPreview = () => {
     const result = validateProduct(product)
@@ -179,7 +200,7 @@ function App() {
   const loadVerifiedDrawingProduct = (item: CapturedDrawingProduct): boolean => {
     if (item.status !== 'VERIFIED') return false
     const template = getProductTemplate(item.templateId)
-    const loaded = changeProduct({ ...product, templateId: item.templateId, type: template.category, width: item.width, height: item.height })
+    const loaded = changeProduct({ ...product, templateId: item.templateId, productCategory: template.productCategory, productName: item.productReference || template.name, dimensionSource: 'USER_ENTERED', type: template.category, width: item.width, height: item.height })
     if (!loaded) return false
     setProject(item.projectReference)
     setProductFromVerifiedImport(true)
@@ -220,7 +241,8 @@ function App() {
             onStandalone={returnToStandalone}
           />
         )}
-        {!activeComponent && !activeCustomComponent && <section className="product-creation-choices" aria-label="Създаване на изделие"><button type="button" onClick={() => setShowTemplatePicker(true)}>Избери типова схема</button><button type="button" className="primary" onClick={() => setShowCustomDesigner(true)}>Начертай нестандартен прозорец</button></section>}
+        {!activeComponent && !activeCustomComponent && hybridSession.productCategory && <section className="product-creation-choices product-context-card" aria-label="Текущо изделие"><div><b>Продължи с изделието</b><span>Категория: {hybridSession.productCategory === 'DOOR' ? 'Врата' : 'Прозорец'}</span><span>{hybridSession.configuration?.productName || 'Без въведено име'}</span><span>{hybridSession.configuration?.overallWidth && hybridSession.configuration.overallHeight ? `${hybridSession.configuration.overallWidth} × ${hybridSession.configuration.overallHeight} mm` : 'Размерите не са въведени'}</span><span>Статус: {hybridSession.configuration?.status === 'HUMAN_CONFIRMED' ? 'Концептуално проверено' : 'Нуждае се от проверка'}</span></div><button type="button" className="primary" onClick={() => setShowDetailDrafting(true)}>Продължи с изделието</button></section>}
+        {!activeComponent && !activeCustomComponent && !hybridSession.productCategory && <section className="product-creation-choices" aria-label="Създаване на изделие"><button type="button" onClick={() => setShowTemplatePicker(true)}>Избери типова схема</button><button type="button" className="primary" onClick={() => product.productCategory === 'WINDOW' ? setShowCustomDesigner(true) : setShowDetailDrafting(true)}>{product.productCategory === 'DOOR' ? 'Начертай нестандартна врата' : product.productCategory === 'WINDOW' ? 'Начертай нестандартен прозорец' : 'Начертай нестандартно изделие'}</button></section>}
         <div className="layout">
           <ProfilePanel
             project={project}
@@ -229,6 +251,7 @@ function App() {
             product={product}
             productTemplate={productTemplate}
             productErrors={productErrors}
+            productComposerActive={Boolean(hybridSession.productCategory)}
             onProject={setProject}
             onProfile={(next) => {
               setProfile(next)
@@ -246,9 +269,7 @@ function App() {
             onProductPreview={openProductPreview}
             onChooseTemplate={() => setShowTemplatePicker(true)}
             onApplyRecommendedDimensions={() => changeProduct({
-              ...product,
-              width: productTemplate.recommendedWidth,
-              height: productTemplate.recommendedHeight,
+              ...applyLegacyDemoDimensions(product, productTemplate),
             })}
           />
           <ProfileWorkspace
@@ -344,7 +365,9 @@ function App() {
       {showProfileCatalogue && <ProfileCatalogue profiles={catalogueProfiles} selection={activeProfileSelection} onProfiles={updateCatalogue} onSelection={setActiveProfileSelection} onClose={() => setShowProfileCatalogue(false)}/>}
       {showDetailDrafting && (
         <DetailDraftingPlaceholder
+          session={hybridSession}
           profiles={catalogueProfiles}
+          onSession={updateHybridSession}
           onClose={() => setShowDetailDrafting(false)}
           onOpenImportCenter={() => { setShowDetailDrafting(false); setShowDrawingImport(true) }}
           onOpenProfileCatalogue={() => setShowProfileCatalogue(true)}
