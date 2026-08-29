@@ -1,0 +1,73 @@
+.drawing-workspace-shell { min-width: 0; min-height: 0; background: #f3f6f7; }
+.drawing-workspace-header,.drawing-workspace-progress,.drawing-workspace-settings,.drawing-workspace-toolbar,.drawing-workspace-main,.drawing-workspace-status { min-width: 0; min-height: 0; }
+.drawing-workspace-header > *,.drawing-workspace-progress > *,.drawing-workspace-settings-content > * { margin: 0; }
+.drawing-workspace-settings-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 5px 16px; background: var(--ff-surface-secondary); border-bottom: 1px solid var(--ff-border-default); font-size: var(--ff-font-xs); }
+.drawing-workspace-settings-heading button { min-height: 30px; padding: 3px 9px; }
+.drawing-workspace-main { display: grid; grid-template-columns: minmax(0,1fr) clamp(270px,23vw,330px); gap: 8px; overflow: hidden; }
+.drawing-workspace-main.without-properties { grid-template-columns: minmax(0,1fr); }
+.drawing-workspace-viewport,.drawing-workspace-properties { min-width: 0; min-height: 0; overflow: hidden; }
+.drawing-workspace-properties { overflow: auto; scrollbar-gutter: stable; }
+.drawing-workspace-header .preview-header { position: static; display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; width: 100%; height: auto; margin: 0; padding: 9px 16px; }
+.drawing-workspace-header .preview-header > div { min-width: 0; }
+.drawing-workspace-header .preview-header h2 { margin: 4px 0 0; line-height: 1.2; }
+.drawing-workspace-header .preview-header p { margin: 3px 0 0; line-height: 1.4; white-space: normal; overflow-wrap: anywhere; }
+.drawing-workspace-header .preview-close { position: static; flex: 0 0 36px; margin: 0; }
+.drawing-workspace-progress .structured-workflow { padding: 6px 16px; }
+.drawing-workspace-progress .structured-workflow > p { display: inline; margin: 0 8px 0 0; font-size: 10px; }
+.drawing-workspace-progress .structured-workflow ol { display: inline-flex; flex-wrap: wrap; gap: 4px; vertical-align: middle; }
+.drawing-workspace-progress .structured-workflow li { min-height: 28px; padding: 2px 5px; }
+.drawing-workspace-progress .structured-workflow li span { flex-basis: 19px; height: 19px; }
+.drawing-workspace-progress .workflow-requirement { display: block !important; margin: 4px 0 0 !important; padding: 3px 6px; line-height: 1.3; }
+.drawing-workspace-settings-content .custom-designer-toolbar { display: grid; grid-template-columns: minmax(150px,1.4fr) repeat(2,minmax(105px,.7fr)) repeat(2,minmax(145px,1fr)) auto auto auto; align-items: end; gap: 6px; padding: 6px 16px; }
+.drawing-workspace-settings-content .custom-designer-toolbar label { min-width: 0; }
+.drawing-workspace-settings-content .custom-designer-toolbar input,.drawing-workspace-settings-content .custom-designer-toolbar select { width: 100%; min-width: 0; height: 34px; min-height: 34px; }
+.drawing-workspace-settings-content .custom-designer-toolbar button:not(.ff-help-trigger) { width: auto; min-height: 34px; height: 34px; padding: 5px 9px; white-space: nowrap; }
+.drawing-workspace-toolbar { display: flex; align-items: center; flex-wrap: wrap; background: var(--ff-surface-secondary); border-bottom: 1px solid var(--ff-border-default); }
+.drawing-workspace-toolbar .custom-workspace-controls { display: flex; align-items: center; flex: 1 1 100%; flex-wrap: wrap; min-width: 0; }
+.drawing-workspace-toolbar .view-switch { flex: 0 0 auto; padding: 5px 8px; border: 0; }
+.drawing-workspace-toolbar .dimension-controls { flex: 1 1 520px; padding: 4px 8px; border: 0; }
+.drawing-workspace-toolbar .dimension-controls { min-width: 0; flex-wrap: wrap; overflow: visible; }
+.drawing-workspace-toolbar .dimension-controls label { flex: 0 0 auto; min-height: 28px; padding: 2px 5px; white-space: nowrap; }
+.drawing-workspace-toolbar .dimension-controls > button { width: auto; min-height: 30px; margin-inline-start: auto; }
+.drawing-workspace-toolbar .custom-canvas-controls { display: flex; flex: 0 1 auto; flex-wrap: wrap; gap: 5px; padding: 5px 8px; border: 0; background: transparent; }
+.drawing-workspace-toolbar .custom-canvas-controls button { min-height: 32px; padding: 4px 8px; }
+.drawing-workspace-viewport > .custom-canvas { display: grid; grid-template-rows: minmax(0,1fr) auto auto; width: 100%; height: 100%; min-width: 0; min-height: 0; overflow: hidden; }
+.drawing-workspace-viewport .custom-drawing-scroll { width: 100%; height: 100%; min-height: 0; overflow: auto; }
+.drawing-workspace-viewport .custom-drawing-scroll > div { height: 100%; min-height: 0; }
+.drawing-workspace-viewport .custom-product-drawing { width: 100%; height: 100%; min-width: 0; max-height: 100%; }
+.drawing-workspace-viewport > .product-3d-preview { width: 100%; height: 100%; min-height: 0; margin: 0; overflow: auto; }
+.drawing-workspace-properties > .selected-field-panel { width: 100%; min-height: 100%; border: 0; }
+.drawing-workspace-status .custom-validation { max-height: 70px; margin: 0 8px; overflow: auto; }
+.drawing-workspace-status .custom-summary { max-height: 82px; margin: 0 8px 5px; padding: 6px; overflow: auto; }
+.drawing-workspace-status .custom-designer-footer { position: static; min-height: 0; padding: 6px 16px; }
+.custom-component-list-region { min-width: 0; background: var(--ff-surface-primary); border-block: 1px solid var(--ff-border-default); }
+.custom-component-list-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 38px; padding: 4px 16px; }
+.custom-component-list-heading strong { min-width: 0; }
+.custom-component-list-heading button { flex: 0 0 auto; min-height: 30px; padding: 3px 9px; }
+.custom-component-list-heading button:focus-visible { outline: 3px solid var(--ff-focus-ring); outline-offset: 2px; }
+.custom-component-list-content { max-height: min(220px,28dvh); overflow-y: auto; overflow-x: hidden; scrollbar-gutter: stable; }
+.custom-component-list-content .custom-summary { max-height: none; margin-bottom: 0; }
+
+@media (min-width: 901px) {
+  .drawing-workspace-shell.drawing-workspace-shell { display: grid; grid-template-rows: max-content max-content max-content max-content minmax(180px,1fr) max-content; width: min(1500px,calc(100vw - 24px)); height: calc(100dvh - 24px); max-height: calc(100dvh - 24px); overflow: hidden; }
+  .drawing-workspace-toolbar .custom-workspace-controls,.drawing-workspace-toolbar .dimension-controls { flex-wrap: wrap; }
+  .drawing-workspace-toolbar .custom-canvas-controls { flex-basis: 100%; }
+  .drawing-workspace-viewport { height: 100%; }
+  .drawing-workspace-status { max-height: min(132px,18dvh); overflow: auto; scrollbar-gutter: stable; }
+  .drawing-workspace-status:has(.custom-component-list-content:not([hidden])) { max-height: min(280px,27dvh); }
+  .drawing-workspace-status .custom-designer-footer { position: sticky; bottom: 0; z-index: 2; }
+}
+
+@media (max-width: 900px) {
+  .drawing-workspace-shell { width: 100%; max-width: 100%; max-height: 96dvh; box-sizing: border-box; overflow-y: auto; }
+  .drawing-workspace-main { grid-template-columns: minmax(0,1fr); overflow: visible; }
+  .drawing-workspace-viewport,.drawing-workspace-properties { overflow: visible; }
+  .drawing-workspace-settings-heading { position: sticky; top: 0; z-index: 2; }
+  .drawing-workspace-settings-content .custom-designer-toolbar { grid-template-columns: minmax(0,1fr); }
+  .drawing-workspace-toolbar .dimension-controls { flex: 1 1 100%; align-items: stretch; }
+  .drawing-workspace-toolbar .custom-workspace-controls,.drawing-workspace-toolbar .dimension-controls,.drawing-workspace-toolbar .custom-canvas-controls,.drawing-workspace-toolbar .view-switch { width: 100%; max-width: 100%; box-sizing: border-box; }
+  .drawing-workspace-toolbar .dimension-controls label { width: 100%; min-height: 42px; box-sizing: border-box; white-space: normal; }
+  .drawing-workspace-toolbar .dimension-controls > button,.drawing-workspace-toolbar .ff-help-trigger { min-height: 42px; min-width: 42px; }
+  .custom-component-list-heading { align-items: flex-start; flex-wrap: wrap; }
+  .custom-component-list-heading button { min-height: 42px; }
+}
