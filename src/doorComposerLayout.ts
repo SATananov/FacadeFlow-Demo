@@ -1,6 +1,7 @@
 import type { DoorField } from './doorComposerTypes'
 
 export interface LayoutBounds { x: number; y: number; width: number; height: number }
+export interface DoorHardwareAnchor { x: number; y: number; bounds: LayoutBounds }
 export interface DoorDrawingLayout {
   frame: LayoutBounds
   scale: number
@@ -26,6 +27,17 @@ export const calculateDoorFieldBounds = (frame: LayoutBounds, field: Pick<DoorFi
   width: field.rect.width * frame.width,
   height: field.rect.height * frame.height,
 })
+
+/** Leaf-local conceptual anchor. The marker touches the selected leaf edge and stays inside its bounds. */
+export function calculateDoorHingeAnchor(leaf: LayoutBounds, side: 'LEFT' | 'RIGHT', positionRatio: number, markerWidth: number, markerHeight: number, verticalAxis: 'DOWN' | 'UP' = 'DOWN'): DoorHardwareAnchor {
+  const width = Math.min(Math.max(0, markerWidth), Math.max(0, leaf.width))
+  const height = Math.min(Math.max(0, markerHeight), Math.max(0, leaf.height))
+  const ratio = Math.max(0, Math.min(1, positionRatio))
+  const centerY = verticalAxis === 'DOWN' ? leaf.y + ratio * leaf.height : leaf.y + (1 - ratio) * leaf.height
+  const x = side === 'LEFT' ? leaf.x : leaf.x + leaf.width - width
+  const y = Math.max(leaf.y, Math.min(leaf.y + leaf.height - height, centerY - height / 2))
+  return { x: side === 'LEFT' ? leaf.x : leaf.x + leaf.width, y: centerY, bounds: { x, y, width, height } }
+}
 
 export function findDoorDropTarget(fields: readonly DoorField[], frame: LayoutBounds, svgX: number, svgY: number): string | null {
   if (!Number.isFinite(svgX) || !Number.isFinite(svgY)) return null
