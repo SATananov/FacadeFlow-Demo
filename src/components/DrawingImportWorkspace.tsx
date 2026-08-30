@@ -26,6 +26,7 @@ import { inspectImportFile } from '../importInspection'
 import { dispatchInspectedSource } from '../importRouteDispatch'
 import { createSourceSession } from '../sourceSession'
 import { ContextHelp } from './ContextHelp'
+import { FacadeFlowWorkspaceHeader } from './FacadeFlowWorkspaceHeader'
 import { evidenceAfterManualEdit, evidenceForManualCapture, evidenceFromCombinedAnalysis } from '../importedDimensionEvidence'
 import { SkyGlazingImportWorkspace } from './SkyGlazingImportWorkspace'
 import { DwgViewerWorkspace } from './DwgViewerWorkspace'
@@ -211,8 +212,10 @@ export function DrawingImportWorkspace({ baseProduct, onPreview, onLoadVerified,
     setProvisionalDraft(null)
   }
 
-  return <div className="preview-overlay drawing-import-overlay" role="presentation"><section ref={modal} className="drawing-import-modal" data-help-id="import-workspace" role="dialog" aria-modal="true" aria-labelledby="drawing-import-title" aria-describedby="drawing-import-safety">
-    <header className="drawing-import-header"><div><span className="preview-badge">СИМУЛАЦИЯ · ЛОКАЛНА ОБРАБОТКА</span><h2 id="drawing-import-title">Избери източник на проекта</h2><p id="drawing-import-safety">Файлът остава в паметта на браузъра. Няма сървърно качване, автоматично производствено тълкуване или машинен export.</p></div><button type="button" className="preview-close" aria-label="Затвори импортния център" onClick={onClose}>×</button></header>
+  return <div className="preview-overlay drawing-import-overlay ff-section-workspace" role="presentation"><section ref={modal} className="drawing-import-modal" data-help-id="import-workspace" role="dialog" aria-modal="true" aria-labelledby="drawing-import-title" aria-describedby="drawing-import-safety">
+    <FacadeFlowWorkspaceHeader titleId="drawing-import-title" icon="import" eyebrow="Проектни източници" title="Импорт на проект / чертеж" subtitle="Локален преглед, OCR и проверими източници без автоматичен производствен изход." onBack={onClose}/>
+    <div id="drawing-import-safety" className="ff-workspace-safety"><b>Симулация · локална обработка.</b> Файлът остава в паметта на браузъра. Няма сървърно качване, автоматично производствено тълкуване или машинен export.</div>
+    <div className="drawing-import-content">
     {!selectedRoute ? <ImportFormatChooser onSelect={setSelectedRoute}/> : selectedRoute === 'SKYGLAZING' ? <SkyGlazingImportWorkspace onBack={backToFormatChoice}/> : selectedRoute === 'CAD' ? <DwgViewerWorkspace onBack={backToFormatChoice}/> : foundationSession ? <FoundationSourceInspection session={foundationSession} onClear={clearSource} onBack={backToFormatChoice}/> : !source ? <section className="drawing-file-start">
       <div className="selected-import-route"><span className="route-badge">{formatCardFor(selectedRoute).badge}</span><div><b>{formatCardFor(selectedRoute).title}</b><p>{formatCardFor(selectedRoute).description}</p></div><button type="button" onClick={backToFormatChoice}>Назад към избор на формат</button></div>
       <div className="drawing-limits"><label>Максимален размер (MB)<input type="number" min="1" max="100" value={Math.round(limits.maximumFileBytes / 1024 / 1024)} onChange={(event) => setLimits({ ...limits, maximumFileBytes: Number(event.target.value) * 1024 * 1024 })}/></label>{selectedRoute === 'PDF' && <label>Максимум PDF страници<input type="number" min="1" max="500" value={limits.maximumPdfPages} onChange={(event) => setLimits({ ...limits, maximumPdfPages: Number(event.target.value) })}/></label>}</div>
@@ -229,5 +232,6 @@ export function DrawingImportWorkspace({ baseProduct, onPreview, onLoadVerified,
       </section>
       <footer className="drawing-import-footer"><p><b>Само симулация.</b> Данните изискват човешка проверка и не са готови за машина.</p><button type="button" className="export" disabled={!products.length && !provisionalDraft} onClick={() => exportDrawingImportSimulation({ source: source.metadata, products, validation: { valid: products.length > 0 || Boolean(provisionalDraft), errors: products.length || provisionalDraft ? [] : ['Няма заснети изделия или автоматична чернова.'] }, ocrJobs, ocrAudit, combinedAnalysis: combinedJob ?? undefined, combinedAudit: combinedAuditEntries, provisionalDraft: provisionalDraft ?? undefined })}>Експортирай import simulation JSON</button></footer>
     </>}
+    </div>
   </section></div>
 }

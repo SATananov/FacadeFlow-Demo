@@ -1,0 +1,232 @@
+/* PHASE 06B.2.3 POLISH — one FacadeFlow visual language, readable text, one primary scroll per workspace. */
+
+:root{
+  --ff-shell-bg:#07171d;
+  --ff-shell-panel:#0d252d;
+  --ff-shell-line:#2c505a;
+  --ff-shell-cyan:#45c7d6;
+  --ff-shell-orange:#e87329;
+  --ff-page-bg:#eef3f4;
+  --ff-page-grid:#dfe8ea;
+  --ff-page-text:#172b33;
+  --ff-page-muted:#526970;
+  --ff-page-soft:#6a7d83;
+}
+
+/* ----- Shared top-level shell ------------------------------------------------ */
+.ff-section-workspace{
+  background:var(--ff-shell-bg)!important;
+  color:#dce9ec!important;
+  overflow:hidden!important;
+}
+.ff-section-workspace>.ff-workspace-header,
+.help-center>.ff-workspace-header,
+.drawing-import-modal>.ff-workspace-header,
+.catalogue-modal>.ff-workspace-header,
+.detail-drafting>.ff-workspace-header,
+.drawing-workspace-header>.ff-workspace-header{
+  flex:0 0 auto!important;
+  width:100%!important;
+  min-height:94px!important;
+  height:auto!important;
+  box-sizing:border-box!important;
+  padding:14px 28px!important;
+  align-items:center!important;
+  color:#f3f8f9!important;
+  background:
+    linear-gradient(90deg,rgba(69,199,214,.055) 1px,transparent 1px),
+    linear-gradient(rgba(69,199,214,.042) 1px,transparent 1px),
+    linear-gradient(135deg,#081a21 0%,#0e2932 58%,#0b2028 100%)!important;
+  background-size:32px 32px,32px 32px,auto!important;
+  border:0!important;
+  border-bottom:1px solid #31545e!important;
+  box-shadow:0 8px 28px rgba(1,10,14,.24)!important;
+}
+.ff-section-workspace>.ff-workspace-header::after,
+.help-center>.ff-workspace-header::after,
+.drawing-import-modal>.ff-workspace-header::after,
+.catalogue-modal>.ff-workspace-header::after,
+.detail-drafting>.ff-workspace-header::after,
+.drawing-workspace-header>.ff-workspace-header::after{
+  height:3px!important;
+  background:linear-gradient(90deg,#18aebe 0 18%,#e87329 18% 23%,#18aebe 23% 100%)!important;
+}
+.ff-workspace-title-wrap{gap:15px!important}
+.ff-workspace-symbol{
+  width:54px!important;height:54px!important;border-color:#3d7280!important;
+  background:#0b2630!important;color:#83e1e9!important;
+}
+.ff-workspace-eyebrow{color:#62c8d4!important;font-size:8.5px!important;letter-spacing:1.65px!important}
+.ff-workspace-title-wrap h2,
+.help-center>.ff-workspace-header .ff-workspace-title-wrap h2{
+  color:#f6fafb!important;font-size:25px!important;font-weight:500!important;opacity:1!important;
+}
+.ff-workspace-title-wrap p,
+.help-center>.ff-workspace-header .ff-workspace-title-wrap p{
+  color:#a4b9bf!important;font-size:10.5px!important;opacity:1!important;
+}
+.ff-workspace-header-right{gap:12px!important}
+.ff-workspace-company-logo{
+  order:3!important;width:144px!important;height:62px!important;margin:0!important;
+  padding:3px!important;background:#f4f7f7!important;border-color:#4d707a!important;
+  box-shadow:0 0 0 2px #081b22,0 8px 20px rgba(0,0,0,.24)!important;
+}
+.ff-workspace-back,.ff-workspace-actions button{
+  min-height:44px!important;padding:8px 14px!important;border-color:#365e69!important;
+  background:#0d2932!important;color:#dfecee!important;font-size:10.5px!important;
+}
+.ff-workspace-back:hover,.ff-workspace-actions button:hover{background:#143843!important;border-color:#64aeba!important}
+
+/* ----- Safety/status chrome -------------------------------------------------- */
+.ff-workspace-safety,.detail-drafting>.detail-drafting-safety,.ff-ai-safety{
+  flex:0 0 auto!important;margin:0!important;padding:10px 28px!important;
+  background:#30261e!important;border:0!important;border-bottom:1px solid #6d4b31!important;
+  color:#efc2a5!important;font-size:10.5px!important;line-height:1.45!important;opacity:1!important;
+}
+
+/* ----- Readability reset for light workspaces -------------------------------- */
+.drawing-import-content,.catalogue-workspace-content,.help-workspace-content,
+.detail-drafting>.hybrid-screen,.detail-drafting>.hybrid-viewport,
+.detail-drafting>.hybrid-breadcrumb,.detail-drafting>.hybrid-navigation{
+  color:var(--ff-page-text)!important;opacity:1!important;
+}
+.drawing-import-content,.catalogue-workspace-content,.help-workspace-content,.hybrid-screen{
+  background-color:var(--ff-page-bg)!important;
+  background-image:
+    linear-gradient(var(--ff-page-grid) 1px,transparent 1px),
+    linear-gradient(90deg,var(--ff-page-grid) 1px,transparent 1px)!important;
+  background-size:34px 34px!important;
+}
+.drawing-import-content h1,.drawing-import-content h2,.drawing-import-content h3,.drawing-import-content h4,
+.catalogue-workspace-content h1,.catalogue-workspace-content h2,.catalogue-workspace-content h3,.catalogue-workspace-content h4,
+.help-workspace-content h1,.help-workspace-content h2,.help-workspace-content h3,.help-workspace-content h4,
+.hybrid-screen h1,.hybrid-screen h2,.hybrid-screen h3,.hybrid-screen h4,
+.hybrid-breadcrumb,.hybrid-navigation{
+  color:var(--ff-page-text)!important;opacity:1!important;
+}
+.drawing-import-content p,.drawing-import-content li,.drawing-import-content small,
+.catalogue-workspace-content p,.catalogue-workspace-content li,.catalogue-workspace-content small,
+.help-workspace-content p,.help-workspace-content li,.help-workspace-content small,
+.hybrid-screen p,.hybrid-screen li,.hybrid-screen small{
+  color:var(--ff-page-muted)!important;opacity:1!important;
+}
+
+/* Keep intentionally disabled controls muted, but never wash out normal content. */
+.ff-section-workspace button:not(:disabled),.ff-section-workspace input:not(:disabled),.ff-section-workspace select:not(:disabled),.ff-section-workspace textarea:not(:disabled){opacity:1!important}
+.ff-section-workspace button:disabled{opacity:.72!important}
+
+/* ----- AI: exactly one primary vertical scroll -------------------------------- */
+.ff-ai-workspace.ff-section-workspace{overflow:hidden!important}
+.ff-ai-unified-header{position:relative!important;top:auto!important;z-index:30!important}
+.ff-ai-safety{position:relative!important;z-index:20!important}
+.ff-ai-status-rail{
+  flex:0 0 auto!important;display:grid!important;grid-template-columns:repeat(5,minmax(0,1fr))!important;
+  gap:7px!important;padding:7px 20px!important;overflow:visible!important;scrollbar-width:none!important;
+  background:#081a20!important;border-bottom:1px solid #294751!important;
+}
+.ff-ai-status-rail::-webkit-scrollbar{display:none!important}
+.ff-ai-status-rail span{min-width:0!important;white-space:normal!important}
+.ff-ai-main{
+  flex:1 1 auto!important;min-height:0!important;overflow-y:auto!important;overflow-x:hidden!important;
+  align-items:start!important;overscroll-behavior:contain!important;scrollbar-gutter:stable!important;
+}
+.ff-ai-intake-column{min-height:0!important;overflow:visible!important}
+.ff-ai-review-column{
+  position:sticky!important;top:16px!important;align-self:start!important;height:max-content!important;
+  min-height:0!important;max-height:none!important;overflow:visible!important;
+}
+
+/* ----- Constructor ------------------------------------------------------------- */
+.detail-drafting{overflow:hidden!important}
+.detail-drafting>.hybrid-breadcrumb{
+  flex:0 0 auto!important;padding:9px 28px!important;background:#f8fbfb!important;
+  border-bottom:1px solid #c8d5d8!important;font-weight:700!important;
+}
+.detail-drafting>.hybrid-navigation{flex:0 0 auto!important;background:#e7eff1!important;color:#29434b!important}
+.detail-drafting>.hybrid-screen,
+.detail-drafting>.hybrid-viewport{
+  flex:1 1 auto!important;min-height:0!important;overflow-y:auto!important;overflow-x:hidden!important;
+  overscroll-behavior:contain!important;scrollbar-gutter:stable!important;
+}
+.hybrid-screen-heading h3{color:#182d35!important}.hybrid-screen-heading p{color:#546b72!important}
+.hybrid-route-card{border-color:#9eb4ba!important;box-shadow:0 10px 28px rgba(20,48,57,.09)!important}
+.hybrid-route-card strong{color:#173841!important}.hybrid-route-card p{color:#4b6269!important}.hybrid-route-card small{color:#697d83!important}
+
+/* ----- Import ------------------------------------------------------------------ */
+.drawing-import-modal{color:var(--ff-page-text)!important}
+.drawing-import-content{
+  flex:1 1 auto!important;min-height:0!important;overflow-y:auto!important;overflow-x:hidden!important;
+  overscroll-behavior:contain!important;scrollbar-gutter:stable!important;
+}
+.import-format-chooser h3{color:#18343d!important;opacity:1!important}
+.import-format-card{color:#1c333b!important;border-color:#b5c8cd!important;box-shadow:0 8px 22px rgba(23,56,66,.07)!important}
+.import-format-card p{color:#445d65!important}.import-format-card small{color:#8c481d!important}
+.route-badge{background:#173a44!important;color:#eff8f9!important}
+
+/* ----- Catalogue --------------------------------------------------------------- */
+.catalogue-modal{color:var(--ff-page-text)!important}
+.catalogue-workspace-content{
+  flex:1 1 auto!important;min-height:0!important;overflow-y:auto!important;overflow-x:hidden!important;
+  overscroll-behavior:contain!important;scrollbar-gutter:stable!important;
+}
+.catalogue-toolbar{position:sticky!important;top:0!important;z-index:8!important;background:#f9fbfb!important;border-bottom:1px solid #cbd7da!important}
+.catalogue-list article{color:#1b323a!important;border-color:#c8d5d8!important;box-shadow:0 5px 18px rgba(23,56,66,.06)!important}
+.catalogue-list article:not(.archived){opacity:1!important}
+.catalogue-list article:not(.archived) *{opacity:1!important}
+.catalogue-list article.archived{opacity:.7!important}
+.catalogue-list article p,.catalogue-list article small{color:#4d656c!important}
+.catalogue-editor{top:74px!important}
+
+/* ----- Help: one workspace scroll, no pale inherited shell text ---------------- */
+.help-center{color:var(--ff-page-text)!important;background:var(--ff-page-bg)!important}
+.help-center>.ff-workspace-header{background:
+    linear-gradient(90deg,rgba(69,199,214,.055) 1px,transparent 1px),
+    linear-gradient(rgba(69,199,214,.042) 1px,transparent 1px),
+    linear-gradient(135deg,#081a21 0%,#0e2932 58%,#0b2028 100%)!important;
+}
+.help-workspace-content{
+  flex:1 1 auto!important;min-height:0!important;overflow-y:auto!important;overflow-x:hidden!important;
+  overscroll-behavior:contain!important;scrollbar-gutter:stable!important;background:#eef3f4!important;
+}
+.help-toolbar{position:sticky!important;top:0!important;z-index:8!important;background:#eaf1f3!important;border-bottom:1px solid #c7d4d8!important}
+.help-layout{min-height:auto!important;flex:none!important;overflow:visible!important;background:#eef3f4!important}
+.help-layout nav{overflow:visible!important;background:#f5f8f8!important;color:#223942!important}
+.help-layout nav button{color:#263e46!important;opacity:1!important}
+.help-layout nav button[aria-current="page"]{color:#874116!important;background:#fff!important}
+.help-content{overflow:visible!important;color:#233b43!important}
+.help-content h3{color:#18323b!important;opacity:1!important}.help-content p,.help-content li{color:#405961!important;opacity:1!important}
+
+/* ----- Custom CAD: shared shell outside, functional local panes inside ---------- */
+.custom-designer-overlay>.drawing-workspace-shell{background:#0a1c23!important}
+.drawing-workspace-header{background:#07171d!important}
+.drawing-workspace-main{min-height:0!important}
+/* CAD canvas/properties/status panes remain intentionally local scroll containers. */
+
+/* ----- Shared scrollbar language ------------------------------------------------ */
+.ff-ai-main,.drawing-import-content,.catalogue-workspace-content,.help-workspace-content,
+.detail-drafting>.hybrid-screen,.detail-drafting>.hybrid-viewport{
+  scrollbar-width:thin!important;scrollbar-color:#607980 #0c222a!important;
+}
+.ff-ai-main::-webkit-scrollbar,.drawing-import-content::-webkit-scrollbar,.catalogue-workspace-content::-webkit-scrollbar,
+.help-workspace-content::-webkit-scrollbar,.detail-drafting>.hybrid-screen::-webkit-scrollbar,.detail-drafting>.hybrid-viewport::-webkit-scrollbar{width:10px!important}
+.ff-ai-main::-webkit-scrollbar-track,.drawing-import-content::-webkit-scrollbar-track,.catalogue-workspace-content::-webkit-scrollbar-track,
+.help-workspace-content::-webkit-scrollbar-track,.detail-drafting>.hybrid-screen::-webkit-scrollbar-track,.detail-drafting>.hybrid-viewport::-webkit-scrollbar-track{background:#dce5e7!important}
+.ff-ai-main::-webkit-scrollbar-thumb,.drawing-import-content::-webkit-scrollbar-thumb,.catalogue-workspace-content::-webkit-scrollbar-thumb,
+.help-workspace-content::-webkit-scrollbar-thumb,.detail-drafting>.hybrid-screen::-webkit-scrollbar-thumb,.detail-drafting>.hybrid-viewport::-webkit-scrollbar-thumb{background:#6d858c!important;border:2px solid #dce5e7!important;border-radius:999px!important}
+.ff-ai-main::-webkit-scrollbar-track{background:#07171d!important}.ff-ai-main::-webkit-scrollbar-thumb{background:#506b74!important;border-color:#07171d!important}
+
+@media(max-width:1100px){
+  .ff-ai-status-rail{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+}
+@media(max-width:980px){
+  .ff-ai-main{display:block!important}
+  .ff-ai-review-column{position:static!important;top:auto!important;align-self:stretch!important}
+}
+@media(max-width:760px){
+  .ff-workspace-header{padding:12px 14px!important;align-items:flex-start!important;flex-wrap:wrap!important}
+  .ff-workspace-header-right{width:100%!important;justify-content:flex-end!important}
+  .ff-workspace-company-logo{width:112px!important;height:48px!important}
+  .ff-ai-status-rail{grid-template-columns:1fr!important;padding:6px 10px!important}
+  .help-layout{grid-template-columns:1fr!important}
+  .help-layout nav{display:flex!important;overflow-x:auto!important;overscroll-behavior:contain!important}
+}

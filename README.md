@@ -96,3 +96,12 @@ Phase 05B добавя отделен локален read-only DWG viewer чре
 ## Phase 06B.1 — AI-ready visual shell
 
 FacadeFlow има отделен локален AI-ready workspace за бъдещи проектни документи, natural-language заявки, скици, единични поръчки и технически детайли. В тази фаза AI модел не е свързан: няма автоматична геометрия, backend или производствен изход. Human review, rules validation и source evidence са задължителни граници. Виж `docs/PHASE_06B_1_AI_READY_VISUAL_SHELL_ACCEPTANCE.md`.
+
+
+## Phase 06B.2.1 + 06B.2.2 — Unified CAD + AI Visual System
+
+Главният shell и AI launchpad използват общ industrial/CAD визуален език с локални outline SVG иконки, blueprint previews и компактна навигация. Това е само UX/визуална фаза: AI моделът остава `NOT_CONNECTED`, автоматична геометрия не е разрешена и съществуващите import/designer/CAD callbacks не са променени. Виж `docs/PHASE_06B_2_1_2_UNIFIED_CAD_AI_VISUAL_ACCEPTANCE.md`.
+
+## Phase 06B.2.3 — Unified FacadeFlow Workspace Shell
+
+AI еталонът вече определя общия shell за Конструктор, Импорт, Каталог, Помощ и Custom CAD: единен технически header, еднакъв back action, Nadezhda logo горе вдясно и full-workspace поведение вместо големи modal прозорци върху основния екран. Вътрешните CAD/document viewport-и запазват локалния си scroll/pan/zoom там, където е функционално необходим. Виж `docs/PHASE_06B_2_3_UNIFIED_WORKSPACE_SHELL_ACCEPTANCE.md`.

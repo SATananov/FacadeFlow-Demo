@@ -3,6 +3,7 @@ import { createDetailDraftDocument, DETAIL_DRAFT_INITIAL_VIEWPORT, DETAIL_DRAFT_
 import { HYBRID_SELECTABLE_CATEGORIES, returnToHybridDesignerStart, selectHybridCreationRoute, selectHybridStandardCategory, type HybridCreationRoute, type HybridProductCategory, type HybridProductDesignerSession } from '../hybridProductDesigner'
 import type { CatalogueProfile } from '../profileCatalogueTypes'
 import { StructuredConfigurationWizard } from './StructuredConfigurationWizard'
+import { FacadeFlowWorkspaceHeader } from './FacadeFlowWorkspaceHeader'
 
 interface Props { session: HybridProductDesignerSession; profiles: CatalogueProfile[]; onSession: (updater: (current: HybridProductDesignerSession) => HybridProductDesignerSession) => void; onClose: () => void; onOpenImportCenter: () => void; onOpenProfileCatalogue: () => void }
 const plannedTools = ['Линия', 'Полилиния', 'Правоъгълник', 'Окръжност', 'Дъга']
@@ -19,8 +20,8 @@ const sketchSteps = ['Избор на страница и зона', 'Потвъ
 export function DetailDraftingPlaceholder({ session, profiles, onSession, onClose, onOpenImportCenter, onOpenProfileCatalogue }: Props) {
   const goStart = () => onSession((current) => returnToHybridDesignerStart(current))
   const goBack = () => session.workflowStep === 'STANDARD_DRAFT' ? onSession((current) => selectHybridCreationRoute(current, 'STANDARD')) : goStart()
-  return <section className="detail-drafting" role="dialog" aria-modal="true" aria-labelledby="detail-drafting-title">
-    <header className="detail-drafting-header"><div><span>ФАЗА 06A.3 · СТРУКТУРИРАНА КОНФИГУРАЦИЯ</span><h2 id="detail-drafting-title">Конструктор на изделие</h2><p>Един семантичен модел само за текущата сесия · без автоматична геометрия и без производствен изход.</p></div><button type="button" onClick={onClose}>Назад към FacadeFlow</button></header>
+  return <section className="detail-drafting ff-section-workspace" role="dialog" aria-modal="true" aria-labelledby="detail-drafting-title">
+    <FacadeFlowWorkspaceHeader titleId="detail-drafting-title" icon="designer" eyebrow="Структурирана конфигурация" title="Конструктор на изделие" subtitle="Един семантичен модел за текущата сесия · без автоматична геометрия и без производствен изход." onBack={onClose}/>
     <div className="detail-drafting-safety">Безопасна визуална подготовка: източниците остават непроменими, геометрия не се създава, записът на DWG и машинните формати са блокирани.</div>
     <nav className="hybrid-breadcrumb" aria-label="Стъпки на конструктора"><b>Начало на конструктора</b>{session.creationRoute && <><span aria-hidden="true">›</span><span>{routeCards.find((card) => card.route === session.creationRoute)?.title}</span></>}{session.productCategory && <><span aria-hidden="true">›</span><span>{categoryCards.find((card) => card.category === session.productCategory)?.title}</span></>}</nav>
     {session.workflowStep !== 'DESIGNER_START' && <div className="hybrid-navigation"><button type="button" onClick={goBack}>Назад</button><button type="button" onClick={goStart}>Начало на конструктора</button></div>}

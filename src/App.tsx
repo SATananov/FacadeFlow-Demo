@@ -16,6 +16,8 @@ import './structuredConfiguration.css'
 import './visualComposer.css'
 import './visualSystem.css'
 import './aiWorkspace.css'
+import './workspaceShell.css'
+import './workspaceUnifiedPolish.css'
 import { OperationsPanel } from './components/OperationsPanel'
 import { ProfilePanel } from './components/ProfilePanel'
 import { ProfileWorkspace } from './components/ProfileWorkspace'
@@ -30,6 +32,7 @@ import { ProfileCatalogue } from './components/ProfileCatalogue'
 import { CustomProductDesigner } from './components/CustomProductDesigner'
 import { DetailDraftingPlaceholder } from './components/DetailDraftingPlaceholder'
 import { FacadeFlowAIWorkspace } from './components/FacadeFlowAIWorkspace'
+import { FacadeFlowIcon } from './components/FacadeFlowIcons'
 import { SelectedCustomComponentContext } from './components/SelectedCustomComponentContext'
 import { operationsForComponent, type ComponentOperations } from './componentOperations'
 import { exportComponentSimulation, exportSimulation } from './exportSimulation'
@@ -228,7 +231,13 @@ function App() {
           <span>●</span> СИМУЛАЦИЯ — БЕЗ ВРЪЗКА С МАШИНА
         </div>
         {isLocalApplication && <div className="local-application-badge">ЛОКАЛНО ПРИЛОЖЕНИЕ</div>}
-        <nav className="app-header-actions" aria-label="Основни действия"><button type="button" className="ai-workspace-action" onClick={() => setShowAiWorkspace(true)}>✦ FacadeFlow AI</button><button type="button" className="help-action" data-help-id="help-button" onClick={() => setShowHelp(true)}>Помощ</button><button type="button" className="drawing-import-action" data-help-id="unified-import" onClick={() => setShowDrawingImport(true)}>Импортирай проект / чертеж</button><button type="button" className="catalogue-action" onClick={() => setShowProfileCatalogue(true)}>Каталог на профилите</button><button type="button" className="detail-drafting-action" onClick={() => setShowDetailDrafting(true)}>Конструктор на изделие</button></nav>
+        <nav className="app-header-actions ff-app-dock" aria-label="Основни действия">
+          <button type="button" className="ai-workspace-action" onClick={() => setShowAiWorkspace(true)}><span className="ff-nav-icon"><FacadeFlowIcon name="ai"/></span><span><b>AI</b><small>FacadeFlow</small></span></button>
+          <button type="button" className="detail-drafting-action" onClick={() => setShowDetailDrafting(true)}><span className="ff-nav-icon"><FacadeFlowIcon name="designer"/></span><span><b>Конструктор</b><small>Изделие</small></span></button>
+          <button type="button" className="drawing-import-action" data-help-id="unified-import" onClick={() => setShowDrawingImport(true)}><span className="ff-nav-icon"><FacadeFlowIcon name="import"/></span><span><b>Импорт</b><small>Проект / чертеж</small></span></button>
+          <button type="button" className="catalogue-action" onClick={() => setShowProfileCatalogue(true)}><span className="ff-nav-icon"><FacadeFlowIcon name="catalogue"/></span><span><b>Каталог</b><small>Профили</small></span></button>
+          <button type="button" className="help-action" data-help-id="help-button" onClick={() => setShowHelp(true)}><span className="ff-nav-icon"><FacadeFlowIcon name="help"/></span><span><b>Помощ</b><small>Ръководство</small></span></button>
+        </nav>
       </header>
       <main>
         <div className={`mode-indicator ${activeComponent || activeCustomComponent ? 'component-mode' : ''}`}>
@@ -339,7 +348,7 @@ function App() {
           </button><ContextHelp helpId="simulation-export"/><ContextHelp helpId="draft"/><ContextHelp helpId="needs-review"/><ContextHelp helpId="verified"/><ContextHelp helpId="machine-ready"/>
         </section>
       </main>
-      <footer>FacadeFlow Demo · Phase 06B.1 AI-ready shell · Само визуална симулация</footer>
+      <footer>FacadeFlow Demo · Phase 06B.2.1 + 06B.2.2 · Единна CAD + AI визуална система · Само визуална симулация</footer>
       {showProductPreview && (
         <ProductPreview
           product={product}

@@ -1,0 +1,89 @@
+/* PHASE 06B.2.3 — Unified FacadeFlow workspace shell */
+.ff-section-workspace{
+  position:fixed;inset:0;z-index:1350;display:flex;flex-direction:column;min-width:0;min-height:0;
+  background:#07171d;color:#dce9ec;overflow:hidden;overscroll-behavior:none
+}
+.ff-section-workspace.ff-section-workspace--higher{z-index:1450}
+.ff-workspace-header{
+  position:relative;z-index:20;min-height:88px;display:flex;align-items:center;justify-content:space-between;gap:18px;
+  padding:12px 24px;background:
+    linear-gradient(90deg,rgba(76,207,219,.055) 1px,transparent 1px),
+    linear-gradient(rgba(76,207,219,.04) 1px,transparent 1px),
+    linear-gradient(135deg,#0a1b22 0%,#102a33 58%,#0d232b 100%);
+  background-size:28px 28px,28px 28px,auto;border-bottom:1px solid #31515b;box-shadow:0 8px 30px #020b0f2b
+}
+.ff-workspace-header:after{content:"";position:absolute;left:0;right:0;bottom:-3px;height:3px;background:linear-gradient(90deg,#13a7ba 0 18%,#e87329 18% 23%,#13a7ba 23% 100%)}
+.ff-workspace-title-wrap{display:flex;align-items:center;gap:13px;min-width:0}
+.ff-workspace-symbol{width:50px;height:50px;display:grid;place-items:center;flex:0 0 auto;border:1px solid #3f7682;border-radius:6px;background:#0a222b;color:#87e5ed;box-shadow:inset 0 0 18px #22c1d018}
+.ff-workspace-symbol svg{width:27px;height:27px}
+.ff-workspace-eyebrow{display:block;margin:0 0 3px;color:#55bfce;font:800 8px/1 ui-monospace;letter-spacing:1.55px;text-transform:uppercase}
+.ff-workspace-title-wrap h2{margin:0;color:#f2f7f8;font-size:24px;line-height:1.1;letter-spacing:.15px}
+.ff-workspace-title-wrap p{margin:5px 0 0;color:#93aab1;font-size:10px;line-height:1.4}
+.ff-workspace-header-right{display:flex;align-items:center;justify-content:flex-end;gap:9px;margin-left:auto}
+.ff-workspace-actions{display:flex;align-items:center;gap:8px}
+.ff-workspace-actions button,.ff-workspace-back{min-height:40px;padding:7px 11px;display:flex;align-items:center;gap:7px;border:1px solid #3b5e68;border-radius:5px;background:#102a33;color:#d8e6e9;font-weight:800;font-size:10px;white-space:nowrap}
+.ff-workspace-actions button:hover,.ff-workspace-back:hover{border-color:#5ca9b6;background:#163844}
+.ff-workspace-actions button svg,.ff-workspace-back svg{width:16px;height:16px;color:#6dd3dd}
+.ff-workspace-company-logo{width:126px;height:54px;object-fit:contain;padding:2px;flex:0 0 auto;background:#eef4f5;border:1px solid #3e626d;border-radius:3px;box-shadow:0 0 0 2px #0c222a,0 5px 15px #00000024}
+.ff-workspace-safety{position:relative;z-index:12;padding:9px 24px;background:#30271f;border-bottom:1px solid #6b4a31;color:#efbf9f;font-size:10px;line-height:1.45}
+.ff-workspace-body{min-height:0;flex:1;overflow-y:auto;overflow-x:hidden;background:#eef3f4;color:#172228;overscroll-behavior:contain;scrollbar-gutter:stable}
+.ff-workspace-body--dark{background:#07171d;color:#dce9ec}
+.ff-workspace-body::-webkit-scrollbar{width:10px}.ff-workspace-body::-webkit-scrollbar-track{background:#0b1d24}.ff-workspace-body::-webkit-scrollbar-thumb{background:#526a73;border:2px solid #0b1d24;border-radius:999px}
+.ff-workspace-body{scrollbar-width:thin;scrollbar-color:#526a73 #0b1d24}
+
+/* Convert former large modals into first-class full workspaces. */
+.preview-overlay.drawing-import-overlay,.preview-overlay.catalogue-overlay,.preview-overlay.help-overlay,.preview-overlay.custom-designer-overlay{
+  inset:0!important;padding:0!important;display:block!important;background:#07171d!important;overflow:hidden!important
+}
+.drawing-import-modal,.catalogue-modal,.help-center,.custom-designer{
+  width:100%!important;max-width:none!important;height:100dvh!important;max-height:100dvh!important;margin:0!important;border:0!important;border-radius:0!important;box-shadow:none!important
+}
+.drawing-import-modal,.catalogue-modal,.help-center{display:flex!important;flex-direction:column!important;overflow:hidden!important;background:#eef3f4!important}
+.drawing-import-modal>.ff-workspace-header,.catalogue-modal>.ff-workspace-header,.help-center>.ff-workspace-header{flex:0 0 auto}
+.drawing-import-modal>.ff-workspace-safety,.catalogue-modal>.ff-workspace-safety,.help-center>.ff-workspace-safety{flex:0 0 auto}
+.drawing-import-content,.catalogue-workspace-content,.help-workspace-content{min-height:0;flex:1;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;scrollbar-gutter:stable}
+
+/* Constructor adopts the same shell while preserving its light semantic workspace. */
+.detail-drafting{background:#07171d!important}
+.detail-drafting>.ff-workspace-header{flex:0 0 auto}
+.detail-drafting>.detail-drafting-safety{flex:0 0 auto;margin:0;background:#30271f;border-color:#6b4a31;color:#efbf9f}
+.detail-drafting>.hybrid-breadcrumb,.detail-drafting>.hybrid-navigation{flex:0 0 auto}
+.detail-drafting>.hybrid-screen,.detail-drafting>.hybrid-viewport{background:#eef3f4;color:#172228}
+
+/* Custom CAD keeps its internal workbench grid, but no longer appears as a floating window. */
+.custom-designer-overlay>.drawing-workspace-shell{width:100%!important;height:100dvh!important;max-height:100dvh!important;border:0!important;box-shadow:none!important}
+.custom-designer-overlay .drawing-workspace-header{flex:0 0 auto}
+.custom-designer-overlay .drawing-workspace-header>.ff-workspace-header{width:100%;box-sizing:border-box}
+
+/* Help keeps useful internal navigation; only the outer shell becomes consistent. */
+.help-workspace-content{display:flex;flex-direction:column;background:#eef3f4}
+.help-workspace-content>.help-toolbar{flex:0 0 auto}
+.help-workspace-content>.help-layout{min-height:0;flex:1}
+
+/* Catalogue uses one top-level scroll; sticky editor remains a local inspector. */
+.catalogue-workspace-content{background:#eef3f4}
+.catalogue-workspace-content>.catalogue-warning{margin:0}
+
+html:has(.ff-section-workspace),body:has(.ff-section-workspace){overflow:hidden;overscroll-behavior:none}
+
+@media(max-width:900px){
+  .ff-workspace-header{align-items:flex-start;flex-wrap:wrap;padding:10px 12px}
+  .ff-workspace-title-wrap{flex:1 1 360px}.ff-workspace-header-right{width:100%;justify-content:flex-end;flex-wrap:wrap}
+  .ff-workspace-company-logo{order:-1;margin-right:auto;width:108px;height:46px}
+  .ff-workspace-title-wrap h2{font-size:20px}.ff-workspace-title-wrap p{font-size:9px}
+}
+@media(max-width:560px){
+  .ff-workspace-symbol{width:42px;height:42px}.ff-workspace-symbol svg{width:22px;height:22px}
+  .ff-workspace-title-wrap h2{font-size:18px}.ff-workspace-eyebrow{font-size:7px}
+  .ff-workspace-header-right{justify-content:stretch}.ff-workspace-actions{flex:1 1 100%;display:grid;grid-template-columns:1fr}
+  .ff-workspace-actions button,.ff-workspace-back{justify-content:center;flex:1}.ff-workspace-company-logo{width:96px;height:40px}
+}
+
+/* AI remains the reference implementation: keep one intentional workspace scroll. */
+.ff-ai-workspace.ff-section-workspace{overflow-y:auto!important;overflow-x:hidden!important;overscroll-behavior:contain}
+.ff-ai-unified-header{position:sticky;top:0;z-index:30}
+.ff-workspace-actions button.selected{background:#143c48;border-color:#4da8b7;color:#dffaff}
+
+@media(max-width:900px){
+  .ff-workspace-company-logo{order:initial;margin-left:auto;margin-right:0}
+}
