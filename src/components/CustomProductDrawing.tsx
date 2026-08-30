@@ -38,6 +38,12 @@ interface Props {
   onMoveLineEndpointDrag?: (id: string, endpoint: CustomDrawingLineEndpoint, coordinates: ModelCoordinates) => void
   onCommitLineEndpointDrag?: (id: string, endpoint: CustomDrawingLineEndpoint, coordinates: ModelCoordinates) => void
   onCancelLineEndpointDrag?: () => void
+  lineBodyEditingEnabled?: boolean
+  lineBodyDrag?: { lineId: string; delta: ModelCoordinates } | null
+  onBeginLineBodyDrag?: (id: string, coordinates: ModelCoordinates) => void
+  onMoveLineBodyDrag?: (id: string, coordinates: ModelCoordinates) => void
+  onCommitLineBodyDrag?: (id: string, coordinates: ModelCoordinates) => void
+  onCancelLineBodyDrag?: () => void
   lineStartPoint?: ModelCoordinates | null
   linePreviewPoint?: ModelCoordinates | null
   onCanvasPoint?: (coordinates: ModelCoordinates) => void
@@ -45,7 +51,7 @@ interface Props {
   showCoordinates?: boolean
 }
 
-export function CustomProductDrawing({ product, selectedFieldId, onSelectField, onClearDrawingLineSelection, large = false, annotations = [], dimensionVisibility = defaultDimensionVisibility, onCursorCoordinates, snapPoint = null, snappingEnabled = false, zoom = 1, drawingLines = [], selectedDrawingLineId = null, lineSelectionEnabled = false, onSelectDrawingLine, lineEndpointEditingEnabled = false, lineEndpointDrag = null, onBeginLineEndpointDrag, onMoveLineEndpointDrag, onCommitLineEndpointDrag, onCancelLineEndpointDrag, lineStartPoint = null, linePreviewPoint = null, onCanvasPoint, cursorCoordinates = null, showCoordinates = true }: Props) {
+export function CustomProductDrawing({ product, selectedFieldId, onSelectField, onClearDrawingLineSelection, large = false, annotations = [], dimensionVisibility = defaultDimensionVisibility, onCursorCoordinates, snapPoint = null, snappingEnabled = false, zoom = 1, drawingLines = [], selectedDrawingLineId = null, lineSelectionEnabled = false, onSelectDrawingLine, lineEndpointEditingEnabled = false, lineEndpointDrag = null, onBeginLineEndpointDrag, onMoveLineEndpointDrag, onCommitLineEndpointDrag, onCancelLineEndpointDrag, lineBodyEditingEnabled = false, lineBodyDrag = null, onBeginLineBodyDrag, onMoveLineBodyDrag, onCommitLineBodyDrag, onCancelLineBodyDrag, lineStartPoint = null, linePreviewPoint = null, onCanvasPoint, cursorCoordinates = null, showCoordinates = true }: Props) {
   const svgRef = useRef<SVGSVGElement>(null)
   const { width: viewWidth, height: viewHeight } = CUSTOM_DRAWING_VIEW
   const transform = getCustomDrawingTransform(Math.max(product.width, 1), Math.max(product.height, 1))
@@ -107,6 +113,35 @@ export function CustomProductDrawing({ product, selectedFieldId, onSelectField, 
     },
   })
 
+
+  const lineBodyDragHandlers = (lineId: string, selected: boolean) => ({
+    onPointerDown: (event: PointerEvent<SVGLineElement>) => {
+      event.stopPropagation()
+      if (!selected || !lineBodyEditingEnabled) return
+      const coordinates = clientToModelCoordinates(event.clientX, event.clientY)
+      if (!coordinates) return
+      event.preventDefault()
+      event.currentTarget.setPointerCapture(event.pointerId)
+      onBeginLineBodyDrag?.(lineId, coordinates)
+    },
+    onPointerMove: (event: PointerEvent<SVGLineElement>) => {
+      if (!event.currentTarget.hasPointerCapture(event.pointerId)) return
+      const coordinates = clientToModelCoordinates(event.clientX, event.clientY)
+      if (coordinates) onMoveLineBodyDrag?.(lineId, coordinates)
+    },
+    onPointerUp: (event: PointerEvent<SVGLineElement>) => {
+      if (!event.currentTarget.hasPointerCapture(event.pointerId)) return
+      const coordinates = clientToModelCoordinates(event.clientX, event.clientY)
+      event.currentTarget.releasePointerCapture(event.pointerId)
+      if (coordinates) onCommitLineBodyDrag?.(lineId, coordinates)
+      else onCancelLineBodyDrag?.()
+    },
+    onPointerCancel: (event: PointerEvent<SVGLineElement>) => {
+      if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId)
+      onCancelLineBodyDrag?.()
+    },
+  })
+
   return <svg ref={svgRef} className={`custom-product-drawing ${large ? 'large' : ''}`} viewBox={`0 0 ${viewWidth} ${viewHeight}`} role="img" aria-label={`Нестандартен прозорец ${product.width} на ${product.height} милиметъра`} onPointerMove={updateCursorCoordinates} onPointerDown={chooseCanvasPoint} onPointerLeave={() => onCursorCoordinates?.(null)}>
     <defs><marker id="custom-dim-arrow" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto-start-reverse"><path d="M8 0L0 4L8 8"/></marker></defs>
     {product.frameCreated && <rect x={ox} y={oy} width={width} height={height} className="custom-frame"/>}
@@ -119,12 +154,16 @@ export function CustomProductDrawing({ product, selectedFieldId, onSelectField, 
     <g className="custom-drawing-line-layer" pointerEvents="none">
       {drawingLines.map((line) => {
         const drag = lineEndpointDrag?.lineId === line.id ? lineEndpointDrag : null
-        const displayStart = drag?.endpoint === 'start' ? drag.point : line.start
-        const displayEnd = drag?.endpoint === 'end' ? drag.point : line.end
+        const bodyDrag = lineBodyDrag?.lineId === line.id ? lineBodyDrag : null
+        const translatedStart = bodyDrag ? { x: line.start.x + bodyDrag.delta.x, y: line.start.y + bodyDrag.delta.y } : line.start
+        const translatedEnd = bodyDrag ? { x: line.end.x + bodyDrag.delta.x, y: line.end.y + bodyDrag.delta.y } : line.end
+        const displayStart = drag?.endpoint === 'start' ? drag.point : translatedStart
+        const displayEnd = drag?.endpoint === 'end' ? drag.point : translatedEnd
         const start = projectLinePoint(displayStart), end = projectLinePoint(displayEnd), selected = selectedDrawingLineId === line.id
-        return <g key={line.id} data-line-id={line.id} className={selected ? 'custom-drawing-line-group selected' : 'custom-drawing-line-group'}>
+        const groupClassName = `custom-drawing-line-group${selected ? ' selected' : ''}${bodyDrag ? ' moving' : ''}`
+        return <g key={line.id} data-line-id={line.id} className={groupClassName}>
           <line x1={start.x} y1={start.y} x2={end.x} y2={end.y} className={selected ? 'custom-drawing-line selected' : 'custom-drawing-line'} pointerEvents="none"/>
-          {lineSelectionEnabled && <line x1={start.x} y1={start.y} x2={end.x} y2={end.y} className="custom-drawing-line-hit" pointerEvents="stroke" onPointerDown={(event) => event.stopPropagation()} onClick={(event) => { event.stopPropagation(); onSelectDrawingLine?.(line.id) }}/>}
+          {lineSelectionEnabled && <line x1={start.x} y1={start.y} x2={end.x} y2={end.y} className="custom-drawing-line-hit" pointerEvents="stroke" aria-label={selected ? `Премести цялата ${line.id}` : `Избери ${line.id}`} {...lineBodyDragHandlers(line.id, selected)} onClick={(event) => { event.stopPropagation(); onSelectDrawingLine?.(line.id) }}/>}
           {selected && <><circle cx={start.x} cy={start.y} r="5" className={`custom-drawing-line-grip${drag?.endpoint === 'start' ? ' dragging' : ''}`} pointerEvents={lineEndpointEditingEnabled ? 'all' : 'none'} aria-label={`Премести начало на ${line.id}`} {...endpointDragHandlers(line.id, 'start')}/><circle cx={end.x} cy={end.y} r="5" className={`custom-drawing-line-grip${drag?.endpoint === 'end' ? ' dragging' : ''}`} pointerEvents={lineEndpointEditingEnabled ? 'all' : 'none'} aria-label={`Премести край на ${line.id}`} {...endpointDragHandlers(line.id, 'end')}/></>}
         </g>
       })}

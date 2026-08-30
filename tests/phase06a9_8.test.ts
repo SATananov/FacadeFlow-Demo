@@ -66,8 +66,8 @@ test('pointer coordinates are converted through the owning SVG model transform d
 test('drag preview is ephemeral and changes only the displayed selected Line endpoint', () => {
   assert.match(designer, /\[lineEndpointDrag, setLineEndpointDrag\]/)
   assert.match(drawing, /lineEndpointDrag\?\.lineId === line\.id/)
-  assert.match(drawing, /displayStart = drag\?\.endpoint === 'start' \? drag\.point : line\.start/)
-  assert.match(drawing, /displayEnd = drag\?\.endpoint === 'end' \? drag\.point : line\.end/)
+  assert.match(drawing, /displayStart = drag\?\.endpoint === 'start' \? drag\.point : translatedStart/)
+  assert.match(drawing, /displayEnd = drag\?\.endpoint === 'end' \? drag\.point : translatedEnd/)
   assert.match(css, /\.custom-drawing-line-grip\.dragging/)
 })
 

@@ -69,7 +69,8 @@ test('Select mode owns Line selection while Line mode disables Line hit targets'
 
 test('Line selection uses a wide invisible hit target without changing visible stroke geometry', () => {
   assert.match(drawing, /className=\{selected \? 'custom-drawing-line selected' : 'custom-drawing-line'\} pointerEvents="none"/)
-  assert.match(drawing, /onPointerDown=\{\(event\) => event\.stopPropagation\(\)\}/)
+  assert.match(drawing, /lineBodyDragHandlers\(line\.id, selected\)/)
+  assert.match(drawing, /lineBodyDragHandlers[\s\S]*event\.stopPropagation\(\)/)
   assert.match(drawing, /onSelectDrawingLine\?\.\(line\.id\)/)
   assert.match(css, /\.custom-drawing-line-hit \{[^}]*stroke: transparent;[^}]*stroke-width: 14/s)
   assert.match(css, /\.custom-drawing-line\.selected \{[^}]*stroke-width: 3\.2/s)

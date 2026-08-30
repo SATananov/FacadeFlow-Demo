@@ -19,7 +19,7 @@ import { DimensionControls } from './DimensionControls'
 import { DrawingWorkspaceShell } from './DrawingWorkspaceShell'
 import { customWorkflowState, structuredWorkflowLabels, structuredWorkflowOrder } from '../structuredProductWorkflow'
 import { CUSTOM_GRID_STEPS, DEFAULT_CUSTOM_GRID_STEP, formatSnapReadout, snapModelPoint, type CustomGridStep, type ModelCoordinates } from '../customDrawingCoordinates'
-import { appendCustomDrawingLine, createCustomDrawingLineLayer, findCustomDrawingLine, removeCustomDrawingLine, updateCustomDrawingLine, updateCustomDrawingLineEndpoint, type CustomDrawingLineEndpoint } from '../customDrawingLines'
+import { appendCustomDrawingLine, createCustomDrawingLineLayer, findCustomDrawingLine, getCustomDrawingLineTranslation, removeCustomDrawingLine, translateCustomDrawingLine, updateCustomDrawingLine, updateCustomDrawingLineEndpoint, type CustomDrawingLineEndpoint } from '../customDrawingLines'
 import { createDefaultCadDisplayState, type CadDisplayState, type CadTool } from '../cad/cadTypes'
 import { CadStatusBar } from './CadStatusBar'
 import { CadWorkbenchGridLayer } from './CadWorkbenchGridLayer'
@@ -29,7 +29,7 @@ import { CadLinePropertiesPanel } from './CadLinePropertiesPanel'
 interface Props { initial: CustomProduct; profiles: CatalogueProfile[]; activeProfiles: ActiveProfileSelection; selectedComponentId: string | null; onCommit: (previous: CustomProduct, next: CustomProduct) => boolean; onOpenComponent: (component: CustomComponent) => void; onClose: () => void }
 
 export function CustomProductDesigner({ initial, profiles, activeProfiles, selectedComponentId, onCommit, onOpenComponent, onClose }: Props) {
-  const [history, setHistory] = useState(() => createHistory(initial)), [selectedFieldId, setSelectedFieldId] = useState('field-root'), [selectedSummaryId, setSelectedSummaryId] = useState<string | null>(selectedComponentId), [reviewChecked, setReviewChecked] = useState(false), [largePreview, setLargePreview] = useState(false), [zoom, setZoom] = useState(1), [view, setView] = useState<'2D' | '3D' | 'SPLIT'>('2D'), [conceptualDepth, setConceptualDepth] = useState(DEFAULT_CONCEPTUAL_DEPTH_MM), [dimensionVisibility, setDimensionVisibility] = useState(defaultDimensionVisibility), [componentsVisible, setComponentsVisible] = useState(false), [gridVisible, setGridVisible] = useState(true), [gridStep, setGridStep] = useState<CustomGridStep>(DEFAULT_CUSTOM_GRID_STEP), [cursorCoordinates, setCursorCoordinates] = useState<ModelCoordinates | null>(null), [snappingEnabled, setSnappingEnabled] = useState(true), [lineHistory, setLineHistory] = useState(() => createHistory(createCustomDrawingLineLayer())), [lineToolActive, setLineToolActive] = useState(false), [lineStartPoint, setLineStartPoint] = useState<ModelCoordinates | null>(null), [selectedDrawingLineId, setSelectedDrawingLineId] = useState<string | null>(null), [lineEndpointDrag, setLineEndpointDrag] = useState<{ lineId: string; endpoint: CustomDrawingLineEndpoint; point: ModelCoordinates } | null>(null)
+  const [history, setHistory] = useState(() => createHistory(initial)), [selectedFieldId, setSelectedFieldId] = useState('field-root'), [selectedSummaryId, setSelectedSummaryId] = useState<string | null>(selectedComponentId), [reviewChecked, setReviewChecked] = useState(false), [largePreview, setLargePreview] = useState(false), [zoom, setZoom] = useState(1), [view, setView] = useState<'2D' | '3D' | 'SPLIT'>('2D'), [conceptualDepth, setConceptualDepth] = useState(DEFAULT_CONCEPTUAL_DEPTH_MM), [dimensionVisibility, setDimensionVisibility] = useState(defaultDimensionVisibility), [componentsVisible, setComponentsVisible] = useState(false), [gridVisible, setGridVisible] = useState(true), [gridStep, setGridStep] = useState<CustomGridStep>(DEFAULT_CUSTOM_GRID_STEP), [cursorCoordinates, setCursorCoordinates] = useState<ModelCoordinates | null>(null), [snappingEnabled, setSnappingEnabled] = useState(true), [lineHistory, setLineHistory] = useState(() => createHistory(createCustomDrawingLineLayer())), [lineToolActive, setLineToolActive] = useState(false), [lineStartPoint, setLineStartPoint] = useState<ModelCoordinates | null>(null), [selectedDrawingLineId, setSelectedDrawingLineId] = useState<string | null>(null), [lineEndpointDrag, setLineEndpointDrag] = useState<{ lineId: string; endpoint: CustomDrawingLineEndpoint; point: ModelCoordinates } | null>(null), [lineBodyDrag, setLineBodyDrag] = useState<{ lineId: string; pointerStart: ModelCoordinates; delta: ModelCoordinates } | null>(null)
   const [cadDisplay, setCadDisplay] = useState(createDefaultCadDisplayState)
   const product = history.present, validation = useMemo(() => validateCustomProduct(product, profiles), [product, profiles]), components = useMemo(() => generateCustomComponents(product, profiles), [product, profiles])
   const workflow = useMemo(() => customWorkflowState(product), [product])
@@ -64,9 +64,9 @@ export function CustomProductDesigner({ initial, profiles, activeProfiles, selec
     setLineHistory((value) => { const next = appendCustomDrawingLine(value.present, lineStartPoint, point); return next === value.present ? value : pushHistory(value, next) })
     if (lineStartPoint.x !== point.x || lineStartPoint.y !== point.y) setLineStartPoint(null)
   }
-  const toggleLineTool = () => { setLineStartPoint(null); setSelectedDrawingLineId(null); setLineEndpointDrag(null); setLineToolActive((active) => !active) }
-  const undoLine = () => { setLineStartPoint(null); setSelectedDrawingLineId(null); setLineEndpointDrag(null); setLineHistory((value) => undoHistory(value)) }
-  const redoLine = () => { setLineStartPoint(null); setSelectedDrawingLineId(null); setLineEndpointDrag(null); setLineHistory((value) => redoHistory(value)) }
+  const toggleLineTool = () => { setLineStartPoint(null); setSelectedDrawingLineId(null); setLineEndpointDrag(null); setLineBodyDrag(null); setLineToolActive((active) => !active) }
+  const undoLine = () => { setLineStartPoint(null); setSelectedDrawingLineId(null); setLineEndpointDrag(null); setLineBodyDrag(null); setLineHistory((value) => undoHistory(value)) }
+  const redoLine = () => { setLineStartPoint(null); setSelectedDrawingLineId(null); setLineEndpointDrag(null); setLineBodyDrag(null); setLineHistory((value) => redoHistory(value)) }
   const updateSelectedDrawingLine = (start: ModelCoordinates, end: ModelCoordinates) => {
     if (!selectedDrawingLineId) return
     setLineHistory((value) => { const next = updateCustomDrawingLine(value.present, selectedDrawingLineId, start, end); return next === value.present ? value : pushHistory(value, next) })
@@ -75,11 +75,14 @@ export function CustomProductDesigner({ initial, profiles, activeProfiles, selec
     if (!selectedDrawingLineId) return
     setLineHistory((value) => { const next = removeCustomDrawingLine(value.present, selectedDrawingLineId); return next === value.present ? value : pushHistory(value, next) })
     setSelectedDrawingLineId(null)
+    setLineEndpointDrag(null)
+    setLineBodyDrag(null)
   }
   const beginLineEndpointDrag = (lineId: string, endpoint: CustomDrawingLineEndpoint) => {
     const line = findCustomDrawingLine(lineHistory.present, lineId)
     if (!line || lineToolActive) return
     setSelectedDrawingLineId(lineId)
+    setLineBodyDrag(null)
     setLineEndpointDrag({ lineId, endpoint, point: { ...line[endpoint] } })
   }
   const moveLineEndpointDrag = (lineId: string, endpoint: CustomDrawingLineEndpoint, rawPoint: ModelCoordinates) => {
@@ -91,8 +94,24 @@ export function CustomProductDesigner({ initial, profiles, activeProfiles, selec
     setLineHistory((value) => { const next = updateCustomDrawingLineEndpoint(value.present, lineId, endpoint, point); return next === value.present ? value : pushHistory(value, next) })
     setLineEndpointDrag(null)
   }
-  const lineToolStatus = lineToolActive ? (lineStartPoint ? 'Изберете крайна точка · Esc отказва' : 'Изберете начална точка · Esc отказва') : lineEndpointDrag ? `Преместване ${lineEndpointDrag.lineId} · ${lineEndpointDrag.endpoint === 'start' ? 'начало' : 'край'} · Esc отказва` : selectedDrawingLine ? `Избрана ${selectedDrawingLine.id}` : 'Линия: неактивна'
+  const beginLineBodyDrag = (lineId: string, pointerStart: ModelCoordinates) => {
+    const line = findCustomDrawingLine(lineHistory.present, lineId)
+    if (!line || lineToolActive || selectedDrawingLineId !== lineId) return
+    setLineEndpointDrag(null)
+    setLineBodyDrag({ lineId, pointerStart: { ...pointerStart }, delta: { x: 0, y: 0 } })
+  }
+  const moveLineBodyDrag = (lineId: string, rawPoint: ModelCoordinates) => {
+    setLineBodyDrag((current) => current?.lineId === lineId ? { ...current, delta: getCustomDrawingLineTranslation(current.pointerStart, rawPoint, gridStep, snappingEnabled) } : current)
+  }
+  const commitLineBodyDrag = (lineId: string, rawPoint: ModelCoordinates) => {
+    if (!lineBodyDrag || lineBodyDrag.lineId !== lineId) return
+    const delta = getCustomDrawingLineTranslation(lineBodyDrag.pointerStart, rawPoint, gridStep, snappingEnabled)
+    setLineHistory((value) => { const next = translateCustomDrawingLine(value.present, lineId, delta); return next === value.present ? value : pushHistory(value, next) })
+    setLineBodyDrag(null)
+  }
+  const lineToolStatus = lineToolActive ? (lineStartPoint ? 'Изберете крайна точка · Esc отказва' : 'Изберете начална точка · Esc отказва') : lineEndpointDrag ? `Преместване ${lineEndpointDrag.lineId} · ${lineEndpointDrag.endpoint === 'start' ? 'начало' : 'край'} · Esc отказва` : lineBodyDrag ? `Преместване ${lineBodyDrag.lineId} · цяла линия · Esc отказва` : selectedDrawingLine ? `Избрана ${selectedDrawingLine.id}` : 'Линия: неактивна'
   useEffect(() => { if (lineEndpointDrag && selectedDrawingLineId !== lineEndpointDrag.lineId) setLineEndpointDrag(null) }, [lineEndpointDrag, selectedDrawingLineId])
+  useEffect(() => { if (lineBodyDrag && selectedDrawingLineId !== lineBodyDrag.lineId) setLineBodyDrag(null) }, [lineBodyDrag, selectedDrawingLineId])
   useEffect(() => {
     if (lineToolActive || !selectedDrawingLineId) return
     const handleLineSelectionKeys = (event: KeyboardEvent) => {
@@ -100,9 +119,11 @@ export function CustomProductDesigner({ initial, profiles, activeProfiles, selec
       if (target?.closest('input, select, textarea, [contenteditable=\"true\"]')) return
       if (event.key === 'Escape') {
         if (lineEndpointDrag) { setLineEndpointDrag(null); return }
+        if (lineBodyDrag) { setLineBodyDrag(null); return }
         setSelectedDrawingLineId(null)
         return
       }
+      if (lineEndpointDrag || lineBodyDrag) return
       if (event.key !== 'Delete' && event.key !== 'Backspace') return
       event.preventDefault()
       setLineHistory((value) => { const next = removeCustomDrawingLine(value.present, selectedDrawingLineId); return next === value.present ? value : pushHistory(value, next) })
@@ -110,7 +131,7 @@ export function CustomProductDesigner({ initial, profiles, activeProfiles, selec
     }
     window.addEventListener('keydown', handleLineSelectionKeys)
     return () => window.removeEventListener('keydown', handleLineSelectionKeys)
-  }, [lineToolActive, selectedDrawingLineId, lineEndpointDrag])
+  }, [lineToolActive, selectedDrawingLineId, lineEndpointDrag, lineBodyDrag])
   const setTop = (patch: Partial<CustomProduct>) => apply({ ...product, ...patch })
   const verify = () => { if (!reviewChecked || !validation.valid) return; const next = { ...product, status: 'VERIFIED' as const, humanReviewConfirmed: true, updatedAt: new Date().toISOString() }; if (onCommit(product, next)) setHistory((value) => pushHistory(value, next)) }
   const header = <header className="preview-header"><div><span className="preview-badge">СИМУЛАЦИЯ · {product.status}</span><h2 id="custom-designer-title">Конструктор на нестандартен прозорец</h2><p>Структуриран правоъгълен модел — не е свободен CAD и не използва производствени формули.</p></div><button className="preview-close" aria-label="Затвори конструктора" onClick={onClose}>×</button></header>
@@ -128,7 +149,7 @@ export function CustomProductDesigner({ initial, profiles, activeProfiles, selec
       <button type="button" aria-pressed={view === 'SPLIT'} disabled={product.status !== 'VERIFIED'} title={product.status !== 'VERIFIED' ? 'Разделеният 3D преглед е достъпен след човешка проверка.' : undefined} onClick={() => setView('SPLIT')}>Разделен изглед</button>
     </div>
     {view !== '3D' && <div className="custom-line-tool-controls" role="group" aria-label="Инструмент линия">
-      <button type="button" aria-pressed={!lineToolActive} onClick={() => { setLineStartPoint(null); setLineEndpointDrag(null); setLineToolActive(false) }}>Избор</button>
+      <button type="button" aria-pressed={!lineToolActive} onClick={() => { setLineStartPoint(null); setLineEndpointDrag(null); setLineBodyDrag(null); setLineToolActive(false) }}>Избор</button>
       <button type="button" aria-pressed={lineToolActive} onClick={toggleLineTool}>Линия</button>
       <button type="button" disabled={!lineHistory.past.length} onClick={undoLine}>Отмени линия</button>
       <button type="button" disabled={!lineHistory.future.length} onClick={redoLine}>Повтори линия</button>
@@ -202,6 +223,12 @@ export function CustomProductDesigner({ initial, profiles, activeProfiles, selec
               onMoveLineEndpointDrag={moveLineEndpointDrag}
               onCommitLineEndpointDrag={commitLineEndpointDrag}
               onCancelLineEndpointDrag={() => setLineEndpointDrag(null)}
+              lineBodyEditingEnabled={!lineToolActive}
+              lineBodyDrag={lineBodyDrag}
+              onBeginLineBodyDrag={beginLineBodyDrag}
+              onMoveLineBodyDrag={moveLineBodyDrag}
+              onCommitLineBodyDrag={commitLineBodyDrag}
+              onCancelLineBodyDrag={() => setLineBodyDrag(null)}
               lineStartPoint={lineStartPoint}
               linePreviewPoint={linePreviewPoint}
               onCanvasPoint={chooseLinePoint}

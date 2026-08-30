@@ -671,3 +671,5 @@
 .cad-line-coordinate-grid label { margin-top: 0; }
 .cad-line-session-note { padding: 8px; background: #eef6f7; border-left: 4px solid #087b91; color: #37525c; font-size: 10px; }
 .cad-line-property-actions { display: grid; gap: 7px; margin-top: 10px; }
+.custom-drawing-line-group.selected .custom-drawing-line-hit { cursor: move; touch-action: none; }
+.custom-drawing-line-group.moving .custom-drawing-line-hit { cursor: grabbing; }

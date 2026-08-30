@@ -74,6 +74,36 @@ export function updateCustomDrawingLineEndpoint(
     : updateCustomDrawingLine(layer, id, line.start, point)
 }
 
+export function getCustomDrawingLineTranslation(
+  pointerStart: ModelCoordinates,
+  pointerCurrent: ModelCoordinates,
+  gridStep: number,
+  snappingEnabled: boolean,
+): ModelCoordinates {
+  const raw = { x: pointerCurrent.x - pointerStart.x, y: pointerCurrent.y - pointerStart.y }
+  if (!snappingEnabled || !Number.isFinite(gridStep) || gridStep <= 0) return raw
+  return {
+    x: Math.round(raw.x / gridStep) * gridStep,
+    y: Math.round(raw.y / gridStep) * gridStep,
+  }
+}
+
+export function translateCustomDrawingLine(
+  layer: CustomDrawingLineLayer,
+  id: string,
+  delta: ModelCoordinates,
+): CustomDrawingLineLayer {
+  if (delta.x === 0 && delta.y === 0) return layer
+  const line = findCustomDrawingLine(layer, id)
+  if (!line) return layer
+  return updateCustomDrawingLine(
+    layer,
+    id,
+    { x: line.start.x + delta.x, y: line.start.y + delta.y },
+    { x: line.end.x + delta.x, y: line.end.y + delta.y },
+  )
+}
+
 export function removeCustomDrawingLine(layer: CustomDrawingLineLayer, id: string): CustomDrawingLineLayer {
   if (!layer.lines.some((line) => line.id === id)) return layer
   return { ...layer, lines: layer.lines.filter((line) => line.id !== id) }
