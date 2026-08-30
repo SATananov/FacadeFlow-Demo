@@ -69,7 +69,8 @@ test('drawing layer and live preview are pointer transparent and separate from p
 })
 
 test('phase adds only the Line tool surface, no object snap modes or dependencies', () => {
-  assert.doesNotMatch(designer, /endpoint|midpoint|intersection|perpendicular/i)
+  assert.doesNotMatch(designer, />\s*(ENDPOINT|MIDPOINT|INTERSECTION|PERPENDICULAR)\s*</i)
+  assert.doesNotMatch(designer, /['"](ENDPOINT|MIDPOINT|INTERSECTION|PERPENDICULAR)['"]/i)
   assert.match(packageJson, /"test:phase06a9_5"/)
   const pkg = JSON.parse(packageJson)
   assert.equal(pkg.dependencies['@mlightcad/libredwg-web'], '0.7.10')

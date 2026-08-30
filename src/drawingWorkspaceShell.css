@@ -658,7 +658,8 @@
 /* Phase 06A.9.7 — session-only Line selection and numeric properties. */
 .custom-drawing-line-hit { stroke: transparent; stroke-width: 14; fill: none; cursor: pointer; vector-effect: non-scaling-stroke; }
 .custom-drawing-line.selected { stroke: #067c91; stroke-width: 3.2; }
-.custom-drawing-line-grip { fill: #fff; stroke: #067c91; stroke-width: 2; vector-effect: non-scaling-stroke; }
+.custom-drawing-line-grip { fill: #fff; stroke: #067c91; stroke-width: 2; vector-effect: non-scaling-stroke; cursor: move; touch-action: none; }
+.custom-drawing-line-grip.dragging { fill: #d7f5f8; stroke-width: 3; }
 .drawing-workspace-properties > .cad-line-properties { width: 100%; min-height: 100%; border: 0; }
 .cad-line-properties-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
 .cad-line-properties-heading h3,.cad-line-properties-heading p { margin-top: 0; }

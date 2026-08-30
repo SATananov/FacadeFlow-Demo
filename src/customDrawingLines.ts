@@ -16,6 +16,8 @@ export interface CustomDrawingLineMetrics {
   angleDeg: number
 }
 
+export type CustomDrawingLineEndpoint = 'start' | 'end'
+
 export function createCustomDrawingLineLayer(): CustomDrawingLineLayer {
   return { nextId: 1, lines: [] }
 }
@@ -57,6 +59,19 @@ export function updateCustomDrawingLine(
   const lines = [...layer.lines]
   lines[index] = { ...current, start: { ...start }, end: { ...end } }
   return { ...layer, lines }
+}
+
+export function updateCustomDrawingLineEndpoint(
+  layer: CustomDrawingLineLayer,
+  id: string,
+  endpoint: CustomDrawingLineEndpoint,
+  point: ModelCoordinates,
+): CustomDrawingLineLayer {
+  const line = findCustomDrawingLine(layer, id)
+  if (!line) return layer
+  return endpoint === 'start'
+    ? updateCustomDrawingLine(layer, id, point, line.end)
+    : updateCustomDrawingLine(layer, id, line.start, point)
 }
 
 export function removeCustomDrawingLine(layer: CustomDrawingLineLayer, id: string): CustomDrawingLineLayer {

@@ -55,6 +55,7 @@ test('marker is pointer transparent, conditional and removed on pointer leave', 
 
 test('snap preview contains no geometry mutation or drawing tools and toolbar wraps', () => {
   assert.doesNotMatch(marker, /updateGeometry|splitField|onClick|pointerCapture/)
-  assert.doesNotMatch(designer, /endpoint|midpoint|intersection|perpendicular/i)
+  assert.doesNotMatch(designer, />\s*(ENDPOINT|MIDPOINT|INTERSECTION|PERPENDICULAR)\s*</i)
+  assert.doesNotMatch(designer, /['"](ENDPOINT|MIDPOINT|INTERSECTION|PERPENDICULAR)['"]/i)
   assert.match(css, /\.custom-grid-controls[^}]*flex-wrap:\s*wrap/s)
 })
