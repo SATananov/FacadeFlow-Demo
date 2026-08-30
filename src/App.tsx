@@ -15,6 +15,7 @@ import './headerNavigation.css'
 import './structuredConfiguration.css'
 import './visualComposer.css'
 import './visualSystem.css'
+import './aiWorkspace.css'
 import { OperationsPanel } from './components/OperationsPanel'
 import { ProfilePanel } from './components/ProfilePanel'
 import { ProfileWorkspace } from './components/ProfileWorkspace'
@@ -28,6 +29,7 @@ import { ContextHelp } from './components/ContextHelp'
 import { ProfileCatalogue } from './components/ProfileCatalogue'
 import { CustomProductDesigner } from './components/CustomProductDesigner'
 import { DetailDraftingPlaceholder } from './components/DetailDraftingPlaceholder'
+import { FacadeFlowAIWorkspace } from './components/FacadeFlowAIWorkspace'
 import { SelectedCustomComponentContext } from './components/SelectedCustomComponentContext'
 import { operationsForComponent, type ComponentOperations } from './componentOperations'
 import { exportComponentSimulation, exportSimulation } from './exportSimulation'
@@ -48,6 +50,8 @@ import { changedCustomComponentIds, generateCustomComponents, type CustomCompone
 import type { ImportedDimensionEvidence } from './dimensionTypes'
 import { createHybridProductDesignerSession, type HybridProductDesignerSession } from './hybridProductDesigner'
 import { applyLegacyDemoDimensions, selectLegacyProductTemplate } from './legacyProductTransition'
+import { createFacadeFlowAiSession } from './aiWorkspaceState'
+import type { FacadeFlowAiSession } from './aiWorkspaceTypes'
 
 function App() {
   const isLocalApplication = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
@@ -76,6 +80,8 @@ function App() {
   const [activeProfileSelection, setActiveProfileSelection] = useState<ActiveProfileSelection>({ FRAME: 'profile-demo-frame-01', SASH: 'profile-demo-sash-01', MULLION: 'profile-demo-mullion-01' })
   const [showProfileCatalogue, setShowProfileCatalogue] = useState(false)
   const [showDetailDrafting, setShowDetailDrafting] = useState(false)
+  const [showAiWorkspace, setShowAiWorkspace] = useState(false)
+  const [aiSession, setAiSession] = useState<FacadeFlowAiSession>(() => createFacadeFlowAiSession(crypto.randomUUID()))
   const [hybridSession, setHybridSession] = useState<HybridProductDesignerSession>(() => createHybridProductDesignerSession(crypto.randomUUID()))
   const hybridSessionRef = useRef(hybridSession)
   const [showCustomDesigner, setShowCustomDesigner] = useState(false)
@@ -222,7 +228,7 @@ function App() {
           <span>●</span> СИМУЛАЦИЯ — БЕЗ ВРЪЗКА С МАШИНА
         </div>
         {isLocalApplication && <div className="local-application-badge">ЛОКАЛНО ПРИЛОЖЕНИЕ</div>}
-        <nav className="app-header-actions" aria-label="Основни действия"><button type="button" className="help-action" data-help-id="help-button" onClick={() => setShowHelp(true)}>Помощ</button><button type="button" className="drawing-import-action" data-help-id="unified-import" onClick={() => setShowDrawingImport(true)}>Импортирай проект / чертеж</button><button type="button" className="catalogue-action" onClick={() => setShowProfileCatalogue(true)}>Каталог на профилите</button><button type="button" className="detail-drafting-action" onClick={() => setShowDetailDrafting(true)}>Конструктор на изделие</button></nav>
+        <nav className="app-header-actions" aria-label="Основни действия"><button type="button" className="ai-workspace-action" onClick={() => setShowAiWorkspace(true)}>✦ FacadeFlow AI</button><button type="button" className="help-action" data-help-id="help-button" onClick={() => setShowHelp(true)}>Помощ</button><button type="button" className="drawing-import-action" data-help-id="unified-import" onClick={() => setShowDrawingImport(true)}>Импортирай проект / чертеж</button><button type="button" className="catalogue-action" onClick={() => setShowProfileCatalogue(true)}>Каталог на профилите</button><button type="button" className="detail-drafting-action" onClick={() => setShowDetailDrafting(true)}>Конструктор на изделие</button></nav>
       </header>
       <main>
         <div className={`mode-indicator ${activeComponent || activeCustomComponent ? 'component-mode' : ''}`}>
@@ -333,7 +339,7 @@ function App() {
           </button><ContextHelp helpId="simulation-export"/><ContextHelp helpId="draft"/><ContextHelp helpId="needs-review"/><ContextHelp helpId="verified"/><ContextHelp helpId="machine-ready"/>
         </section>
       </main>
-      <footer>FacadeFlow Demo · Phase 01 + 02A + 02B · Само визуална симулация</footer>
+      <footer>FacadeFlow Demo · Phase 06B.1 AI-ready shell · Само визуална симулация</footer>
       {showProductPreview && (
         <ProductPreview
           product={product}
@@ -364,6 +370,7 @@ function App() {
         />
       )}
       {showProfileCatalogue && <ProfileCatalogue profiles={catalogueProfiles} selection={activeProfileSelection} onProfiles={updateCatalogue} onSelection={setActiveProfileSelection} onClose={() => setShowProfileCatalogue(false)}/>}
+      {showAiWorkspace && <FacadeFlowAIWorkspace session={aiSession} onSession={setAiSession} activeProfileCount={catalogueProfiles.filter((item) => item.status !== 'ARCHIVED').length} onClose={() => setShowAiWorkspace(false)} onOpenImportCenter={() => { setShowAiWorkspace(false); setShowDrawingImport(true) }} onOpenProductDesigner={() => { setShowAiWorkspace(false); setShowDetailDrafting(true) }} onOpenCustomCad={() => { setShowAiWorkspace(false); setShowCustomDesigner(true) }} onOpenProfileCatalogue={() => { setShowAiWorkspace(false); setShowProfileCatalogue(true) }}/>}
       {showDetailDrafting && (
         <DetailDraftingPlaceholder
           session={hybridSession}

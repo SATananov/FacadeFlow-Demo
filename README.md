@@ -92,3 +92,7 @@ Unified import center поддържа изрично избрани локал�
 Phase 05B добавя отделен локален read-only DWG viewer чрез `@mlightcad/libredwg-web@0.7.10`/LibreDWG WASM. Той е разрешен само като непрехвърляем вътрешен evaluation прототип: **INTERNAL EVALUATION ONLY — EXTERNAL DISTRIBUTION NOT APPROVED**. Преди публикуване, deploy, продажба, прехвърляне или друго разпространение е задължителен нов GPL/правен преглед. Viewer-ът не редактира, не конвертира и не експортира DWG и не създава изделия или операции. Вижте [license review](docs/PHASE_05B_DWG_VIEWER_LICENSE_REVIEW.md) и [acceptance](docs/PHASE_05B_DWG_VIEWER_ACCEPTANCE.md).
 
 Източниците остават in-memory с SHA-256 provenance, `simulationOnly: true` и `machineReady: false`. Няма XML/LTE/DWG export, автоматично създаване на изделия или операции, backend, upload, network request или machine communication. Реалните evidence файлове в `local-samples/` са private и игнорирани от Git. Вижте [Phase 05A acceptance](docs/PHASE_05A_SKYGLAZING_READ_ONLY_ACCEPTANCE.md).
+
+## Phase 06B.1 — AI-ready visual shell
+
+FacadeFlow има отделен локален AI-ready workspace за бъдещи проектни документи, natural-language заявки, скици, единични поръчки и технически детайли. В тази фаза AI модел не е свързан: няма автоматична геометрия, backend или производствен изход. Human review, rules validation и source evidence са задължителни граници. Виж `docs/PHASE_06B_1_AI_READY_VISUAL_SHELL_ACCEPTANCE.md`.
