@@ -19,11 +19,17 @@ import { DimensionControls } from './DimensionControls'
 import { DrawingWorkspaceShell } from './DrawingWorkspaceShell'
 import { customWorkflowState, structuredWorkflowLabels, structuredWorkflowOrder } from '../structuredProductWorkflow'
 import { CUSTOM_GRID_STEPS, DEFAULT_CUSTOM_GRID_STEP, formatSnapReadout, snapModelPoint, type CustomGridStep, type ModelCoordinates } from '../customDrawingCoordinates'
+import { appendCustomDrawingLine, createCustomDrawingLineLayer } from '../customDrawingLines'
+import { createDefaultCadDisplayState, type CadDisplayState, type CadTool } from '../cad/cadTypes'
+import { CadStatusBar } from './CadStatusBar'
+import { CadWorkbenchGridLayer } from './CadWorkbenchGridLayer'
+import { CadWorkbenchGuideLayer } from './CadWorkbenchGuideLayer'
 
 interface Props { initial: CustomProduct; profiles: CatalogueProfile[]; activeProfiles: ActiveProfileSelection; selectedComponentId: string | null; onCommit: (previous: CustomProduct, next: CustomProduct) => boolean; onOpenComponent: (component: CustomComponent) => void; onClose: () => void }
 
 export function CustomProductDesigner({ initial, profiles, activeProfiles, selectedComponentId, onCommit, onOpenComponent, onClose }: Props) {
-  const [history, setHistory] = useState(() => createHistory(initial)), [selectedFieldId, setSelectedFieldId] = useState('field-root'), [selectedSummaryId, setSelectedSummaryId] = useState<string | null>(selectedComponentId), [reviewChecked, setReviewChecked] = useState(false), [largePreview, setLargePreview] = useState(false), [zoom, setZoom] = useState(1), [view, setView] = useState<'2D' | '3D' | 'SPLIT'>('2D'), [conceptualDepth, setConceptualDepth] = useState(DEFAULT_CONCEPTUAL_DEPTH_MM), [dimensionVisibility, setDimensionVisibility] = useState(defaultDimensionVisibility), [componentsVisible, setComponentsVisible] = useState(false), [gridVisible, setGridVisible] = useState(true), [gridStep, setGridStep] = useState<CustomGridStep>(DEFAULT_CUSTOM_GRID_STEP), [cursorCoordinates, setCursorCoordinates] = useState<ModelCoordinates | null>(null), [snappingEnabled, setSnappingEnabled] = useState(true)
+  const [history, setHistory] = useState(() => createHistory(initial)), [selectedFieldId, setSelectedFieldId] = useState('field-root'), [selectedSummaryId, setSelectedSummaryId] = useState<string | null>(selectedComponentId), [reviewChecked, setReviewChecked] = useState(false), [largePreview, setLargePreview] = useState(false), [zoom, setZoom] = useState(1), [view, setView] = useState<'2D' | '3D' | 'SPLIT'>('2D'), [conceptualDepth, setConceptualDepth] = useState(DEFAULT_CONCEPTUAL_DEPTH_MM), [dimensionVisibility, setDimensionVisibility] = useState(defaultDimensionVisibility), [componentsVisible, setComponentsVisible] = useState(false), [gridVisible, setGridVisible] = useState(true), [gridStep, setGridStep] = useState<CustomGridStep>(DEFAULT_CUSTOM_GRID_STEP), [cursorCoordinates, setCursorCoordinates] = useState<ModelCoordinates | null>(null), [snappingEnabled, setSnappingEnabled] = useState(true), [lineHistory, setLineHistory] = useState(() => createHistory(createCustomDrawingLineLayer())), [lineToolActive, setLineToolActive] = useState(false), [lineStartPoint, setLineStartPoint] = useState<ModelCoordinates | null>(null)
+  const [cadDisplay, setCadDisplay] = useState(createDefaultCadDisplayState)
   const product = history.present, validation = useMemo(() => validateCustomProduct(product, profiles), [product, profiles]), components = useMemo(() => generateCustomComponents(product, profiles), [product, profiles])
   const workflow = useMemo(() => customWorkflowState(product), [product])
   const dimensionsValid = workflow.DIMENSIONS
@@ -33,7 +39,12 @@ export function CustomProductDesigner({ initial, profiles, activeProfiles, selec
   const nominalLengths = useMemo(() => Object.fromEntries(components.map((component) => [component.id, component.nominalLength])), [components])
   const annotations = useMemo(() => calculateCustomDimensions(product, components, selectedSummaryId, conceptualDepth), [product, components, selectedSummaryId, conceptualDepth])
   const snapPoint = useMemo(() => cursorCoordinates ? snapModelPoint(cursorCoordinates, gridStep, snappingEnabled) : null, [cursorCoordinates, gridStep, snappingEnabled])
+  const linePreviewPoint = useMemo(() => lineToolActive && lineStartPoint && cursorCoordinates ? snapModelPoint(cursorCoordinates, gridStep, snappingEnabled) : null, [lineToolActive, lineStartPoint, cursorCoordinates, gridStep, snappingEnabled])
+  const displayCursorCoordinates = snappingEnabled && snapPoint ? snapPoint : cursorCoordinates
+  const activeCadTool: CadTool = lineToolActive ? 'LINE' : 'SELECT'
+  const setCadDisplayFlag = (key: keyof CadDisplayState, checked: boolean) => setCadDisplay((current) => ({ ...current, [key]: checked }))
   useEffect(() => { const fallback = () => setView('2D'); window.addEventListener('facadeflow-3d-unavailable', fallback); return () => window.removeEventListener('facadeflow-3d-unavailable', fallback) }, [])
+  useEffect(() => { if (!lineToolActive) return; const cancel = (event: KeyboardEvent) => { if (event.key !== 'Escape') return; setLineStartPoint(null); setLineToolActive(false) }; window.addEventListener('keydown', cancel); return () => window.removeEventListener('keydown', cancel) }, [lineToolActive])
   const projected = useMemo(() => projectGeometry(product.geometry, { x: 0, y: 0, width: product.width, height: product.height }), [product]), selectedProjection = projected.find(({ node }) => node.id === selectedFieldId), selectedNode = findGeometryNode(product.geometry, selectedFieldId)
   const apply = (next: CustomProduct) => { const status = validateCustomProduct(next, profiles).valid ? 'NEEDS_REVIEW' as const : 'DRAFT' as const; const normalized = { ...next, status, humanReviewConfirmed: false, updatedAt: new Date().toISOString() }; if (!onCommit(product, normalized)) return; setHistory((value) => pushHistory(value, normalized)); setReviewChecked(false); setView('2D') }
   const replaceGeometry = (geometry: CustomGeometryNode) => apply({ ...product, geometry })
@@ -44,6 +55,17 @@ export function CustomProductDesigner({ initial, profiles, activeProfiles, selec
   }
   const undo = () => { const next = undoHistory(history); if (next.present !== product && onCommit(product, next.present)) { setHistory(next); setReviewChecked(false) } }
   const redo = () => { const next = redoHistory(history); if (next.present !== product && onCommit(product, next.present)) { setHistory(next); setReviewChecked(false) } }
+  const chooseLinePoint = (rawPoint: ModelCoordinates) => {
+    if (!lineToolActive) return
+    const point = snapModelPoint(rawPoint, gridStep, snappingEnabled)
+    if (!lineStartPoint) { setLineStartPoint(point); return }
+    setLineHistory((value) => { const next = appendCustomDrawingLine(value.present, lineStartPoint, point); return next === value.present ? value : pushHistory(value, next) })
+    if (lineStartPoint.x !== point.x || lineStartPoint.y !== point.y) setLineStartPoint(null)
+  }
+  const toggleLineTool = () => { setLineStartPoint(null); setLineToolActive((active) => !active) }
+  const undoLine = () => { setLineStartPoint(null); setLineHistory((value) => undoHistory(value)) }
+  const redoLine = () => { setLineStartPoint(null); setLineHistory((value) => redoHistory(value)) }
+  const lineToolStatus = lineToolActive ? (lineStartPoint ? 'Изберете крайна точка · Esc отказва' : 'Изберете начална точка · Esc отказва') : 'Линия: неактивна'
   const setTop = (patch: Partial<CustomProduct>) => apply({ ...product, ...patch })
   const verify = () => { if (!reviewChecked || !validation.valid) return; const next = { ...product, status: 'VERIFIED' as const, humanReviewConfirmed: true, updatedAt: new Date().toISOString() }; if (onCommit(product, next)) setHistory((value) => pushHistory(value, next)) }
   const header = <header className="preview-header"><div><span className="preview-badge">СИМУЛАЦИЯ · {product.status}</span><h2 id="custom-designer-title">Конструктор на нестандартен прозорец</h2><p>Структуриран правоъгълен модел — не е свободен CAD и не използва производствени формули.</p></div><button className="preview-close" aria-label="Затвори конструктора" onClick={onClose}>×</button></header>
@@ -54,7 +76,40 @@ export function CustomProductDesigner({ initial, profiles, activeProfiles, selec
       {dimensionsValid && !workflow.FRAME && <p className="workflow-requirement" role="status">Изберете профил и създайте външната каса, преди да добавяте делители или крила.</p>}
     </nav>
   const settings = <div className="custom-designer-toolbar"><label>Име<input value={product.name} onChange={(event) => setTop({ name: event.target.value })}/></label><label>Обща ширина (mm)<input type="number" min="1" value={product.width} onChange={(event) => setTop({ width: Number(event.target.value) })}/></label><label>Обща височина (mm)<input type="number" min="1" value={product.height} onChange={(event) => setTop({ height: Number(event.target.value) })}/></label><label>Каса <ContextHelp helpId="profile-frame"/><select value={product.frameProfileId} onChange={(event) => setTop({ frameProfileId: event.target.value })}><option value="">Изберете</option>{profiles.filter((item) => item.role === 'FRAME' && item.status !== 'ARCHIVED').map((item) => <option key={item.id} value={item.id}>{item.code}</option>)}</select></label><label>Делител <ContextHelp helpId="profile-mullion"/><select value={product.mullionProfileId ?? ''} onChange={(event) => setTop({ mullionProfileId: event.target.value || undefined })}><option value="">Изберете при разделяне</option>{profiles.filter((item) => item.role === 'MULLION' && item.status !== 'ARCHIVED').map((item) => <option key={item.id} value={item.id}>{item.code}</option>)}</select></label><button className="primary" disabled={!dimensionsValid || !product.frameProfileId || product.frameCreated} onClick={() => setTop({ frameCreated: true })}>{product.frameCreated ? 'Външната каса е създадена' : 'Създай външна каса'}</button><button onClick={undo} disabled={!history.past.length}>Отмени</button><button onClick={redo} disabled={!history.future.length}>Повтори</button></div>
-  const toolbar = <><div className="custom-workspace-controls"><div className="view-switch" role="group" aria-label="Изглед на нестандартното изделие"><button type="button" aria-pressed={view === '2D'} onClick={() => setView('2D')}>2D чертеж</button><button type="button" aria-pressed={view === '3D'} disabled={product.status !== 'VERIFIED'} title={product.status !== 'VERIFIED' ? '3D прегледът е достъпен след човешка проверка.' : undefined} onClick={() => setView('3D')}>3D преглед</button><button type="button" aria-pressed={view === 'SPLIT'} disabled={product.status !== 'VERIFIED'} title={product.status !== 'VERIFIED' ? 'Разделеният 3D преглед е достъпен след човешка проверка.' : undefined} onClick={() => setView('SPLIT')}>Разделен изглед</button></div><DimensionControls value={dimensionVisibility} onChange={setDimensionVisibility}/>{view !== '3D' && <div className="custom-grid-controls" role="group" aria-label="Координатна мрежа и прихващане"><label className="custom-grid-toggle"><input type="checkbox" checked={gridVisible} onChange={(event) => setGridVisible(event.target.checked)}/> Мрежа</label><label>Стъпка на мрежата <select value={gridStep} onChange={(event) => setGridStep(Number(event.target.value) as CustomGridStep)}>{CUSTOM_GRID_STEPS.map((step) => <option key={step} value={step}>{step} mm</option>)}</select></label><label className="custom-snap-toggle"><input type="checkbox" checked={snappingEnabled} onChange={(event) => setSnappingEnabled(event.target.checked)}/> Прихващане</label><span className="custom-snap-mode" aria-label="Режим на прихващане">GRID</span><output className="custom-cursor-coordinates" aria-live="polite">{formatSnapReadout(cursorCoordinates, snapPoint, snappingEnabled)}</output></div>}</div>{view !== '3D' && <div className="custom-canvas-controls"><button onClick={() => setZoom((value) => Math.min(1.8, value + .15))}>Увеличи</button><button onClick={() => setZoom((value) => Math.max(.55, value - .15))}>Намали</button><button onClick={() => setZoom(1)}>Побери / нулирай</button><button onClick={() => setLargePreview((value) => !value)}>{largePreview ? 'Редактор' : 'Преглед на изделието'}</button></div>}</>
+  const toolbar = <div className="custom-workspace-controls">
+    <div className="view-switch" role="group" aria-label="Изглед на нестандартното изделие">
+      <button type="button" aria-pressed={view === '2D'} onClick={() => setView('2D')}>2D чертеж</button>
+      <button type="button" aria-pressed={view === '3D'} disabled={product.status !== 'VERIFIED'} title={product.status !== 'VERIFIED' ? '3D прегледът е достъпен след човешка проверка.' : undefined} onClick={() => setView('3D')}>3D преглед</button>
+      <button type="button" aria-pressed={view === 'SPLIT'} disabled={product.status !== 'VERIFIED'} title={product.status !== 'VERIFIED' ? 'Разделеният 3D преглед е достъпен след човешка проверка.' : undefined} onClick={() => setView('SPLIT')}>Разделен изглед</button>
+    </div>
+    {view !== '3D' && <div className="custom-line-tool-controls" role="group" aria-label="Инструмент линия">
+      <button type="button" aria-pressed={!lineToolActive} onClick={() => { setLineStartPoint(null); setLineToolActive(false) }}>Избор</button>
+      <button type="button" aria-pressed={lineToolActive} onClick={toggleLineTool}>Линия</button>
+      <button type="button" disabled={!lineHistory.past.length} onClick={undoLine}>Отмени линия</button>
+      <button type="button" disabled={!lineHistory.future.length} onClick={redoLine}>Повтори линия</button>
+      <span className="custom-line-tool-status" role="status">{lineToolStatus}</span>
+    </div>}
+    {view !== '3D' && <div className="custom-grid-controls" role="group" aria-label="Координатна мрежа и прихващане">
+      <label className="custom-grid-toggle"><input type="checkbox" checked={gridVisible} onChange={(event) => setGridVisible(event.target.checked)}/> Мрежа</label>
+      <label>Стъпка на мрежата <select value={gridStep} onChange={(event) => setGridStep(Number(event.target.value) as CustomGridStep)}>{CUSTOM_GRID_STEPS.map((step) => <option key={step} value={step}>{step} mm</option>)}</select></label>
+      <label className="custom-snap-toggle"><input type="checkbox" checked={snappingEnabled} onChange={(event) => setSnappingEnabled(event.target.checked)}/> Прихващане</label>
+      <span className="custom-snap-mode" aria-label="Режим на прихващане">GRID</span>
+      <output className="custom-cursor-coordinates" aria-live="polite">{formatSnapReadout(cursorCoordinates, snapPoint, snappingEnabled)}</output>
+    </div>}
+    {view !== '3D' && <div className="custom-canvas-controls">
+      <button onClick={() => setZoom((value) => Math.min(3, value + .25))}>Увеличи</button>
+      <button onClick={() => setZoom((value) => Math.max(.5, value - .25))}>Намали</button>
+      <button onClick={() => setZoom(1)}>Побери / нулирай</button>
+      <button onClick={() => setLargePreview((value) => !value)}>{largePreview ? 'Редактор' : 'Преглед на изделието'}</button>
+    </div>}
+    {view !== '3D' && <div className="custom-cad-display-controls" role="group" aria-label="CAD помощни визуализации">
+      <label><input type="checkbox" checked={cadDisplay.showMajorGrid} disabled={!gridVisible} onChange={(event) => setCadDisplayFlag('showMajorGrid', event.target.checked)}/> Главна мрежа</label>
+      <label><input type="checkbox" checked={cadDisplay.showAxes} onChange={(event) => setCadDisplayFlag('showAxes', event.target.checked)}/> Оси X/Y</label>
+      <label><input type="checkbox" checked={cadDisplay.showRulers} onChange={(event) => setCadDisplayFlag('showRulers', event.target.checked)}/> Линийки</label>
+      <label><input type="checkbox" checked={cadDisplay.showCoordinates} onChange={(event) => setCadDisplayFlag('showCoordinates', event.target.checked)}/> Координати до курсора</label>
+    </div>}
+    <DimensionControls value={dimensionVisibility} onChange={setDimensionVisibility}/>
+  </div>
   const viewport = <>{view !== '2D' && (
       <Product3DPreview
         buildScene={build3DScene}
@@ -70,7 +125,50 @@ export function CustomProductDesigner({ initial, profiles, activeProfiles, selec
           if (component) onOpenComponent(component)
         }}
       />
-    )}{view !== '3D' && <div className="custom-canvas"><div className="custom-drawing-scroll"><div style={{ width: `${zoom * 100}%` }}><CustomProductDrawing product={product} selectedFieldId={selectedFieldId} onSelectField={setSelectedFieldId} large={largePreview} annotations={annotations} dimensionVisibility={dimensionVisibility} gridVisible={gridVisible} gridStep={gridStep} snapPoint={snapPoint} snappingEnabled={snappingEnabled} zoom={zoom} onCursorCoordinates={(next) => setCursorCoordinates((current) => current?.x === next?.x && current?.y === next?.y ? current : next)}/></div></div><p className="dimension-legend">Размерите са проектни/геометрични. Производствените отнемания и допуски не са приложени.</p><div className="current-assignments">Активни: каса {activeProfiles.FRAME ?? '—'} · крило {activeProfiles.SASH ?? '—'} · делител {activeProfiles.MULLION ?? '—'}</div></div>}</>
+    )}{view !== '3D' && <div className="custom-canvas">
+      <div className="custom-drawing-scroll">
+        <div className="custom-drawing-zoom" style={{ width: `${zoom * 100}%`, height: `${zoom * 100}%` }}>
+          <div className="custom-drawing-stage">
+            <CadWorkbenchGridLayer
+              productWidth={product.width}
+              productHeight={product.height}
+              gridVisible={gridVisible}
+              gridStep={gridStep}
+              showMajorGrid={cadDisplay.showMajorGrid}
+            />
+            <CustomProductDrawing
+              product={product}
+              selectedFieldId={selectedFieldId}
+              onSelectField={setSelectedFieldId}
+              large={largePreview}
+              annotations={annotations}
+              dimensionVisibility={dimensionVisibility}
+              snapPoint={snapPoint}
+              snappingEnabled={snappingEnabled}
+              zoom={zoom}
+              drawingLines={lineHistory.present.lines}
+              lineStartPoint={lineStartPoint}
+              linePreviewPoint={linePreviewPoint}
+              onCanvasPoint={chooseLinePoint}
+              cursorCoordinates={displayCursorCoordinates}
+              showCoordinates={cadDisplay.showCoordinates}
+              onCursorCoordinates={(next) => setCursorCoordinates((current) => current?.x === next?.x && current?.y === next?.y ? current : next)}
+            />
+            <CadWorkbenchGuideLayer
+              productWidth={product.width}
+              productHeight={product.height}
+              gridStep={gridStep}
+              zoom={zoom}
+              showAxes={cadDisplay.showAxes}
+              showRulers={cadDisplay.showRulers}
+            />
+          </div>
+        </div>
+      </div>
+      <CadStatusBar tool={activeCadTool} gridVisible={gridVisible} gridStep={gridStep} snappingEnabled={snappingEnabled} cursorCoordinates={displayCursorCoordinates} zoom={zoom}/>
+      <p className="dimension-legend">Размерите са проектни/геометрични. Производствените отнемания и допуски не са приложени.</p>
+      <div className="current-assignments">Активни: каса {activeProfiles.FRAME ?? '—'} · крило {activeProfiles.SASH ?? '—'} · делител {activeProfiles.MULLION ?? '—'}</div>
+    </div>}</>
   const properties = view !== '3D' ? <SelectedFieldPanel node={selectedNode} fieldWidth={selectedProjection?.rect.width ?? 0} fieldHeight={selectedProjection?.rect.height ?? 0} profiles={profiles} errors={validation.fieldErrors[selectedFieldId] ?? []} frameReady={frameReady} defaultSashProfileId={activeProfiles.SASH} onSplit={changeSplit} onLeaf={(patch: Partial<CustomLeafNode>) => replaceGeometry(updateGeometryNode(product.geometry, selectedFieldId, (node) => node.kind === 'LEAF' ? { ...node, ...patch } : node))} onRemoveSplit={() => { if (!selectedNode || selectedNode.kind !== 'SPLIT' || !frameReady) return; if (geometryHasNestedSplit(selectedNode) && !window.confirm('Разделянето съдържа вложена геометрия. Да бъде ли премахната?')) return; const parentId = selectedNode.id.replace(/^split-/, ''); replaceGeometry(removeSplit(product.geometry, selectedNode.id)); setSelectedFieldId(parentId) }}/> : undefined
   const status = <>{validation.errors.length > 0 && <div className="custom-validation inline-errors" role="alert"><b>Черновата изисква корекции:</b><ul>{validation.errors.map((error) => <li key={error}>{error}</li>)}</ul></div>}<section className="custom-component-list-region" aria-labelledby="custom-component-list-title"><div className="custom-component-list-heading"><strong id="custom-component-list-title">Компоненти <span>({components.length})</span></strong><button type="button" aria-expanded={componentsVisible} aria-controls="custom-component-list-content" onClick={() => setComponentsVisible((visible) => !visible)}>{componentsVisible ? 'Скрий компонентите' : 'Покажи компонентите'}</button></div><div id="custom-component-list-content" className="custom-component-list-content" hidden={!componentsVisible}><CustomProductSummary components={components} selectedId={selectedSummaryId} onSelect={setSelectedSummaryId} onOpen={(component) => { setSelectedSummaryId(component.id); onOpenComponent(component) }}/></div></section><footer className="custom-designer-footer"><div><p className="custom-production-warning">Номиналната дължина не е производствен размер. Формулите за сглобка и отнемане предстоят за потвърждение.</p><label><input type="checkbox" checked={reviewChecked} onChange={(event) => setReviewChecked(event.target.checked)}/> Проверих размерите, профилите, разделянето и отваряемостта.</label><small>VERIFIED означава проверена от човек симулация, не технологично или машинно одобрение.</small></div><div><button onClick={() => exportCustomProduct(product, profiles, components, validation)}>Експортирай custom simulation JSON</button><button className="primary" disabled={!validation.valid || !reviewChecked} onClick={verify}>Потвърди след човешка проверка</button></div></footer></>
   return <div className="preview-overlay custom-designer-overlay"><DrawingWorkspaceShell labelId="custom-designer-title" className="custom-designer" header={header} progress={progress} settings={settings} toolbar={toolbar} viewport={viewport} properties={properties} status={status}/></div>

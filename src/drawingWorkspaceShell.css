@@ -63,11 +63,26 @@
 @media (min-width: 901px) {
   .drawing-workspace-shell.drawing-workspace-shell { display: grid; grid-template-rows: max-content max-content max-content max-content minmax(180px,1fr) max-content; width: min(1500px,calc(100vw - 24px)); height: calc(100dvh - 24px); max-height: calc(100dvh - 24px); overflow: hidden; }
   .drawing-workspace-toolbar .custom-workspace-controls,.drawing-workspace-toolbar .dimension-controls { flex-wrap: wrap; }
-  .drawing-workspace-toolbar .custom-canvas-controls { flex-basis: 100%; }
+  .drawing-workspace-toolbar .custom-canvas-controls { flex: 0 1 auto; }
   .drawing-workspace-viewport { height: 100%; }
   .drawing-workspace-status { max-height: min(132px,18dvh); overflow: auto; scrollbar-gutter: stable; }
   .drawing-workspace-status:has(.custom-component-list-content:not([hidden])) { max-height: min(280px,27dvh); }
   .drawing-workspace-status .custom-designer-footer { position: sticky; bottom: 0; z-index: 2; }
+}
+
+
+/* Phase 06A.9.5 browser-audit correction — preserve a usable 2D viewport on short desktop screens. */
+@media (min-width: 901px) and (max-height: 850px) {
+  .drawing-workspace-shell.drawing-workspace-shell { overflow-x: hidden; overflow-y: auto; scrollbar-gutter: stable; }
+  .drawing-workspace-header .preview-header { padding-block: 6px; }
+  .drawing-workspace-header .preview-header p { display: none; }
+  .drawing-workspace-progress .structured-workflow { padding-block: 4px; }
+  .drawing-workspace-settings-heading { padding-block: 3px; }
+  .drawing-workspace-toolbar .custom-canvas-controls { border-top: 1px solid var(--ff-border-default); }
+  .drawing-workspace-main { min-height: min(430px,54dvh); }
+  .drawing-workspace-viewport .custom-drawing-scroll { overflow: auto; overscroll-behavior: contain; }
+  .drawing-workspace-viewport .custom-drawing-zoom { min-width: 0; min-height: 0; }
+  .drawing-workspace-status { max-height: min(84px,12dvh); }
 }
 
 @media (max-width: 900px) {
@@ -85,4 +100,557 @@
   .custom-cursor-coordinates { min-height: 42px; box-sizing: border-box; }
   .custom-component-list-heading { align-items: flex-start; flex-wrap: wrap; }
   .custom-component-list-heading button { min-height: 42px; }
+}
+
+/* Phase 06A.9.5 — local-session Line tool */
+.drawing-workspace-toolbar .custom-line-tool-controls { display: flex; align-items: center; flex: 1 1 420px; flex-wrap: wrap; gap: 5px 8px; min-width: 0; padding: 4px 8px; border-top: 1px solid var(--ff-border-default); }
+.drawing-workspace-toolbar .custom-line-tool-controls button { min-height: 32px; padding: 4px 8px; }
+.drawing-workspace-toolbar .custom-line-tool-controls button[aria-pressed="true"] { border-color: #087b91; box-shadow: inset 0 0 0 1px #087b91; }
+.custom-line-tool-status { min-width: 220px; color: var(--ff-text-secondary); font-size: 11px; font-weight: 700; white-space: normal; }
+.custom-drawing-line-layer { pointer-events: none; }
+.custom-drawing-line { stroke: #8b3a1f; stroke-width: 2.4; vector-effect: non-scaling-stroke; }
+.custom-drawing-line-preview { stroke: #8b3a1f; stroke-width: 2; stroke-dasharray: 8 5; opacity: .72; vector-effect: non-scaling-stroke; }
+
+@media (max-width: 900px) {
+  .drawing-workspace-toolbar .custom-line-tool-controls { flex: 1 1 100%; width: 100%; }
+  .drawing-workspace-toolbar .custom-line-tool-controls button { min-height: 42px; }
+  .custom-line-tool-status { min-width: 0; width: 100%; }
+}
+
+/* Phase 06A.9.5 desktop workbench polish — side rails around an emphasized drawing canvas. */
+@media (min-width: 1180px) {
+  .drawing-workspace-shell.drawing-workspace-shell {
+    grid-template-columns: clamp(225px,15vw,265px) minmax(0,1fr);
+    grid-template-rows: max-content max-content max-content minmax(0,1fr) max-content;
+    grid-template-areas:
+      "header header"
+      "progress progress"
+      "settings settings"
+      "toolbar main"
+      "status status";
+    width: min(1780px,calc(100vw - 16px));
+    height: calc(100dvh - 12px);
+    max-height: calc(100dvh - 12px);
+    overflow: hidden;
+  }
+
+  .drawing-workspace-header { grid-area: header; }
+  .drawing-workspace-progress { grid-area: progress; }
+  .drawing-workspace-settings { grid-area: settings; }
+  .drawing-workspace-toolbar { grid-area: toolbar; }
+  .drawing-workspace-main { grid-area: main; }
+  .drawing-workspace-status { grid-area: status; }
+
+  .drawing-workspace-toolbar {
+    display: block;
+    min-height: 0;
+    padding: 8px;
+    overflow-x: hidden;
+    overflow-y: auto;
+    scrollbar-gutter: stable;
+    background: #eaf0f2;
+    border-right: 1px solid var(--ff-border-default);
+    border-bottom: 0;
+  }
+
+  .drawing-workspace-toolbar::before {
+    content: "ИНСТРУМЕНТИ";
+    display: block;
+    margin: 0 2px 8px;
+    color: #49636d;
+    font-size: 10px;
+    font-weight: 900;
+    letter-spacing: .09em;
+  }
+
+  .drawing-workspace-toolbar .custom-workspace-controls {
+    display: grid;
+    grid-template-columns: minmax(0,1fr);
+    align-content: start;
+    gap: 8px;
+    width: 100%;
+  }
+
+  .drawing-workspace-toolbar .view-switch {
+    display: grid;
+    grid-template-columns: minmax(0,1fr);
+    gap: 5px;
+    width: 100%;
+    padding: 0 0 8px;
+    border-bottom: 1px solid var(--ff-border-default);
+  }
+
+  .drawing-workspace-toolbar .view-switch button {
+    width: 100%;
+    min-height: 34px;
+    text-align: left;
+  }
+
+  .drawing-workspace-toolbar .dimension-controls {
+    display: grid;
+    grid-template-columns: minmax(0,1fr);
+    gap: 4px;
+    width: 100%;
+    padding: 0 0 8px;
+    border-bottom: 1px solid var(--ff-border-default);
+  }
+
+  .drawing-workspace-toolbar .dimension-controls legend {
+    float: none;
+    margin: 0 0 2px;
+    padding: 0;
+    color: #49636d;
+    font-size: 10px;
+    font-weight: 900;
+  }
+
+  .drawing-workspace-toolbar .dimension-controls label {
+    width: 100%;
+    min-height: 30px;
+    box-sizing: border-box;
+    padding: 3px 6px;
+    white-space: normal;
+  }
+
+  .drawing-workspace-toolbar .dimension-controls > button {
+    width: 100%;
+    min-height: 32px;
+    margin: 2px 0 0;
+  }
+
+  .drawing-workspace-toolbar .custom-grid-controls {
+    display: grid;
+    grid-template-columns: minmax(0,1fr);
+    gap: 5px;
+    width: 100%;
+    padding: 0 0 8px;
+    border-bottom: 1px solid var(--ff-border-default);
+  }
+
+  .drawing-workspace-toolbar .custom-grid-controls label {
+    display: flex;
+    width: 100%;
+    min-height: 30px;
+    box-sizing: border-box;
+    justify-content: flex-start;
+    white-space: normal;
+  }
+
+  .drawing-workspace-toolbar .custom-grid-controls label:not(.custom-grid-toggle):not(.custom-snap-toggle) {
+    display: grid;
+    grid-template-columns: minmax(0,1fr) auto;
+    align-items: center;
+  }
+
+  .drawing-workspace-toolbar .custom-grid-controls select {
+    width: 88px;
+    min-width: 0;
+  }
+
+  .drawing-workspace-toolbar .custom-snap-mode {
+    justify-self: start;
+  }
+
+  .drawing-workspace-toolbar .custom-cursor-coordinates {
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+  }
+
+  .drawing-workspace-toolbar .custom-line-tool-controls::before,
+  .drawing-workspace-toolbar .custom-grid-controls::before,
+  .drawing-workspace-toolbar .custom-canvas-controls::before {
+    grid-column: 1 / -1;
+    display: block;
+    margin: 0 0 2px;
+    color: #49636d;
+    font-size: 10px;
+    font-weight: 900;
+    letter-spacing: .07em;
+  }
+
+  .drawing-workspace-toolbar .custom-line-tool-controls::before { content: "ЧЕРТАНЕ"; }
+  .drawing-workspace-toolbar .custom-grid-controls::before { content: "МРЕЖА / SNAP"; }
+  .drawing-workspace-toolbar .custom-canvas-controls::before { content: "НАВИГАЦИЯ"; }
+
+  .drawing-workspace-toolbar .custom-line-tool-controls {
+    display: grid;
+    grid-template-columns: repeat(2,minmax(0,1fr));
+    gap: 5px;
+    width: 100%;
+    padding: 0 0 8px;
+    border-top: 0;
+    border-bottom: 1px solid var(--ff-border-default);
+  }
+
+  .drawing-workspace-toolbar .custom-line-tool-controls button {
+    width: 100%;
+    min-height: 34px;
+  }
+
+  .drawing-workspace-toolbar .custom-line-tool-controls button:first-child,
+  .drawing-workspace-toolbar .custom-line-tool-status {
+    grid-column: 1 / -1;
+  }
+
+  .drawing-workspace-toolbar .custom-line-tool-status {
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    padding: 5px 6px;
+    border-radius: 4px;
+    background: #f7fafb;
+  }
+
+  .drawing-workspace-toolbar .custom-canvas-controls {
+    display: grid;
+    grid-template-columns: repeat(2,minmax(0,1fr));
+    gap: 5px;
+    width: 100%;
+    padding: 0;
+    border: 0;
+  }
+
+  .drawing-workspace-toolbar .custom-canvas-controls button {
+    width: 100%;
+    min-height: 34px;
+  }
+
+  .drawing-workspace-toolbar .custom-canvas-controls button:last-child {
+    grid-column: 1 / -1;
+  }
+
+  .drawing-workspace-main {
+    display: grid;
+    grid-template-columns: minmax(0,1fr) clamp(270px,19vw,330px);
+    gap: 10px;
+    min-height: 0;
+    padding: 10px;
+    overflow: hidden;
+    background: #dfe7e9;
+  }
+
+  .drawing-workspace-main.without-properties {
+    grid-template-columns: minmax(0,1fr);
+  }
+
+  .drawing-workspace-viewport {
+    position: relative;
+    min-height: 0;
+    overflow: hidden;
+    background: #d5e0e3;
+    border: 2px solid #087b91;
+    border-radius: 6px;
+    box-shadow: 0 0 0 3px rgba(8,123,145,.10), 0 10px 24px rgba(24,54,65,.13);
+  }
+
+  .drawing-workspace-viewport::before {
+    content: "РАБОТНО ПОЛЕ";
+    position: absolute;
+    top: 8px;
+    left: 10px;
+    z-index: 5;
+    padding: 4px 7px;
+    border: 1px solid rgba(8,123,145,.35);
+    border-radius: 4px;
+    background: rgba(247,250,251,.92);
+    color: #075f70;
+    font-size: 9px;
+    font-weight: 900;
+    letter-spacing: .08em;
+    pointer-events: none;
+  }
+
+  .drawing-workspace-viewport > .custom-canvas,
+  .drawing-workspace-viewport > .product-3d-preview {
+    background: #d5e0e3;
+  }
+
+  .drawing-workspace-viewport .custom-drawing-scroll {
+    background: #d5e0e3;
+    overscroll-behavior: contain;
+  }
+
+  .drawing-workspace-properties {
+    position: relative;
+    min-height: 0;
+    overflow: auto;
+    scrollbar-gutter: stable;
+    background: #f8fafb;
+    border: 1px solid #b8c8ce;
+    border-radius: 6px;
+    box-shadow: 0 5px 16px rgba(24,54,65,.08);
+  }
+
+  .drawing-workspace-properties::before {
+    content: "СВОЙСТВА";
+    display: block;
+    position: sticky;
+    top: 0;
+    z-index: 3;
+    padding: 6px 12px;
+    background: #eaf0f2;
+    border-bottom: 1px solid var(--ff-border-default);
+    color: #49636d;
+    font-size: 10px;
+    font-weight: 900;
+    letter-spacing: .09em;
+  }
+
+  .drawing-workspace-properties > .selected-field-panel {
+    min-height: 0;
+    background: #fff;
+  }
+
+  .drawing-workspace-status {
+    max-height: min(105px,14dvh);
+    overflow: auto;
+    scrollbar-gutter: stable;
+    border-top: 1px solid var(--ff-border-default);
+    background: #f7fafb;
+  }
+
+  .drawing-workspace-status:has(.custom-component-list-content:not([hidden])) {
+    max-height: min(240px,27dvh);
+  }
+}
+
+@media (min-width: 1180px) and (max-height: 850px) {
+  .drawing-workspace-shell.drawing-workspace-shell {
+    overflow: hidden;
+  }
+
+  .drawing-workspace-main {
+    min-height: 0;
+  }
+
+  .drawing-workspace-toolbar {
+    padding-top: 6px;
+    padding-bottom: 6px;
+  }
+
+  .drawing-workspace-toolbar .custom-workspace-controls {
+    gap: 6px;
+  }
+
+  .drawing-workspace-status {
+    max-height: min(78px,10dvh);
+  }
+}
+
+/* Phase 06A.9.6 — CAD workbench drafting aids. */
+.drawing-workspace-viewport > .custom-canvas { grid-template-rows: minmax(0,1fr) auto auto auto; }
+.drawing-workspace-viewport .custom-product-drawing { cursor: crosshair; background: #edf3f4; }
+.custom-coordinate-grid-minor-line { stroke: #9cabb1; stroke-width: .45; opacity: .34; vector-effect: non-scaling-stroke; }
+.custom-coordinate-grid-major-line { stroke: #6d838c; stroke-width: .9; opacity: .62; vector-effect: non-scaling-stroke; }
+.custom-coordinate-axis { stroke: #0b7285; stroke-width: 1.4; opacity: .9; vector-effect: non-scaling-stroke; }
+.custom-coordinate-axis-arrow { fill: #0b7285; }
+.custom-coordinate-axis-label,.custom-coordinate-origin-label { fill: #075f70; font-weight: 800; paint-order: stroke; stroke: #f7fbfc; stroke-width: 3px; stroke-linejoin: round; }
+.cad-origin-marker { fill: #fff; stroke: #0b7285; stroke-width: 1.7; vector-effect: non-scaling-stroke; }
+.cad-ruler-band { fill: rgba(247,250,251,.94); stroke: #9dafb6; stroke-width: .75; vector-effect: non-scaling-stroke; }
+.cad-ruler-tick { stroke: #70858e; stroke-width: .8; vector-effect: non-scaling-stroke; }
+.cad-ruler-tick.major { stroke: #365b68; stroke-width: 1.1; }
+.cad-ruler-label,.cad-ruler-unit { fill: #365b68; font-variant-numeric: tabular-nums; font-weight: 700; paint-order: stroke; stroke: #f7fafb; stroke-width: 2px; }
+.cad-ruler-unit { font-weight: 900; }
+.cad-crosshair path { fill: none; stroke: #086f83; stroke-width: 1; opacity: .92; vector-effect: non-scaling-stroke; }
+.cad-crosshair > circle { fill: #fff; stroke: #086f83; stroke-width: 1; vector-effect: non-scaling-stroke; }
+.cad-crosshair-readout rect { fill: rgba(14,35,43,.88); stroke: rgba(255,255,255,.82); stroke-width: .8; vector-effect: non-scaling-stroke; }
+.cad-crosshair-readout text { fill: #fff; font-weight: 800; font-variant-numeric: tabular-nums; }
+.cad-status-bar { display: flex; align-items: center; gap: 12px; min-width: 0; padding: 4px 9px; overflow-x: auto; background: #102c35; color: #e9f5f7; border-top: 1px solid #2c5562; font-size: 10px; line-height: 1.35; white-space: nowrap; scrollbar-width: thin; }
+.cad-status-bar span { display: inline-flex; gap: 4px; align-items: baseline; }
+.cad-status-bar b { color: #8ed6df; font-size: 9px; letter-spacing: .06em; }
+.cad-status-coordinates { min-width: 150px; font-variant-numeric: tabular-nums; }
+.custom-cad-display-controls { display: flex; align-items: center; flex: 1 1 420px; flex-wrap: wrap; gap: 5px 10px; min-width: 0; padding: 4px 8px; }
+.custom-cad-display-controls label { display: inline-flex; align-items: center; gap: 5px; min-height: 30px; white-space: nowrap; }
+
+@media (max-width: 900px) {
+  .custom-cad-display-controls { flex: 1 1 100%; width: 100%; }
+  .custom-cad-display-controls label { width: 100%; min-height: 42px; box-sizing: border-box; white-space: normal; }
+}
+
+@media (min-width: 1180px) {
+  .drawing-workspace-toolbar .custom-cad-display-controls {
+    display: grid;
+    grid-template-columns: minmax(0,1fr);
+    gap: 4px;
+    width: 100%;
+    padding: 0 0 8px;
+    border-bottom: 1px solid var(--ff-border-default);
+  }
+
+  .drawing-workspace-toolbar .custom-cad-display-controls::before {
+    content: "ПОКАЗВАНЕ";
+    display: block;
+    margin: 0 0 2px;
+    color: #49636d;
+    font-size: 10px;
+    font-weight: 900;
+    letter-spacing: .07em;
+  }
+
+  .drawing-workspace-toolbar .custom-cad-display-controls label {
+    display: flex;
+    width: 100%;
+    min-height: 29px;
+    box-sizing: border-box;
+    justify-content: flex-start;
+    padding: 2px 4px;
+    white-space: normal;
+  }
+
+  .drawing-workspace-toolbar .custom-line-tool-controls button:first-child { grid-column: auto; }
+  .drawing-workspace-toolbar .custom-line-tool-status { grid-column: 1 / -1; }
+  .drawing-workspace-viewport .custom-drawing-scroll { background: #edf3f4; }
+}
+.cad-ruler-corner { fill: #dfe9ec; stroke: #9dafb6; stroke-width: .75; vector-effect: non-scaling-stroke; }
+
+
+/* Phase 06A.9.6 CAD visibility hotfix — keep drafting aids readable through product fills. */
+.drawing-workspace-viewport .custom-product-drawing { background: #f4f8f9; }
+.drawing-workspace-viewport .custom-frame { fill: rgba(223,231,233,.46); }
+.drawing-workspace-viewport .custom-field { fill: rgba(232,247,249,.72); }
+.drawing-workspace-viewport .custom-field.opening_sash { fill: rgba(232,247,249,.76); }
+.drawing-workspace-viewport .custom-field.placeholder { fill: rgba(255,241,210,.78); }
+.custom-coordinate-grid-minor-line { stroke: #9aadb4; stroke-width: .62; opacity: .52; }
+.custom-coordinate-grid-major-line { stroke: #587983; stroke-width: 1.15; opacity: .82; }
+.custom-coordinate-axis { stroke: #046f84; stroke-width: 1.8; opacity: .96; }
+.cad-origin-marker { fill: #fff; stroke: #046f84; stroke-width: 2.1; }
+.cad-origin-cross { fill: none; stroke: #046f84; stroke-width: 1.45; vector-effect: non-scaling-stroke; }
+.cad-origin-badge rect { fill: rgba(6,68,82,.92); stroke: rgba(255,255,255,.92); stroke-width: .8; vector-effect: non-scaling-stroke; }
+.cad-origin-badge .custom-coordinate-origin-label { fill: #fff; stroke: none; font-weight: 900; }
+.cad-ruler-band { fill: rgba(219,231,235,.98); stroke: #6f8993; stroke-width: 1; }
+.cad-ruler-corner { fill: #c9dce1; stroke: #6f8993; stroke-width: 1; }
+.cad-ruler-tick { stroke: #526f79; stroke-width: 1; }
+.cad-ruler-tick.major { stroke: #173f4d; stroke-width: 1.4; }
+.cad-ruler-label,.cad-ruler-unit,.cad-ruler-axis-name { fill: #173f4d; font-variant-numeric: tabular-nums; font-weight: 800; paint-order: stroke; stroke: #edf5f7; stroke-width: 2.2px; }
+.cad-ruler-axis-name { fill: #046f84; font-weight: 950; }
+.cad-crosshair-guide { fill: none; stroke: #0c8196; stroke-width: .8; opacity: .38; stroke-dasharray: 5 5; vector-effect: non-scaling-stroke; }
+.cad-crosshair-arms { fill: none; stroke: #035f72; stroke-width: 1.45; opacity: 1; vector-effect: non-scaling-stroke; }
+.cad-crosshair > circle { fill: #fff; stroke: #035f72; stroke-width: 1.4; }
+@media (min-width: 1180px) {
+  .drawing-workspace-viewport::before { left: auto; right: 10px; }
+}
+
+/* Phase 06A.9.6 grid + ruler render fix — explicit CAD grid and product-anchored rulers. */
+.custom-coordinate-grid-minor-line {
+  stroke: #b8c8ce;
+  stroke-width: .8;
+  opacity: .7;
+  vector-effect: non-scaling-stroke;
+}
+.custom-coordinate-grid-major-line {
+  stroke: #6e8d97;
+  stroke-width: 1.25;
+  opacity: .95;
+  vector-effect: non-scaling-stroke;
+}
+.custom-coordinate-axis {
+  stroke: #00788c;
+  stroke-width: 1.9;
+  opacity: 1;
+  stroke-dasharray: 8 4 2 4;
+  vector-effect: non-scaling-stroke;
+}
+.cad-ruler-band {
+  fill: #dce8eb;
+  stroke: #557581;
+  stroke-width: 1.15;
+  vector-effect: non-scaling-stroke;
+}
+.cad-ruler-band-x { fill: #e6eff1; }
+.cad-ruler-band-y { fill: #e6eff1; }
+.cad-ruler-corner {
+  fill: #c4d9de;
+  stroke: #557581;
+  stroke-width: 1.15;
+  vector-effect: non-scaling-stroke;
+}
+.cad-ruler-tick { stroke: #4d6974; stroke-width: 1; vector-effect: non-scaling-stroke; }
+.cad-ruler-tick.major { stroke: #123f4c; stroke-width: 1.55; }
+.cad-ruler-label,
+.cad-ruler-unit,
+.cad-ruler-axis-name {
+  fill: #123f4c;
+  font-variant-numeric: tabular-nums;
+  font-weight: 900;
+  paint-order: stroke;
+  stroke: #f3f8f9;
+  stroke-width: 2px;
+}
+.cad-ruler-axis-name { fill: #006c80; }
+.cad-origin-marker { fill: #fff; stroke: #00788c; stroke-width: 2.25; }
+.cad-origin-cross { stroke: #00788c; stroke-width: 1.6; }
+
+/* Phase 06A.9.6 workbench grid + ruler layer fix — drafting layers live outside product SVG. */
+.drawing-workspace-viewport .custom-drawing-zoom {
+  position: relative;
+  min-width: 0;
+  min-height: 0;
+}
+.drawing-workspace-viewport .custom-drawing-stage {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-width: 560px;
+  min-height: 100%;
+  overflow: hidden;
+  background: #f7fbfc;
+}
+.drawing-workspace-viewport .custom-drawing-stage > svg {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  max-height: none;
+}
+.drawing-workspace-viewport .cad-workbench-grid-layer {
+  z-index: 1;
+  pointer-events: none;
+}
+.drawing-workspace-viewport .custom-drawing-stage > .custom-product-drawing {
+  z-index: 2;
+  background: transparent;
+}
+.drawing-workspace-viewport .cad-workbench-guide-layer {
+  z-index: 3;
+  pointer-events: none;
+}
+.cad-workbench-grid-background { fill: #f7fbfc; }
+.cad-workbench-grid-layer .custom-coordinate-grid-minor-line {
+  stroke: #b5c7cd;
+  stroke-width: .72;
+  opacity: .78;
+}
+.cad-workbench-grid-layer .custom-coordinate-grid-major-line {
+  stroke: #718e98;
+  stroke-width: 1.18;
+  opacity: .96;
+}
+/* Product colour remains readable but no longer masks the independent grid layer. */
+.drawing-workspace-viewport .custom-drawing-stage .custom-frame { fill: transparent; }
+.drawing-workspace-viewport .custom-drawing-stage .custom-field { fill: rgba(230,247,249,.16); }
+.drawing-workspace-viewport .custom-drawing-stage .custom-field.opening_sash { fill: rgba(222,245,249,.20); }
+.drawing-workspace-viewport .custom-drawing-stage .custom-field.placeholder { fill: rgba(255,241,210,.28); }
+.cad-workbench-guide-layer .custom-coordinate-axis {
+  stroke: #00778b;
+  stroke-width: 1.8;
+  opacity: .94;
+  stroke-dasharray: 8 5;
+}
+.cad-workbench-guide-layer .cad-ruler-band {
+  fill: rgba(226,238,241,.98);
+  stroke: #5d7b86;
+  stroke-width: 1;
+}
+.cad-workbench-guide-layer .cad-ruler-corner { fill: #c9dde2; }
+.cad-workbench-guide-layer .cad-ruler-tick { stroke: #58747e; stroke-width: .95; }
+.cad-workbench-guide-layer .cad-ruler-tick.major { stroke: #183f4c; stroke-width: 1.45; }
+.cad-workbench-guide-layer .cad-ruler-label,
+.cad-workbench-guide-layer .cad-ruler-unit,
+.cad-workbench-guide-layer .cad-ruler-axis-name {
+  fill: #153d49;
+  stroke: #eff6f8;
+  stroke-width: 2px;
+  font-weight: 900;
 }

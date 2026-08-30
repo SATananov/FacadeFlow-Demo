@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from 'react'
+import { useEffect, useState, type ReactNode } from 'react'
 import '../drawingWorkspaceShell.css'
 
 interface Props {
@@ -15,6 +15,11 @@ interface Props {
 
 export function DrawingWorkspaceShell({ labelId, header, progress, settings, toolbar, viewport, properties, status, className = '' }: Props) {
   const [settingsVisible, setSettingsVisible] = useState(true)
+  useEffect(() => {
+    const shortDesktop = window.matchMedia('(min-width: 901px) and (max-height: 850px)')
+    const workbenchDesktop = window.matchMedia('(min-width: 1180px)')
+    if (shortDesktop.matches || workbenchDesktop.matches) setSettingsVisible(false)
+  }, [])
   return <section className={`drawing-workspace-shell ${className}`.trim()} role="dialog" aria-modal="true" aria-labelledby={labelId}>
     <div className="drawing-workspace-header">{header}</div>
     <div className="drawing-workspace-progress">{progress}</div>

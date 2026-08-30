@@ -43,7 +43,7 @@ test('disabled snapping returns raw values and readout distinguishes its state',
 test('grid visibility and snapping are independent view-only state outside history', () => {
   assert.match(designer, /gridVisible.*snappingEnabled/s)
   assert.doesNotMatch(designer, /pushHistory\([^\n]*(gridVisible|gridStep|snappingEnabled)/)
-  assert.match(designer, /gridVisible=\{gridVisible\} gridStep=\{gridStep\} snapPoint=\{snapPoint\}/)
+  assert.match(designer, /gridVisible=\{gridVisible\}[\s\S]*gridStep=\{gridStep\}[\s\S]*snapPoint=\{snapPoint\}/)
 })
 
 test('marker is pointer transparent, conditional and removed on pointer leave', () => {

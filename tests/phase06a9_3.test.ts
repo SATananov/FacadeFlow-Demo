@@ -15,6 +15,7 @@ import {
 
 const drawingSource = readFileSync('src/components/CustomProductDrawing.tsx', 'utf8')
 const gridSource = readFileSync('src/components/CustomCoordinateGrid.tsx', 'utf8')
+const gridLayerSource = readFileSync('src/components/CadWorkbenchGridLayer.tsx', 'utf8')
 const designerSource = readFileSync('src/components/CustomProductDesigner.tsx', 'utf8')
 const cssSource = readFileSync('src/drawingWorkspaceShell.css', 'utf8')
 
@@ -50,12 +51,16 @@ test('frame bounds are deterministic and cursor placeholder is explicit', () => 
   assert.equal(formatCursorCoordinates({ x: 49.6, y: 75.4 }), 'X: 50 mm · Y: 75 mm')
 })
 
-test('grid is a bounded non-interactive SVG viewport layer below product geometry', () => {
-  assert.match(gridSource, /pointerEvents="none"/)
-  assert.match(gridSource, /CUSTOM_DRAWING_VIEW\.width/)
-  assert.match(gridSource, /CUSTOM_DRAWING_VIEW\.height/)
-  assert.ok(drawingSource.indexOf('<CustomCoordinateGrid') < drawingSource.indexOf('className="custom-frame"'))
+test('grid remains a bounded non-interactive workbench layer below product geometry', () => {
+  assert.match(gridLayerSource, /pointerEvents="none"/)
+  assert.match(gridLayerSource, /CUSTOM_DRAWING_VIEW\.width/)
+  assert.match(gridLayerSource, /CUSTOM_DRAWING_VIEW\.height/)
+  assert.match(gridLayerSource, /<CustomCoordinateGrid/)
+  const gridIndex = designerSource.indexOf('<CadWorkbenchGridLayer')
+  const drawingIndex = designerSource.indexOf('<CustomProductDrawing')
+  assert.ok(gridIndex >= 0 && drawingIndex > gridIndex)
   assert.doesNotMatch(gridSource, /onPointer|onClick|onKeyDown/)
+  assert.doesNotMatch(gridLayerSource, /onPointer|onClick|onKeyDown/)
 })
 
 test('toolbar controls are accessible, wrapping, and view-only', () => {
