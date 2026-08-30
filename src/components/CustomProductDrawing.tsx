@@ -20,6 +20,7 @@ interface Props {
   product: CustomProduct
   selectedFieldId: string
   onSelectField: (id: string) => void
+  onClearDrawingLineSelection?: () => void
   large?: boolean
   annotations?: DimensionAnnotation[]
   dimensionVisibility?: DimensionVisibility
@@ -28,6 +29,9 @@ interface Props {
   snappingEnabled?: boolean
   zoom?: number
   drawingLines?: CustomDrawingLine[]
+  selectedDrawingLineId?: string | null
+  lineSelectionEnabled?: boolean
+  onSelectDrawingLine?: (id: string) => void
   lineStartPoint?: ModelCoordinates | null
   linePreviewPoint?: ModelCoordinates | null
   onCanvasPoint?: (coordinates: ModelCoordinates) => void
@@ -35,7 +39,7 @@ interface Props {
   showCoordinates?: boolean
 }
 
-export function CustomProductDrawing({ product, selectedFieldId, onSelectField, large = false, annotations = [], dimensionVisibility = defaultDimensionVisibility, onCursorCoordinates, snapPoint = null, snappingEnabled = false, zoom = 1, drawingLines = [], lineStartPoint = null, linePreviewPoint = null, onCanvasPoint, cursorCoordinates = null, showCoordinates = true }: Props) {
+export function CustomProductDrawing({ product, selectedFieldId, onSelectField, onClearDrawingLineSelection, large = false, annotations = [], dimensionVisibility = defaultDimensionVisibility, onCursorCoordinates, snapPoint = null, snappingEnabled = false, zoom = 1, drawingLines = [], selectedDrawingLineId = null, lineSelectionEnabled = false, onSelectDrawingLine, lineStartPoint = null, linePreviewPoint = null, onCanvasPoint, cursorCoordinates = null, showCoordinates = true }: Props) {
   const { width: viewWidth, height: viewHeight } = CUSTOM_DRAWING_VIEW
   const transform = getCustomDrawingTransform(Math.max(product.width, 1), Math.max(product.height, 1))
   const { scale, width, height, ox, oy } = transform
@@ -70,15 +74,22 @@ export function CustomProductDrawing({ product, selectedFieldId, onSelectField, 
   return <svg className={`custom-product-drawing ${large ? 'large' : ''}`} viewBox={`0 0 ${viewWidth} ${viewHeight}`} role="img" aria-label={`Нестандартен прозорец ${product.width} на ${product.height} милиметъра`} onPointerMove={updateCursorCoordinates} onPointerDown={chooseCanvasPoint} onPointerLeave={() => onCursorCoordinates?.(null)}>
     <defs><marker id="custom-dim-arrow" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto-start-reverse"><path d="M8 0L0 4L8 8"/></marker></defs>
     {product.frameCreated && <rect x={ox} y={oy} width={width} height={height} className="custom-frame"/>}
-    {leaves.map(({ node, rect }) => node.kind === 'LEAF' && <g key={node.id} role="button" tabIndex={0} aria-label={`Поле ${node.id}, ${node.fieldType}`} onClick={() => onSelectField(node.id)} onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); onSelectField(node.id) } }}>
+    {leaves.map(({ node, rect }) => node.kind === 'LEAF' && <g key={node.id} role="button" tabIndex={0} aria-label={`Поле ${node.id}, ${node.fieldType}`} onClick={() => { onClearDrawingLineSelection?.(); onSelectField(node.id) }} onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); onClearDrawingLineSelection?.(); onSelectField(node.id) } }}>
       <rect x={rect.x + 5} y={rect.y + 5} width={Math.max(0, rect.width - 10)} height={Math.max(0, rect.height - 10)} className={`custom-field ${node.fieldType.toLowerCase()} ${selectedFieldId === node.id ? 'selected' : ''}`}/>
       {node.fieldType === 'OPENING_SASH' && <><rect x={rect.x + 12} y={rect.y + 12} width={Math.max(0, rect.width - 24)} height={Math.max(0, rect.height - 24)} className="custom-sash-outline"/>{node.openingDirection && <OpeningSymbol x={rect.x + 13} y={rect.y + 13} width={Math.max(0, rect.width - 26)} height={Math.max(0, rect.height - 26)} notation={node.openingDirection === 'right' ? 'SIDE_TRIANGLE_LEFT' : 'SIDE_TRIANGLE_RIGHT'} openingDirection={node.openingDirection} directionConfirmed/>}</>}
       <text x={rect.x + rect.width / 2} y={rect.y + rect.height / 2 + 4} className="custom-field-id">{node.id}</text>
     </g>)}
     {splits.map(({ node, rect }) => node.kind === 'SPLIT' && <g key={node.id}>{node.orientation === 'VERTICAL' ? <line x1={rect.x + node.position * scale} y1={rect.y} x2={rect.x + node.position * scale} y2={rect.y + rect.height} className="custom-divider"/> : <line x1={rect.x} y1={rect.y + node.position * scale} x2={rect.x + rect.width} y2={rect.y + node.position * scale} className="custom-divider"/>}<text x={node.orientation === 'VERTICAL' ? rect.x + node.position * scale + 7 : rect.x + 7} y={node.orientation === 'VERTICAL' ? rect.y + 17 : rect.y + node.position * scale - 7} className="custom-divider-label">{Math.round(node.position)} mm</text></g>)}
     <g className="custom-drawing-line-layer" pointerEvents="none">
-      {drawingLines.map((line) => { const start = projectLinePoint(line.start), end = projectLinePoint(line.end); return <line key={line.id} data-line-id={line.id} x1={start.x} y1={start.y} x2={end.x} y2={end.y} className="custom-drawing-line"/> })}
-      {lineStartPoint && linePreviewPoint && (() => { const start = projectLinePoint(lineStartPoint), end = projectLinePoint(linePreviewPoint); return <line x1={start.x} y1={start.y} x2={end.x} y2={end.y} className="custom-drawing-line-preview"/> })()}
+      {drawingLines.map((line) => {
+        const start = projectLinePoint(line.start), end = projectLinePoint(line.end), selected = selectedDrawingLineId === line.id
+        return <g key={line.id} data-line-id={line.id} className={selected ? 'custom-drawing-line-group selected' : 'custom-drawing-line-group'}>
+          <line x1={start.x} y1={start.y} x2={end.x} y2={end.y} className={selected ? 'custom-drawing-line selected' : 'custom-drawing-line'} pointerEvents="none"/>
+          {lineSelectionEnabled && <line x1={start.x} y1={start.y} x2={end.x} y2={end.y} className="custom-drawing-line-hit" pointerEvents="stroke" onPointerDown={(event) => event.stopPropagation()} onClick={(event) => { event.stopPropagation(); onSelectDrawingLine?.(line.id) }}/>}
+          {selected && <><circle cx={start.x} cy={start.y} r="4" className="custom-drawing-line-grip" pointerEvents="none"/><circle cx={end.x} cy={end.y} r="4" className="custom-drawing-line-grip" pointerEvents="none"/></>}
+        </g>
+      })}
+      {lineStartPoint && linePreviewPoint && (() => { const start = projectLinePoint(lineStartPoint), end = projectLinePoint(linePreviewPoint); return <line x1={start.x} y1={start.y} x2={end.x} y2={end.y} className="custom-drawing-line-preview" pointerEvents="none"/> })()}
     </g>
     <ProductDimensions2D annotations={annotations} visibility={dimensionVisibility} project={(point) => ({ x: ox + point.x * scale, y: oy + point.y * scale })}/>
     {snappingEnabled && snapPoint && <CustomSnapMarker point={snapPoint} transform={transform} zoom={zoom}/>}

@@ -654,3 +654,19 @@
   stroke-width: 2px;
   font-weight: 900;
 }
+
+/* Phase 06A.9.7 — session-only Line selection and numeric properties. */
+.custom-drawing-line-hit { stroke: transparent; stroke-width: 14; fill: none; cursor: pointer; vector-effect: non-scaling-stroke; }
+.custom-drawing-line.selected { stroke: #067c91; stroke-width: 3.2; }
+.custom-drawing-line-grip { fill: #fff; stroke: #067c91; stroke-width: 2; vector-effect: non-scaling-stroke; }
+.drawing-workspace-properties > .cad-line-properties { width: 100%; min-height: 100%; border: 0; }
+.cad-line-properties-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
+.cad-line-properties-heading h3,.cad-line-properties-heading p { margin-top: 0; }
+.cad-line-properties-close { min-width: 32px; min-height: 32px; padding: 2px 8px; font-size: 20px; line-height: 1; }
+.cad-line-metrics { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin: 10px 0; }
+.cad-line-metrics span { display: grid; gap: 2px; padding: 7px; border: 1px solid var(--ff-border-default); background: #f5f9fa; font-variant-numeric: tabular-nums; }
+.cad-line-metrics b { font-size: 9px; color: var(--ff-text-secondary); text-transform: uppercase; letter-spacing: .04em; }
+.cad-line-coordinate-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; }
+.cad-line-coordinate-grid label { margin-top: 0; }
+.cad-line-session-note { padding: 8px; background: #eef6f7; border-left: 4px solid #087b91; color: #37525c; font-size: 10px; }
+.cad-line-property-actions { display: grid; gap: 7px; margin-top: 10px; }
