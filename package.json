@@ -33,7 +33,12 @@
     "test:phase06b1": "vite build --ssr tests/phase06b1.test.ts --outDir .facadeflow-runtime/phase06b1-tests --emptyOutDir && node --test .facadeflow-runtime/phase06b1-tests/phase06b1.test.js",
     "test:phase06b2_1_2": "vite build --ssr tests/phase06b2_1_2.test.ts --outDir .facadeflow-runtime/phase06b2_1_2-tests --emptyOutDir && node --test .facadeflow-runtime/phase06b2_1_2-tests/phase06b2_1_2.test.js",
     "test:phase06b2_polish": "vite build --ssr tests/phase06b2_polish.test.ts --outDir .facadeflow-runtime/phase06b2-polish-tests --emptyOutDir && node --test .facadeflow-runtime/phase06b2-polish-tests/phase06b2_polish.test.js",
-    "test:phase06b2_3": "vite build --ssr tests/phase06b2_3.test.ts --outDir .facadeflow-runtime/phase06b2_3-tests --emptyOutDir && node --test .facadeflow-runtime/phase06b2_3-tests/phase06b2_3.test.js"
+    "test:phase06b2_3": "vite build --ssr tests/phase06b2_3.test.ts --outDir .facadeflow-runtime/phase06b2_3-tests --emptyOutDir && node --test .facadeflow-runtime/phase06b2_3-tests/phase06b2_3.test.js",
+    "test:phase06c1": "vite build --ssr tests/phase06c1.test.ts --outDir .facadeflow-runtime/phase06c1-tests --emptyOutDir && node --test .facadeflow-runtime/phase06c1-tests/phase06c1.test.js",
+    "test:phase06c1_1": "vite build --ssr tests/phase06c1_1.test.ts --outDir .facadeflow-runtime/phase06c1_1-tests --emptyOutDir && node --test .facadeflow-runtime/phase06c1_1-tests/phase06c1_1.test.js",
+    "test:phase06c1_2": "vite build --ssr tests/phase06c1_2.test.ts --outDir .facadeflow-runtime/phase06c1_2-tests --emptyOutDir && node --test .facadeflow-runtime/phase06c1_2-tests/phase06c1_2.test.js",
+    "test:phase06c1_3": "vite build --ssr tests/phase06c1_3.test.ts --outDir .facadeflow-runtime/phase06c1_3-tests --emptyOutDir && node --test .facadeflow-runtime/phase06c1_3-tests/phase06c1_3.test.js",
+    "test:phase06c1_4": "vite build --ssr tests/phase06c1_4.test.ts --outDir .facadeflow-runtime/phase06c1_4-tests --emptyOutDir && node --test .facadeflow-runtime/phase06c1_4-tests/phase06c1_4.test.js"
   },
   "dependencies": {
     "@mlightcad/libredwg-web": "0.7.10",

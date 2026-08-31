@@ -54,6 +54,7 @@ import type { ImportedDimensionEvidence } from './dimensionTypes'
 import { createHybridProductDesignerSession, type HybridProductDesignerSession } from './hybridProductDesigner'
 import { applyLegacyDemoDimensions, selectLegacyProductTemplate } from './legacyProductTransition'
 import { createFacadeFlowAiSession } from './aiWorkspaceState'
+import { createHybridSessionFromGuidedAi } from './aiConstructorHandoff'
 import type { FacadeFlowAiSession } from './aiWorkspaceTypes'
 
 function App() {
@@ -83,6 +84,7 @@ function App() {
   const [activeProfileSelection, setActiveProfileSelection] = useState<ActiveProfileSelection>({ FRAME: 'profile-demo-frame-01', SASH: 'profile-demo-sash-01', MULLION: 'profile-demo-mullion-01' })
   const [showProfileCatalogue, setShowProfileCatalogue] = useState(false)
   const [showDetailDrafting, setShowDetailDrafting] = useState(false)
+  const [detailDraftingOrigin, setDetailDraftingOrigin] = useState<'MAIN' | 'AI'>('MAIN')
   const [showAiWorkspace, setShowAiWorkspace] = useState(false)
   const [aiSession, setAiSession] = useState<FacadeFlowAiSession>(() => createFacadeFlowAiSession(crypto.randomUUID()))
   const [hybridSession, setHybridSession] = useState<HybridProductDesignerSession>(() => createHybridProductDesignerSession(crypto.randomUUID()))
@@ -90,6 +92,22 @@ function App() {
   const [showCustomDesigner, setShowCustomDesigner] = useState(false)
   const [activeCustomComponentId, setActiveCustomComponentId] = useState<string | null>(null)
   const [customProduct, setCustomProduct] = useState<CustomProduct>(() => { const now = new Date().toISOString(); return { id: crypto.randomUUID(), name: 'Нестандартен прозорец 001', width: 1400, height: 1200, frameProfileId: 'profile-demo-frame-01', frameCreated: false, mullionProfileId: 'profile-demo-mullion-01', geometry: initialGeometry(), status: 'DRAFT', humanReviewConfirmed: false, createdAt: now, updatedAt: now, simulationOnly: true, machineReady: false } })
+
+  const replaceHybridSession = (next: HybridProductDesignerSession) => { hybridSessionRef.current = next; setHybridSession(next) }
+  const openDetailDraftingFromMain = () => { setDetailDraftingOrigin('MAIN'); setShowDetailDrafting(true) }
+  const closeDetailDrafting = () => {
+    setShowDetailDrafting(false)
+    if (detailDraftingOrigin === 'AI') setShowAiWorkspace(true)
+    setDetailDraftingOrigin('MAIN')
+  }
+  const openConfirmedAiProductInConstructor = () => {
+    const next = createHybridSessionFromGuidedAi(aiSession, catalogueProfiles, hybridSession.id)
+    if (!next) return
+    replaceHybridSession(next)
+    setDetailDraftingOrigin('AI')
+    setShowAiWorkspace(false)
+    setShowDetailDrafting(true)
+  }
 
   const updateHybridSession = (updater: (current: HybridProductDesignerSession) => HybridProductDesignerSession) => {
     const previous = hybridSessionRef.current, next = updater(previous)
@@ -233,7 +251,7 @@ function App() {
         {isLocalApplication && <div className="local-application-badge">ЛОКАЛНО ПРИЛОЖЕНИЕ</div>}
         <nav className="app-header-actions ff-app-dock" aria-label="Основни действия">
           <button type="button" className="ai-workspace-action" onClick={() => setShowAiWorkspace(true)}><span className="ff-nav-icon"><FacadeFlowIcon name="ai"/></span><span><b>AI</b><small>FacadeFlow</small></span></button>
-          <button type="button" className="detail-drafting-action" onClick={() => setShowDetailDrafting(true)}><span className="ff-nav-icon"><FacadeFlowIcon name="designer"/></span><span><b>Конструктор</b><small>Изделие</small></span></button>
+          <button type="button" className="detail-drafting-action" onClick={openDetailDraftingFromMain}><span className="ff-nav-icon"><FacadeFlowIcon name="designer"/></span><span><b>Конструктор</b><small>Изделие</small></span></button>
           <button type="button" className="drawing-import-action" data-help-id="unified-import" onClick={() => setShowDrawingImport(true)}><span className="ff-nav-icon"><FacadeFlowIcon name="import"/></span><span><b>Импорт</b><small>Проект / чертеж</small></span></button>
           <button type="button" className="catalogue-action" onClick={() => setShowProfileCatalogue(true)}><span className="ff-nav-icon"><FacadeFlowIcon name="catalogue"/></span><span><b>Каталог</b><small>Профили</small></span></button>
           <button type="button" className="help-action" data-help-id="help-button" onClick={() => setShowHelp(true)}><span className="ff-nav-icon"><FacadeFlowIcon name="help"/></span><span><b>Помощ</b><small>Ръководство</small></span></button>
@@ -257,8 +275,8 @@ function App() {
             onStandalone={returnToStandalone}
           />
         )}
-        {!activeComponent && !activeCustomComponent && hybridSession.productCategory && <section className="product-creation-choices product-context-card" aria-label="Текущо изделие"><div><b>Продължи с изделието</b><span>Категория: {hybridSession.productCategory === 'DOOR' ? 'Врата' : 'Прозорец'}</span><span>{hybridSession.configuration?.productName || 'Без въведено име'}</span><span>{hybridSession.configuration?.overallWidth && hybridSession.configuration.overallHeight ? `${hybridSession.configuration.overallWidth} × ${hybridSession.configuration.overallHeight} mm` : 'Размерите не са въведени'}</span><span>Статус: {hybridSession.configuration?.status === 'HUMAN_CONFIRMED' ? 'Концептуално проверено' : 'Нуждае се от проверка'}</span></div><button type="button" className="primary" onClick={() => setShowDetailDrafting(true)}>Продължи с изделието</button></section>}
-        {!activeComponent && !activeCustomComponent && !hybridSession.productCategory && <section className="product-creation-choices" aria-label="Създаване на изделие"><button type="button" onClick={() => setShowTemplatePicker(true)}>Избери типова схема</button><button type="button" className="primary" onClick={() => product.productCategory === 'WINDOW' ? setShowCustomDesigner(true) : setShowDetailDrafting(true)}>{product.productCategory === 'DOOR' ? 'Начертай нестандартна врата' : product.productCategory === 'WINDOW' ? 'Начертай нестандартен прозорец' : 'Начертай нестандартно изделие'}</button></section>}
+        {!activeComponent && !activeCustomComponent && hybridSession.productCategory && <section className="product-creation-choices product-context-card" aria-label="Текущо изделие"><div><b>Продължи с изделието</b><span>Категория: {hybridSession.productCategory === 'DOOR' ? 'Врата' : 'Прозорец'}</span><span>{hybridSession.configuration?.productName || 'Без въведено име'}</span><span>{hybridSession.configuration?.overallWidth && hybridSession.configuration.overallHeight ? `${hybridSession.configuration.overallWidth} × ${hybridSession.configuration.overallHeight} mm` : 'Размерите не са въведени'}</span><span>Статус: {hybridSession.configuration?.status === 'HUMAN_CONFIRMED' ? 'Концептуално проверено' : 'Нуждае се от проверка'}</span></div><button type="button" className="primary" onClick={openDetailDraftingFromMain}>Продължи с изделието</button></section>}
+        {!activeComponent && !activeCustomComponent && !hybridSession.productCategory && <section className="product-creation-choices" aria-label="Създаване на изделие"><button type="button" onClick={() => setShowTemplatePicker(true)}>Избери типова схема</button><button type="button" className="primary" onClick={() => product.productCategory === 'WINDOW' ? setShowCustomDesigner(true) : openDetailDraftingFromMain()}>{product.productCategory === 'DOOR' ? 'Начертай нестандартна врата' : product.productCategory === 'WINDOW' ? 'Начертай нестандартен прозорец' : 'Начертай нестандартно изделие'}</button></section>}
         <div className="layout">
           <ProfilePanel
             project={project}
@@ -379,14 +397,15 @@ function App() {
         />
       )}
       {showProfileCatalogue && <ProfileCatalogue profiles={catalogueProfiles} selection={activeProfileSelection} onProfiles={updateCatalogue} onSelection={setActiveProfileSelection} onClose={() => setShowProfileCatalogue(false)}/>}
-      {showAiWorkspace && <FacadeFlowAIWorkspace session={aiSession} onSession={setAiSession} activeProfileCount={catalogueProfiles.filter((item) => item.status !== 'ARCHIVED').length} onClose={() => setShowAiWorkspace(false)} onOpenImportCenter={() => { setShowAiWorkspace(false); setShowDrawingImport(true) }} onOpenProductDesigner={() => { setShowAiWorkspace(false); setShowDetailDrafting(true) }} onOpenCustomCad={() => { setShowAiWorkspace(false); setShowCustomDesigner(true) }} onOpenProfileCatalogue={() => { setShowAiWorkspace(false); setShowProfileCatalogue(true) }}/>}
+      {showAiWorkspace && <FacadeFlowAIWorkspace session={aiSession} onSession={setAiSession} activeProfileCount={catalogueProfiles.filter((item) => item.status !== 'ARCHIVED').length} profiles={catalogueProfiles} onClose={() => setShowAiWorkspace(false)} onOpenImportCenter={() => { setShowAiWorkspace(false); setShowDrawingImport(true) }} onOpenProductDesigner={openConfirmedAiProductInConstructor} onOpenCustomCad={() => { setShowAiWorkspace(false); setShowCustomDesigner(true) }} onOpenProfileCatalogue={() => { setShowAiWorkspace(false); setShowProfileCatalogue(true) }}/>}
       {showDetailDrafting && (
         <DetailDraftingPlaceholder
           session={hybridSession}
           profiles={catalogueProfiles}
           onSession={updateHybridSession}
-          onClose={() => setShowDetailDrafting(false)}
-          onOpenImportCenter={() => { setShowDetailDrafting(false); setShowDrawingImport(true) }}
+          onClose={closeDetailDrafting}
+          returnToAi={detailDraftingOrigin === 'AI'}
+          onOpenImportCenter={() => { setShowDetailDrafting(false); setDetailDraftingOrigin('MAIN'); setShowDrawingImport(true) }}
           onOpenProfileCatalogue={() => setShowProfileCatalogue(true)}
         />
       )}

@@ -1,12 +1,15 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
+import { resolve } from 'node:path'
 import { FACADEFLOW_AI_INPUT_LABELS, FACADEFLOW_JOB_TYPE_LABELS, createFacadeFlowAiSession } from '../src/aiWorkspaceState'
 
-const appSource = readFileSync(new URL('../src/App.tsx', import.meta.url), 'utf8')
-const aiSource = readFileSync(new URL('../src/components/FacadeFlowAIWorkspace.tsx', import.meta.url), 'utf8')
-const iconSource = readFileSync(new URL('../src/components/FacadeFlowIcons.tsx', import.meta.url), 'utf8')
-const blueprintSource = readFileSync(new URL('../src/components/AiBlueprintPreview.tsx', import.meta.url), 'utf8')
+const projectSource = (relativePath: string) => readFileSync(resolve(process.cwd(), relativePath), 'utf8')
+
+const appSource = projectSource('src/App.tsx')
+const aiSource = projectSource('src/components/FacadeFlowAIWorkspace.tsx')
+const iconSource = projectSource('src/components/FacadeFlowIcons.tsx')
+const blueprintSource = projectSource('src/components/AiBlueprintPreview.tsx')
 
 test('06B.2.1 keeps one unified icon navigation dock without changing destinations', () => {
   assert.match(appSource, /ff-app-dock/)

@@ -41,3 +41,55 @@
 .product-context-card > div > span { color: var(--muted); font-size: .86rem; }
 .standalone-profile-boundary { margin: 1rem 0 0; padding: .8rem; border: 1px solid #88aaa9; border-radius: 8px; background: #eef7f6; color: #294846; line-height: 1.45; }
 .product-empty-placeholder { display: grid; gap: .25rem; margin: .75rem 0; padding: .85rem; border: 1px dashed #779a99; border-radius: 8px; background: #f4f8f8; color: #345554; }
+
+/* PHASE 06C.1.2 — AI → CONSTRUCTOR HANDOFF */
+.hybrid-ai-handoff { display: grid; gap: 10px; margin: 14px 28px 0; padding: 14px 16px; border: 1px solid #2f8594; border-left: 4px solid #23c7d8; background: #eaf7f8; color: #173842; box-shadow: 0 7px 20px #17384212; }
+.hybrid-ai-handoff-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; }
+.hybrid-ai-handoff-head span { color: #087b91; font-size: 10px; font-weight: 900; letter-spacing: .12em; }
+.hybrid-ai-handoff-head h3 { margin: 3px 0 0; font-size: 16px; }
+.hybrid-ai-handoff-head > b { padding: 5px 7px; border: 1px solid #b96b30; background: #fff1df; color: #8c4818; font-size: 9px; letter-spacing: .05em; white-space: nowrap; }
+.hybrid-ai-handoff > p { margin: 0; color: #45616a; font-size: 11px; line-height: 1.45; }
+.hybrid-ai-handoff dl { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 7px; margin: 0; }
+.hybrid-ai-handoff dl > div { min-width: 0; padding: 7px 8px; border: 1px solid #bedadd; background: #fff; }
+.hybrid-ai-handoff dl > div.wide { grid-column: span 5; }
+.hybrid-ai-handoff dt { color: #668087; font-size: 9px; font-weight: 800; text-transform: uppercase; }
+.hybrid-ai-handoff dd { margin: 3px 0 0; overflow-wrap: anywhere; font-size: 11px; font-weight: 800; }
+.hybrid-ai-handoff footer { color: #8c4818; font-size: 9px; font-weight: 900; letter-spacing: .04em; }
+@media (max-width: 950px) { .hybrid-ai-handoff dl { grid-template-columns: repeat(2, minmax(0, 1fr)); } .hybrid-ai-handoff dl > div.wide { grid-column: span 2; } }
+@media (max-width: 650px) { .hybrid-ai-handoff { margin-inline: 12px; } .hybrid-ai-handoff-head { display: grid; } .hybrid-ai-handoff-head > b { white-space: normal; } .hybrid-ai-handoff dl { grid-template-columns: 1fr; } .hybrid-ai-handoff dl > div.wide { grid-column: auto; } }
+
+/* PHASE 06C.1.3 — visual handoff + contextual return */
+.detail-drafting.has-ai-handoff .hybrid-ai-handoff { margin: 18px 28px 10px; padding: 16px; border: 1px solid #2c6773; border-left: 4px solid #22c6d6; border-radius: 4px; background: linear-gradient(135deg, #082832 0%, #0d3440 100%); color: #dcecef; box-shadow: 0 14px 30px #03161d2e; }
+.detail-drafting.has-ai-handoff .hybrid-ai-handoff-head { align-items: center; padding-bottom: 12px; border-bottom: 1px solid #2b5660; }
+.detail-drafting.has-ai-handoff .hybrid-ai-handoff-head span { color: #65dce7; }
+.detail-drafting.has-ai-handoff .hybrid-ai-handoff-head h3 { color: #f4fbfc; font-size: 18px; }
+.detail-drafting.has-ai-handoff .hybrid-ai-handoff-head p { margin: 5px 0 0; color: #9dbac1; font-size: 10px; }
+.detail-drafting.has-ai-handoff .hybrid-ai-handoff-head > b { border-color: #97552d; background: #3b2a20; color: #ffb47f; }
+.hybrid-ai-handoff-layout { display: grid; grid-template-columns: minmax(280px, .78fr) minmax(0, 1.22fr); gap: 14px; align-items: stretch; }
+.hybrid-ai-handoff-evidence { min-width: 0; padding: 12px; border: 1px solid #28515b; background: #09262f; }
+.hybrid-ai-handoff-evidence > p { margin: 0 0 10px; color: #91aeb5; font-size: 10px; line-height: 1.5; }
+.hybrid-ai-handoff-evidence dl { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.detail-drafting.has-ai-handoff .hybrid-ai-handoff dl > div { border-color: #315862; background: #0e3039; }
+.detail-drafting.has-ai-handoff .hybrid-ai-handoff dt { color: #78a3ad; }
+.detail-drafting.has-ai-handoff .hybrid-ai-handoff dd { color: #eef8fa; }
+.detail-drafting.has-ai-handoff .hybrid-ai-handoff footer { padding-top: 10px; border-top: 1px solid #2b5660; color: #ff9b59; text-align: center; }
+.hybrid-handoff-preview { display: grid; grid-template-rows: auto 1fr auto; min-width: 0; margin: 0; padding: 12px; border: 1px solid #2b5964; background: #061f27; }
+.hybrid-handoff-preview-title { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.hybrid-handoff-preview-title span { color: #65dce7; font-size: 9px; font-weight: 900; letter-spacing: .12em; }
+.hybrid-handoff-preview-title b { color: #e8f7f9; font-size: 12px; }
+.hybrid-handoff-preview svg { width: 100%; min-height: 220px; max-height: 270px; }
+.hybrid-handoff-preview .handoff-product-frame { fill: #103b45; stroke: #ff7e32; stroke-width: 5; }
+.hybrid-handoff-preview .handoff-product-glass { fill: #0b2d36; stroke: #4ccad7; stroke-width: 1.3; }
+.hybrid-handoff-preview .handoff-dimension, .hybrid-handoff-preview .handoff-dimension-tick { stroke: #68dce7; stroke-width: 1; }
+.hybrid-handoff-preview .handoff-dimension-label { fill: #b8d7dc; font-size: 11px; font-weight: 800; }
+.hybrid-handoff-preview .handoff-opening-symbol line { stroke: #72e2e9; stroke-width: 1.8; }
+.hybrid-handoff-preview .handoff-opening-symbol path { fill: #72e2e9; }
+.hybrid-handoff-preview .handoff-opening-symbol text { fill: #d7f1f3; font-size: 9px; font-weight: 800; }
+.hybrid-handoff-preview figcaption { display: grid; gap: 4px; color: #8eabb2; font-size: 9px; line-height: 1.45; }
+.hybrid-handoff-preview figcaption strong { color: #ffb47f; font-weight: 700; }
+.detail-drafting.has-ai-handoff .hybrid-breadcrumb { border-top: 1px solid #d8e3e5; }
+.detail-drafting.has-ai-handoff .hybrid-navigation { display: flex; align-items: center; gap: 8px; }
+.detail-drafting.has-ai-handoff .hybrid-navigation button:first-child { border-color: #188da1; color: #0b6574; font-weight: 800; }
+@media (max-width: 1050px) { .hybrid-ai-handoff-layout { grid-template-columns: 1fr; } .hybrid-ai-handoff-evidence dl { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 650px) { .detail-drafting.has-ai-handoff .hybrid-ai-handoff { margin-inline: 12px; } .hybrid-ai-handoff-evidence dl { grid-template-columns: 1fr; } .hybrid-handoff-preview svg { min-height: 190px; } }
+.detail-drafting.has-ai-handoff .hybrid-ai-handoff-evidence dl > div.wide { grid-column: 1 / -1; }

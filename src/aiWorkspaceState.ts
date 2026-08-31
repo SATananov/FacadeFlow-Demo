@@ -1,4 +1,6 @@
-import type { FacadeFlowAiInputMode, FacadeFlowAiSession, FacadeFlowJobType, KnowledgeBaseSectionDefinition } from './aiWorkspaceTypes'
+import { createEmptyGuidedProductDraft, createGuidedDemoProductDraft, guidedProductHasInput, guidedProductToSpecification, guidedProductUnresolved, setGuidedProductReviewAccepted, updateGuidedProductDraft } from './aiGuidedProduct'
+import type { CatalogueProfile } from './profileCatalogueTypes'
+import type { FacadeFlowAiInputMode, FacadeFlowAiSession, FacadeFlowGuidedProductDraft, FacadeFlowJobType, KnowledgeBaseSectionDefinition } from './aiWorkspaceTypes'
 
 export const FACADEFLOW_JOB_TYPE_LABELS: Record<FacadeFlowJobType, { title: string; description: string; groupHint: string }> = {
   BUILDING: { title: 'Сграда / голям обект', description: 'Много изделия, етажи, фасади, позиции и повтарящи се марки.', groupHint: 'Корпус → етаж → фасада / помещение → позиция' },
@@ -11,7 +13,7 @@ export const FACADEFLOW_JOB_TYPE_LABELS: Record<FacadeFlowJobType, { title: stri
 
 export const FACADEFLOW_AI_INPUT_LABELS: Record<FacadeFlowAiInputMode, { title: string; description: string }> = {
   DOCUMENTS: { title: 'Проект / документи', description: 'PDF, изображение, DWG/DXF, XML/LTE или бъдеща таблична спецификация.' },
-  DESCRIPTION: { title: 'Описание с думи', description: 'Размери, профили, отваряне, дръжки, панти, стъклопакет, цвят и допълнителни инструкции.' },
+  DESCRIPTION: { title: 'Води ме / описание', description: 'Структурирани dropdown-и за изделие, размери, профили, отваряне, стъкло, цвят и обков + свободни бележки.' },
   SKETCH: { title: 'Скица / чертеж', description: 'Качена или ръчно изградена скица, която остава доказателствен източник.' },
   MANUAL: { title: 'Ръчно без AI', description: 'Продължаване към сегашния конструктор или CAD работна зона без зависимост от AI.' },
 }
@@ -35,7 +37,7 @@ export function createFacadeFlowAiSession(id = 'facadeflow-ai-session'): FacadeF
     id,
     view: 'INTAKE',
     job: {
-      id: `${id}-job`, name: '', reference: '', jobType: null, inputMode: null, description: '', products: [], technicalDetails: [], groupLabels: [],
+      id: `${id}-job`, name: '', reference: '', jobType: null, inputMode: null, description: '', guidedProduct: createEmptyGuidedProductDraft(), products: [], technicalDetails: [], groupLabels: [],
       intakeStatus: 'EMPTY', createdAt: timestamp, updatedAt: timestamp, sessionOnly: true, simulationOnly: true, machineReady: false,
     },
     aiModelStatus: 'NOT_CONNECTED', humanReviewRequired: true, rulesValidationRequired: true, automaticGeometryAllowed: false,
@@ -45,19 +47,54 @@ export function createFacadeFlowAiSession(id = 'facadeflow-ai-session'): FacadeF
 
 export function selectFacadeFlowJobType(session: FacadeFlowAiSession, jobType: FacadeFlowJobType): FacadeFlowAiSession {
   const definition = FACADEFLOW_JOB_TYPE_LABELS[jobType]
-  return { ...session, job: { ...session.job, jobType, inputMode: null, groupLabels: [definition.groupHint], intakeStatus: session.job.name.trim() || session.job.description.trim() ? 'SOURCE_CAPTURED' : 'EMPTY', updatedAt: now() } }
+  return { ...session, job: { ...session.job, jobType, inputMode: null, groupLabels: [definition.groupHint], intakeStatus: session.job.name.trim() || session.job.description.trim() || guidedProductHasInput(session.job.guidedProduct) ? 'SOURCE_CAPTURED' : 'EMPTY', updatedAt: now() } }
 }
 
 export function selectFacadeFlowAiInputMode(session: FacadeFlowAiSession, inputMode: FacadeFlowAiInputMode): FacadeFlowAiSession {
   if (!session.job.jobType) return session
-  return { ...session, job: { ...session.job, inputMode, intakeStatus: session.job.description.trim() || session.job.name.trim() ? 'SOURCE_CAPTURED' : 'EMPTY', updatedAt: now() } }
+  return { ...session, job: { ...session.job, inputMode, intakeStatus: session.job.description.trim() || session.job.name.trim() || guidedProductHasInput(session.job.guidedProduct) ? 'SOURCE_CAPTURED' : 'EMPTY', updatedAt: now() } }
 }
 
 export function updateFacadeFlowJobMetadata(session: FacadeFlowAiSession, patch: Partial<Pick<FacadeFlowAiSession['job'], 'name' | 'reference' | 'description'>>): FacadeFlowAiSession {
   const job = { ...session.job, ...patch, updatedAt: now() }
-  const captured = Boolean(job.name.trim() || job.reference.trim() || job.description.trim())
+  const captured = Boolean(job.name.trim() || job.reference.trim() || job.description.trim() || guidedProductHasInput(job.guidedProduct))
   return { ...session, job: { ...job, intakeStatus: captured ? 'SOURCE_CAPTURED' : 'EMPTY' } }
 }
 
 export function setFacadeFlowAiView(session: FacadeFlowAiSession, view: FacadeFlowAiSession['view']): FacadeFlowAiSession { return { ...session, view } }
 export function resetFacadeFlowAiIntake(session: FacadeFlowAiSession): FacadeFlowAiSession { const fresh = createFacadeFlowAiSession(session.id); return { ...fresh, view: session.view } }
+
+
+export function updateFacadeFlowGuidedProduct(session: FacadeFlowAiSession, patch: Partial<FacadeFlowGuidedProductDraft>, profiles: CatalogueProfile[]): FacadeFlowAiSession {
+  const guidedProduct = updateGuidedProductDraft(session.job.guidedProduct, patch, profiles)
+  const guidedId = `${session.job.id}-guided-product`
+  const products = session.job.products.filter((product) => product.id !== guidedId)
+  const captured = guidedProductHasInput(guidedProduct) || Boolean(session.job.name.trim() || session.job.reference.trim() || session.job.description.trim())
+  return { ...session, job: { ...session.job, guidedProduct, products, intakeStatus: captured ? 'SOURCE_CAPTURED' : 'EMPTY', updatedAt: now() } }
+}
+
+export function applyFacadeFlowGuidedDemo(session: FacadeFlowAiSession, profiles: CatalogueProfile[]): FacadeFlowAiSession {
+  const productType = session.job.guidedProduct.productType || 'WINDOW'
+  const guidedProduct = createGuidedDemoProductDraft(productType, profiles)
+  const guidedId = `${session.job.id}-guided-product`
+  const products = session.job.products.filter((product) => product.id !== guidedId)
+  return { ...session, job: { ...session.job, guidedProduct, products, intakeStatus: 'SOURCE_CAPTURED', updatedAt: now() } }
+}
+
+export function prepareFacadeFlowGuidedProduct(session: FacadeFlowAiSession, profiles: CatalogueProfile[]): FacadeFlowAiSession {
+  const specification = guidedProductToSpecification(session.job.guidedProduct, profiles, session.job.id, 'NEEDS_REVIEW')
+  const products = [...session.job.products.filter((product) => product.id !== specification.id), specification]
+  return { ...session, job: { ...session.job, guidedProduct: { ...session.job.guidedProduct, status: 'NEEDS_REVIEW', reviewAccepted: false }, products, intakeStatus: 'NEEDS_REVIEW', updatedAt: now() } }
+}
+
+export function setFacadeFlowGuidedReviewAccepted(session: FacadeFlowAiSession, accepted: boolean): FacadeFlowAiSession {
+  return { ...session, job: { ...session.job, guidedProduct: setGuidedProductReviewAccepted(session.job.guidedProduct, accepted), updatedAt: now() } }
+}
+
+export function confirmFacadeFlowGuidedProduct(session: FacadeFlowAiSession, profiles: CatalogueProfile[]): FacadeFlowAiSession {
+  const unresolved = guidedProductUnresolved(session.job.guidedProduct, profiles)
+  if (!session.job.guidedProduct.reviewAccepted || unresolved.length > 0) return session
+  const specification = guidedProductToSpecification(session.job.guidedProduct, profiles, session.job.id, 'HUMAN_CONFIRMED')
+  const products = [...session.job.products.filter((product) => product.id !== specification.id), specification]
+  return { ...session, job: { ...session.job, guidedProduct: { ...session.job.guidedProduct, status: 'HUMAN_CONFIRMED' }, products, intakeStatus: 'HUMAN_CONFIRMED', updatedAt: now() } }
+}

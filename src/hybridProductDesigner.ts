@@ -4,7 +4,7 @@ export type HybridCreationRoute = 'STANDARD' | 'SKETCH_ASSISTED' | 'NON_STANDARD
 export type HybridProductCategory = 'WINDOW' | 'DOOR' | 'SLIDING' | 'SHOPFRONT' | 'FACADE_MODULE'
 export type HybridWorkflowStep = 'DESIGNER_START' | 'STANDARD_CATEGORY' | 'STANDARD_DRAFT' | 'SKETCH_ROUTE' | 'NON_STANDARD_VIEWPORT'
 export type HybridReviewStatus = 'DRAFT'
-export type HybridSourceReferenceStatus = 'NONE' | 'ROUTE_SELECTED'
+export type HybridSourceReferenceStatus = 'NONE' | 'ROUTE_SELECTED' | 'AI_GUIDED_CONFIRMED'
 export type StructuredConfigurationStatus = 'EMPTY' | 'NEEDS_REVIEW' | 'HUMAN_CONFIRMED'
 export type ThresholdRequirementStatus = 'NOT_APPLICABLE' | 'UNRESOLVED'
 export type StructuredConfigurationStep = 1 | 2 | 3 | 4 | 5
@@ -17,9 +17,31 @@ export interface StructuredProfileConfiguration {
   sessionOnly: true; simulationOnly: true; machineReady: false; geometryCreated: false; exportAvailable: false
 }
 export interface HybridFutureCapabilities { structuredConfigurationAvailable: false; sketchUnderlayAvailable: false; semanticGeometryAvailable: false; synchronized2D3DAvailable: false; parametricCorrectionAvailable: false; freeDrawingAvailable: false }
+export interface HybridGuidedAiHandoff {
+  source: 'AI_GUIDED_HUMAN_CONFIRMED'
+  aiSessionId: string
+  jobId: string
+  productSpecificationId: string
+  quantity: number
+  productType: 'WINDOW' | 'DOOR'
+  dimensions: { width: string; height: string }
+  profileEvidence: { system: string; frame: string; sash: string; mullion: string; threshold: string }
+  opening: { type: string; direction: string; inwardOutward: string }
+  glazing: string
+  finish: { exterior: string; interior: string }
+  hardware: { type: string; description: string; handle: string; hingeQuantity: string }
+  notes: string
+  humanConfirmed: true
+  rulesValidated: false
+  automaticGeometryAllowed: false
+  simulationOnly: true
+  machineReady: false
+}
+
 export interface HybridProductDesignerSession {
   id: string; creationRoute: HybridCreationRoute | null; productCategory: HybridProductCategory | null; workflowStep: HybridWorkflowStep
   configuration: StructuredProfileConfiguration | null; humanReviewStatus: HybridReviewStatus; sourceReferenceStatus: HybridSourceReferenceStatus
+  guidedAiHandoff: HybridGuidedAiHandoff | null
   geometryEntityCount: 0; futureCapabilities: HybridFutureCapabilities; sessionOnly: true; simulationOnly: true; machineReady: false
   internalEvaluationOnly: true; productionApproved: false; sourceImmutable: true; geometryCreated: false; exportAvailable: false
   dwgWriteAvailable: false; machineConnectivityAvailable: false
@@ -104,8 +126,8 @@ export function confirmStructuredConfiguration(configuration: StructuredProfileC
   if (validationErrors.length || !configuration.humanReviewChecked) return { ...configuration, validationErrors: configuration.humanReviewChecked ? validationErrors : [...validationErrors, 'Потвърдете, че сте проверили размерите, системата и избраните профили.'], status: semanticStatus(configuration) }
   return { ...configuration, validationErrors: [], status: 'HUMAN_CONFIRMED' }
 }
-export function createHybridProductDesignerSession(id = 'hybrid-product-session'): HybridProductDesignerSession { return Object.freeze({ id, creationRoute: null, productCategory: null, workflowStep: 'DESIGNER_START', configuration: null, humanReviewStatus: 'DRAFT', sourceReferenceStatus: 'NONE', geometryEntityCount: 0, futureCapabilities: HYBRID_FUTURE_CAPABILITIES, sessionOnly: true, simulationOnly: true, machineReady: false, internalEvaluationOnly: true, productionApproved: false, sourceImmutable: true, geometryCreated: false, exportAvailable: false, dwgWriteAvailable: false, machineConnectivityAvailable: false }) }
-export function selectHybridCreationRoute(session: HybridProductDesignerSession, route: HybridCreationRoute): HybridProductDesignerSession { const workflowStep: HybridWorkflowStep = route === 'STANDARD' ? 'STANDARD_CATEGORY' : route === 'SKETCH_ASSISTED' ? 'SKETCH_ROUTE' : 'NON_STANDARD_VIEWPORT'; return { ...session, creationRoute: route, productCategory: null, workflowStep, configuration: route === 'STANDARD' ? session.configuration : null, sourceReferenceStatus: route === 'SKETCH_ASSISTED' ? 'ROUTE_SELECTED' : 'NONE', geometryEntityCount: 0 } }
+export function createHybridProductDesignerSession(id = 'hybrid-product-session'): HybridProductDesignerSession { return Object.freeze({ id, creationRoute: null, productCategory: null, workflowStep: 'DESIGNER_START', configuration: null, humanReviewStatus: 'DRAFT', sourceReferenceStatus: 'NONE', guidedAiHandoff: null, geometryEntityCount: 0, futureCapabilities: HYBRID_FUTURE_CAPABILITIES, sessionOnly: true, simulationOnly: true, machineReady: false, internalEvaluationOnly: true, productionApproved: false, sourceImmutable: true, geometryCreated: false, exportAvailable: false, dwgWriteAvailable: false, machineConnectivityAvailable: false }) }
+export function selectHybridCreationRoute(session: HybridProductDesignerSession, route: HybridCreationRoute): HybridProductDesignerSession { const workflowStep: HybridWorkflowStep = route === 'STANDARD' ? 'STANDARD_CATEGORY' : route === 'SKETCH_ASSISTED' ? 'SKETCH_ROUTE' : 'NON_STANDARD_VIEWPORT'; return { ...session, creationRoute: route, productCategory: null, workflowStep, configuration: route === 'STANDARD' ? session.configuration : null, sourceReferenceStatus: route === 'SKETCH_ASSISTED' ? 'ROUTE_SELECTED' : 'NONE', guidedAiHandoff: null, geometryEntityCount: 0 } }
 export function selectHybridStandardCategory(session: HybridProductDesignerSession, category: HybridProductCategory, profiles: CatalogueProfile[] = []): HybridProductDesignerSession { if (session.creationRoute !== 'STANDARD' || !HYBRID_SELECTABLE_CATEGORIES.includes(category)) return session; const productCategory = category as 'WINDOW' | 'DOOR'; const configuration = session.configuration ? changeStructuredCategory(session.configuration, productCategory, profiles) : createStructuredConfiguration(productCategory); return { ...session, productCategory: category, workflowStep: 'STANDARD_DRAFT', configuration, geometryEntityCount: 0 } }
 export function returnToHybridDesignerStart(session: HybridProductDesignerSession): HybridProductDesignerSession { return createHybridProductDesignerSession(session.id) }
 export const canOpenVisualComposer = (configuration: StructuredProfileConfiguration): boolean => configuration.productCategory === 'WINDOW' && configuration.thresholdStatus === 'NOT_APPLICABLE' && configuration.status === 'HUMAN_CONFIRMED'

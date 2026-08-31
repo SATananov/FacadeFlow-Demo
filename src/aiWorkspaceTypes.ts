@@ -4,6 +4,49 @@ export type FacadeFlowAiWorkspaceView = 'INTAKE' | 'KNOWLEDGE_BASE'
 export type FacadeFlowAiIntakeStatus = 'EMPTY' | 'SOURCE_CAPTURED' | 'NEEDS_REVIEW' | 'HUMAN_CONFIRMED'
 export type FacadeFlowAiModelStatus = 'NOT_CONNECTED'
 
+
+export type FacadeFlowGuidedProductType = '' | 'WINDOW' | 'DOOR'
+export type FacadeFlowGuidedOpeningType = '' | 'FIXED' | 'TURN' | 'TILT' | 'TILT_TURN' | 'DOUBLE_LEAF' | 'SLIDING' | 'OTHER'
+export type FacadeFlowGuidedOpeningDirection = '' | 'LEFT' | 'RIGHT'
+export type FacadeFlowGuidedInwardOutward = '' | 'INWARD' | 'OUTWARD'
+export type FacadeFlowGuidedFillType = '' | 'GLAZING_UNIT' | 'GLASS' | 'PANEL' | 'OTHER'
+export type FacadeFlowGuidedColorMode = '' | 'SAME_BOTH_SIDES' | 'DIFFERENT_SIDES' | 'PROJECT_DEFINED' | 'OTHER'
+export type FacadeFlowGuidedHardwareType = '' | 'WINDOW' | 'DOOR' | 'SLIDING' | 'OTHER'
+export type FacadeFlowGuidedHandleType = '' | 'STANDARD' | 'HANDLE_HANDLE' | 'HANDLE_KNOB' | 'KEYED' | 'OTHER'
+
+export interface FacadeFlowGuidedProductDraft {
+  productType: FacadeFlowGuidedProductType
+  name: string
+  quantity: string
+  width: string
+  height: string
+  profileSystem: string
+  manualProfileSystem: string
+  frameProfileId: string
+  sashProfileId: string
+  mullionProfileId: string
+  manualFrameProfile: string
+  manualSashProfile: string
+  manualMullionProfile: string
+  thresholdDescription: string
+  openingType: FacadeFlowGuidedOpeningType
+  openingDirection: FacadeFlowGuidedOpeningDirection
+  inwardOutward: FacadeFlowGuidedInwardOutward
+  fillType: FacadeFlowGuidedFillType
+  fillDescription: string
+  colorMode: FacadeFlowGuidedColorMode
+  exteriorColor: string
+  interiorColor: string
+  hardwareType: FacadeFlowGuidedHardwareType
+  hardwareDescription: string
+  handleType: FacadeFlowGuidedHandleType
+  handleDescription: string
+  hingeQuantity: string
+  notes: string
+  reviewAccepted: boolean
+  status: 'EMPTY' | 'NEEDS_REVIEW' | 'HUMAN_CONFIRMED'
+}
+
 export interface FacadeFlowEvidenceReference {
   id: string
   sourceName: string
@@ -27,6 +70,7 @@ export interface FacadeFlowProductSpecification {
   hardware: { hinges?: string; hingeQuantity?: number; handle?: string; handleHeight?: number; lock?: string; mechanism?: string }
   glazing: { description?: string; thicknessMm?: number }
   finish: { exterior?: string; interior?: string }
+  notes?: string
   evidence: FacadeFlowEvidenceReference[]
   unresolved: string[]
   status: 'PROPOSED' | 'NEEDS_REVIEW' | 'HUMAN_CONFIRMED'
@@ -54,6 +98,7 @@ export interface FacadeFlowJobDraft {
   jobType: FacadeFlowJobType | null
   inputMode: FacadeFlowAiInputMode | null
   description: string
+  guidedProduct: FacadeFlowGuidedProductDraft
   products: FacadeFlowProductSpecification[]
   technicalDetails: FacadeFlowTechnicalDetailSpecification[]
   groupLabels: string[]
