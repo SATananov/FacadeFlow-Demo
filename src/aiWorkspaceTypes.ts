@@ -114,6 +114,74 @@ export interface FacadeFlowTechnicalDetailSpecification {
   machineReady: false
 }
 
+
+export type FacadeFlowUnifiedReviewPacketKind = 'PRODUCT' | 'PROJECT_SOURCE' | 'SKETCH_SOURCE' | 'MANUAL_ROUTE' | 'KNOWLEDGE_CONTEXT'
+export type FacadeFlowUnifiedReviewPacketStatus = 'NEEDS_REVIEW' | 'HUMAN_REVIEWED'
+
+export type FacadeFlowRuleGateRequirementId =
+  | 'GEOMETRY_LIMITS'
+  | 'PROFILE_COMPATIBILITY'
+  | 'OPENING_HARDWARE'
+  | 'GLAZING_FILL'
+  | 'FINISH_COLOR'
+  | 'THRESHOLD'
+  | 'PROJECT_CONTEXT'
+  | 'SOURCE_TRACEABILITY'
+export type FacadeFlowRuleGateRequirementApplicability = 'REQUIRED' | 'DEFERRED' | 'NOT_APPLICABLE'
+export type FacadeFlowRuleGateRequirementState = 'SOURCE_REQUIRED' | 'DEFERRED' | 'NOT_APPLICABLE'
+
+export interface FacadeFlowRuleGateRequirement {
+  id: FacadeFlowRuleGateRequirementId
+  label: string
+  applicability: FacadeFlowRuleGateRequirementApplicability
+  state: FacadeFlowRuleGateRequirementState
+  summary: string
+  sourceRequirement: string
+  evidence: FacadeFlowEvidenceReference[]
+}
+
+export interface FacadeFlowRuleGate {
+  status: 'FRAMEWORK_READY'
+  sourcePolicy: 'TRACEABLE_SOURCE_REQUIRED'
+  ruleSetRevision: null
+  requirements: FacadeFlowRuleGateRequirement[]
+  realRuleCount: 0
+  validated: false
+  simulationOnly: true
+  machineReady: false
+}
+
+export interface FacadeFlowUnifiedReviewSection {
+  id: 'CONTEXT' | 'SOURCE' | 'STRUCTURE' | 'PRODUCT' | 'EVIDENCE' | 'RULES'
+  label: string
+  state: 'CAPTURED' | 'UNRESOLVED' | 'NOT_APPLICABLE'
+  summary: string
+}
+
+export interface FacadeFlowUnifiedReviewPacket {
+  id: string
+  demoScenario: FacadeFlowAiDemoScenario
+  kind: FacadeFlowUnifiedReviewPacketKind
+  inputMode: FacadeFlowAiInputMode | 'KNOWLEDGE_BASE'
+  jobType: FacadeFlowJobType | null
+  title: string
+  jobName: string
+  reference: string
+  groupPath: string[]
+  placementNodeId?: string
+  linkedProductSpecificationId?: string
+  sections: FacadeFlowUnifiedReviewSection[]
+  evidence: FacadeFlowEvidenceReference[]
+  unresolved: string[]
+  reviewAccepted: boolean
+  status: FacadeFlowUnifiedReviewPacketStatus
+  ruleGate: FacadeFlowRuleGate | null
+  aiGenerated: false
+  rulesValidated: false
+  simulationOnly: true
+  machineReady: false
+}
+
 export interface FacadeFlowJobDraft {
   id: string
   name: string
@@ -127,6 +195,7 @@ export interface FacadeFlowJobDraft {
   technicalDetails: FacadeFlowTechnicalDetailSpecification[]
   groupLabels: string[]
   projectStructure: FacadeFlowProjectStructure
+  reviewPacket: FacadeFlowUnifiedReviewPacket | null
   intakeStatus: FacadeFlowAiIntakeStatus
   createdAt: string
   updatedAt: string

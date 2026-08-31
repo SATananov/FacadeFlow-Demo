@@ -1,4 +1,6 @@
 import { createEmptyGuidedProductDraft, createGuidedDemoProductDraft, guidedProductHasInput, guidedProductToSpecification, guidedProductUnresolved, setGuidedProductReviewAccepted, updateGuidedProductDraft } from './aiGuidedProduct'
+import { buildFacadeFlowDemoReviewPacket } from './aiUnifiedReview'
+import { buildFacadeFlowDemoRulesGate } from './aiRulesGate'
 import type { CatalogueProfile } from './profileCatalogueTypes'
 import type { FacadeFlowAiDemoScenario, FacadeFlowAiInputMode, FacadeFlowAiSession, FacadeFlowGuidedProductDraft, FacadeFlowJobType, FacadeFlowProjectNodeKind, KnowledgeBaseSectionDefinition } from './aiWorkspaceTypes'
 import { addProjectStructureNode, createEmptyProjectStructure, projectStructurePathLabels, removeProjectStructureNode, selectProjectStructureNode } from './projectStructure'
@@ -47,7 +49,7 @@ export function createFacadeFlowAiSession(id = 'facadeflow-ai-session'): FacadeF
     id,
     view: 'INTAKE',
     job: {
-      id: `${id}-job`, name: '', reference: '', jobType: null, inputMode: null, description: '', demoScenario: null, guidedProduct: createEmptyGuidedProductDraft(), products: [], technicalDetails: [], groupLabels: [], projectStructure: createEmptyProjectStructure(),
+      id: `${id}-job`, name: '', reference: '', jobType: null, inputMode: null, description: '', demoScenario: null, guidedProduct: createEmptyGuidedProductDraft(), products: [], technicalDetails: [], groupLabels: [], projectStructure: createEmptyProjectStructure(), reviewPacket: null,
       intakeStatus: 'EMPTY', createdAt: timestamp, updatedAt: timestamp, sessionOnly: true, simulationOnly: true, machineReady: false,
     },
     aiModelStatus: 'NOT_CONNECTED', humanReviewRequired: true, rulesValidationRequired: true, automaticGeometryAllowed: false,
@@ -57,16 +59,16 @@ export function createFacadeFlowAiSession(id = 'facadeflow-ai-session'): FacadeF
 
 export function selectFacadeFlowJobType(session: FacadeFlowAiSession, jobType: FacadeFlowJobType): FacadeFlowAiSession {
   const definition = FACADEFLOW_JOB_TYPE_LABELS[jobType]
-  return { ...session, job: { ...session.job, jobType, inputMode: null, groupLabels: [definition.groupHint], intakeStatus: session.job.name.trim() || session.job.description.trim() || guidedProductHasInput(session.job.guidedProduct) ? 'SOURCE_CAPTURED' : 'EMPTY', updatedAt: now() } }
+  return { ...session, job: { ...session.job, jobType, inputMode: null, reviewPacket: null, groupLabels: [definition.groupHint], intakeStatus: session.job.name.trim() || session.job.description.trim() || guidedProductHasInput(session.job.guidedProduct) ? 'SOURCE_CAPTURED' : 'EMPTY', updatedAt: now() } }
 }
 
 export function selectFacadeFlowAiInputMode(session: FacadeFlowAiSession, inputMode: FacadeFlowAiInputMode): FacadeFlowAiSession {
   if (!session.job.jobType) return session
-  return { ...session, job: { ...session.job, inputMode, intakeStatus: session.job.description.trim() || session.job.name.trim() || guidedProductHasInput(session.job.guidedProduct) ? 'SOURCE_CAPTURED' : 'EMPTY', updatedAt: now() } }
+  return { ...session, job: { ...session.job, inputMode, reviewPacket: null, intakeStatus: session.job.description.trim() || session.job.name.trim() || guidedProductHasInput(session.job.guidedProduct) ? 'SOURCE_CAPTURED' : 'EMPTY', updatedAt: now() } }
 }
 
 export function updateFacadeFlowJobMetadata(session: FacadeFlowAiSession, patch: Partial<Pick<FacadeFlowAiSession['job'], 'name' | 'reference' | 'description'>>): FacadeFlowAiSession {
-  const job = { ...session.job, ...patch, updatedAt: now() }
+  const job = { ...session.job, ...patch, reviewPacket: null, updatedAt: now() }
   const captured = Boolean(job.name.trim() || job.reference.trim() || job.description.trim() || guidedProductHasInput(job.guidedProduct))
   return { ...session, job: { ...job, intakeStatus: captured ? 'SOURCE_CAPTURED' : 'EMPTY' } }
 }
@@ -84,6 +86,7 @@ function withProjectStructure(session: FacadeFlowAiSession, projectStructure: Fa
     job: {
       ...session.job,
       projectStructure,
+      reviewPacket: null,
       products: session.job.products.filter((product) => product.id !== guidedId),
       guidedProduct: { ...session.job.guidedProduct, reviewAccepted: false, status: guidedHasInput ? 'NEEDS_REVIEW' : 'EMPTY' },
       intakeStatus: guidedHasInput || session.job.name.trim() || session.job.reference.trim() || session.job.description.trim() ? 'SOURCE_CAPTURED' : 'EMPTY',
@@ -168,7 +171,7 @@ export function updateFacadeFlowGuidedProduct(session: FacadeFlowAiSession, patc
   const guidedId = `${session.job.id}-guided-product`
   const products = session.job.products.filter((product) => product.id !== guidedId)
   const captured = guidedProductHasInput(guidedProduct) || Boolean(session.job.name.trim() || session.job.reference.trim() || session.job.description.trim())
-  return { ...session, job: { ...session.job, guidedProduct, products, intakeStatus: captured ? 'SOURCE_CAPTURED' : 'EMPTY', updatedAt: now() } }
+  return { ...session, job: { ...session.job, guidedProduct, products, reviewPacket: null, intakeStatus: captured ? 'SOURCE_CAPTURED' : 'EMPTY', updatedAt: now() } }
 }
 
 export function applyFacadeFlowGuidedDemo(session: FacadeFlowAiSession, profiles: CatalogueProfile[]): FacadeFlowAiSession {
@@ -176,7 +179,7 @@ export function applyFacadeFlowGuidedDemo(session: FacadeFlowAiSession, profiles
   const guidedProduct = createGuidedDemoProductDraft(productType, profiles)
   const guidedId = `${session.job.id}-guided-product`
   const products = session.job.products.filter((product) => product.id !== guidedId)
-  return { ...session, job: { ...session.job, guidedProduct, products, intakeStatus: 'SOURCE_CAPTURED', updatedAt: now() } }
+  return { ...session, job: { ...session.job, guidedProduct, products, reviewPacket: null, intakeStatus: 'SOURCE_CAPTURED', updatedAt: now() } }
 }
 
 export function prepareFacadeFlowGuidedProduct(session: FacadeFlowAiSession, profiles: CatalogueProfile[]): FacadeFlowAiSession {
@@ -195,4 +198,40 @@ export function confirmFacadeFlowGuidedProduct(session: FacadeFlowAiSession, pro
   const specification = guidedProductToSpecification(session.job.guidedProduct, profiles, session.job.id, 'HUMAN_CONFIRMED', projectStructurePathLabels(session.job.projectStructure), session.job.projectStructure.activeNodeId ?? undefined)
   const products = [...session.job.products.filter((product) => product.id !== specification.id), specification]
   return { ...session, job: { ...session.job, guidedProduct: { ...session.job.guidedProduct, status: 'HUMAN_CONFIRMED' }, products, intakeStatus: 'HUMAN_CONFIRMED', updatedAt: now() } }
+}
+
+
+export function prepareFacadeFlowDemoReviewPacket(session: FacadeFlowAiSession, profiles: CatalogueProfile[]): FacadeFlowAiSession {
+  const reviewPacket = buildFacadeFlowDemoReviewPacket(session, profiles)
+  if (!reviewPacket) return session
+  let products = session.job.products
+  if ((session.job.demoScenario === 'GUIDED_WINDOW' || session.job.demoScenario === 'GUIDED_DOOR') && reviewPacket.linkedProductSpecificationId) {
+    const specification = guidedProductToSpecification(session.job.guidedProduct, profiles, session.job.id, 'NEEDS_REVIEW', reviewPacket.groupPath, reviewPacket.placementNodeId)
+    products = [...products.filter((product) => product.id !== specification.id), specification]
+  }
+  return { ...session, job: { ...session.job, reviewPacket, products, intakeStatus: 'NEEDS_REVIEW', updatedAt: now() } }
+}
+
+export function setFacadeFlowDemoReviewAccepted(session: FacadeFlowAiSession, accepted: boolean): FacadeFlowAiSession {
+  if (!session.job.reviewPacket || session.job.reviewPacket.status === 'HUMAN_REVIEWED') return session
+  return { ...session, job: { ...session.job, reviewPacket: { ...session.job.reviewPacket, reviewAccepted: accepted }, updatedAt: now() } }
+}
+
+export function completeFacadeFlowDemoHumanReview(session: FacadeFlowAiSession): FacadeFlowAiSession {
+  const packet = session.job.reviewPacket
+  if (!packet || !packet.reviewAccepted || packet.status === 'HUMAN_REVIEWED') return session
+  return { ...session, job: { ...session.job, reviewPacket: { ...packet, status: 'HUMAN_REVIEWED' }, updatedAt: now() } }
+}
+
+export function prepareFacadeFlowDemoRulesGate(session: FacadeFlowAiSession): FacadeFlowAiSession {
+  const packet = session.job.reviewPacket
+  if (!packet || packet.status !== 'HUMAN_REVIEWED' || packet.ruleGate?.status === 'FRAMEWORK_READY') return session
+  return {
+    ...session,
+    job: {
+      ...session.job,
+      reviewPacket: { ...packet, ruleGate: buildFacadeFlowDemoRulesGate(packet) },
+      updatedAt: now(),
+    },
+  }
 }
