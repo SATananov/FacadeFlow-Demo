@@ -7,6 +7,7 @@ import { AiBlueprintPreview } from './AiBlueprintPreview'
 import { FacadeFlowIcon, type FacadeFlowIconName } from './FacadeFlowIcons'
 import { FacadeFlowWorkspaceHeader } from './FacadeFlowWorkspaceHeader'
 import { GuidedAiProductBuilder } from './GuidedAiProductBuilder'
+import { ProjectStructureBuilder } from './ProjectStructureBuilder'
 
 interface Props {
   session: FacadeFlowAiSession
@@ -65,7 +66,8 @@ function Intake({ session, profiles, setSession, onOpenImportCenter, onOpenProdu
       <div className="ff-ai-context-strip" role="group" aria-label="Работен контекст">{jobTypes.map((jobType) => { const item = FACADEFLOW_JOB_TYPE_LABELS[jobType]; const selected = session.job.jobType === jobType; return <button type="button" key={jobType} className={`ff-ai-job-card ${selected ? 'selected' : ''}`} aria-pressed={selected} onClick={() => setSession((current) => selectFacadeFlowAiInputMode(selectFacadeFlowJobType(current, jobType), 'DESCRIPTION'))}><span className="ff-ai-context-icon"><FacadeFlowIcon name={jobIcons[jobType]}/></span><span><strong>{item.title}</strong><small>{item.groupHint}</small></span><span className="ff-ai-context-blueprint" aria-hidden="true"><AiBlueprintPreview type={jobType}/></span></button> })}</div>
 
       {session.job.jobType && <>
-        <div className="ff-ai-job-meta ff-ai-job-meta-compact"><label>Име на работа / поръчка<input value={session.job.name} onChange={(event) => setSession((current) => updateFacadeFlowJobMetadata(current, { name: event.target.value }))} placeholder={session.job.jobType === 'SINGLE_PRODUCT' ? 'Напр. W-01 / входна врата' : 'Напр. Къща Иванови / Обект А'}/></label><label>Референция / номер<input value={session.job.reference} onChange={(event) => setSession((current) => updateFacadeFlowJobMetadata(current, { reference: event.target.value }))} placeholder="По желание"/></label><div><span>Структура</span><b>{selectedJob?.groupHint}</b></div></div>
+        <div className="ff-ai-job-meta ff-ai-job-meta-compact"><label>Име на работа / поръчка<input value={session.job.name} onChange={(event) => setSession((current) => updateFacadeFlowJobMetadata(current, { name: event.target.value }))} placeholder={session.job.jobType === 'SINGLE_PRODUCT' ? 'Напр. W-01 / входна врата' : 'Напр. Къща Иванови / Обект А'}/></label><label>Референция / номер<input value={session.job.reference} onChange={(event) => setSession((current) => updateFacadeFlowJobMetadata(current, { reference: event.target.value }))} placeholder="По желание"/></label><div><span>Препоръчана структура</span><b>{selectedJob?.groupHint}</b></div></div>
+        <ProjectStructureBuilder session={session} setSession={setSession}/>
         <div className="ff-ai-mode-switch-row"><span>Начин на работа</span><div className="ff-ai-input-switcher">{inputModes.map((mode) => { const item = FACADEFLOW_AI_INPUT_LABELS[mode]; const selected = session.job.inputMode === mode; return <button type="button" key={mode} className={selected ? 'selected' : ''} aria-pressed={selected} title={item.description} onClick={() => setSession((current) => selectFacadeFlowAiInputMode(current, mode))}><span className="ff-ai-input-icon"><FacadeFlowIcon name={inputIcons[mode]}/></span><strong>{item.title}</strong></button> })}</div></div>
       </>}
 

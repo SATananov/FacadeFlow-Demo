@@ -297,7 +297,7 @@ export function setGuidedProductReviewAccepted(current: FacadeFlowGuidedProductD
   return { ...current, reviewAccepted: accepted }
 }
 
-export function guidedProductToSpecification(draft: FacadeFlowGuidedProductDraft, profiles: CatalogueProfile[], jobId: string, status: FacadeFlowProductSpecification['status'] = 'NEEDS_REVIEW'): FacadeFlowProductSpecification {
+export function guidedProductToSpecification(draft: FacadeFlowGuidedProductDraft, profiles: CatalogueProfile[], jobId: string, status: FacadeFlowProductSpecification['status'] = 'NEEDS_REVIEW', groupPath: string[] = [], placementNodeId?: string): FacadeFlowProductSpecification {
   const system = effectiveGuidedProfileSystem(draft)
   const openingType = draft.openingType ? GUIDED_OPENING_LABELS[draft.openingType] : undefined
   const openingDirection = draft.openingDirection ? GUIDED_DIRECTION_LABELS[draft.openingDirection] : undefined
@@ -312,7 +312,8 @@ export function guidedProductToSpecification(draft: FacadeFlowGuidedProductDraft
     id: `${jobId}-guided-product`,
     name: draft.name.trim() || (draft.productType ? GUIDED_PRODUCT_TYPE_LABELS[draft.productType] : 'Неименувано изделие'),
     quantity: validPositiveInteger(draft.quantity) ? Number(draft.quantity) : 1,
-    groupPath: [],
+    groupPath: [...groupPath],
+    placementNodeId,
     dimensions: {
       width: validPositiveNumber(draft.width) ? Number(draft.width) : undefined,
       height: validPositiveNumber(draft.height) ? Number(draft.height) : undefined,

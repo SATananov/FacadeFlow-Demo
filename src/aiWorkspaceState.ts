@@ -1,6 +1,7 @@
 import { createEmptyGuidedProductDraft, createGuidedDemoProductDraft, guidedProductHasInput, guidedProductToSpecification, guidedProductUnresolved, setGuidedProductReviewAccepted, updateGuidedProductDraft } from './aiGuidedProduct'
 import type { CatalogueProfile } from './profileCatalogueTypes'
-import type { FacadeFlowAiInputMode, FacadeFlowAiSession, FacadeFlowGuidedProductDraft, FacadeFlowJobType, KnowledgeBaseSectionDefinition } from './aiWorkspaceTypes'
+import type { FacadeFlowAiInputMode, FacadeFlowAiSession, FacadeFlowGuidedProductDraft, FacadeFlowJobType, FacadeFlowProjectNodeKind, KnowledgeBaseSectionDefinition } from './aiWorkspaceTypes'
+import { addProjectStructureNode, createEmptyProjectStructure, projectStructurePathLabels, removeProjectStructureNode, selectProjectStructureNode } from './projectStructure'
 
 export const FACADEFLOW_JOB_TYPE_LABELS: Record<FacadeFlowJobType, { title: string; description: string; groupHint: string }> = {
   BUILDING: { title: 'Сграда / голям обект', description: 'Много изделия, етажи, фасади, позиции и повтарящи се марки.', groupHint: 'Корпус → етаж → фасада / помещение → позиция' },
@@ -37,7 +38,7 @@ export function createFacadeFlowAiSession(id = 'facadeflow-ai-session'): FacadeF
     id,
     view: 'INTAKE',
     job: {
-      id: `${id}-job`, name: '', reference: '', jobType: null, inputMode: null, description: '', guidedProduct: createEmptyGuidedProductDraft(), products: [], technicalDetails: [], groupLabels: [],
+      id: `${id}-job`, name: '', reference: '', jobType: null, inputMode: null, description: '', guidedProduct: createEmptyGuidedProductDraft(), products: [], technicalDetails: [], groupLabels: [], projectStructure: createEmptyProjectStructure(),
       intakeStatus: 'EMPTY', createdAt: timestamp, updatedAt: timestamp, sessionOnly: true, simulationOnly: true, machineReady: false,
     },
     aiModelStatus: 'NOT_CONNECTED', humanReviewRequired: true, rulesValidationRequired: true, automaticGeometryAllowed: false,
@@ -65,6 +66,36 @@ export function setFacadeFlowAiView(session: FacadeFlowAiSession, view: FacadeFl
 export function resetFacadeFlowAiIntake(session: FacadeFlowAiSession): FacadeFlowAiSession { const fresh = createFacadeFlowAiSession(session.id); return { ...fresh, view: session.view } }
 
 
+function withProjectStructure(session: FacadeFlowAiSession, projectStructure: FacadeFlowAiSession['job']['projectStructure']): FacadeFlowAiSession {
+  if (projectStructure === session.job.projectStructure) return session
+  const guidedId = `${session.job.id}-guided-product`
+  const guidedHasInput = guidedProductHasInput(session.job.guidedProduct)
+  return {
+    ...session,
+    job: {
+      ...session.job,
+      projectStructure,
+      products: session.job.products.filter((product) => product.id !== guidedId),
+      guidedProduct: { ...session.job.guidedProduct, reviewAccepted: false, status: guidedHasInput ? 'NEEDS_REVIEW' : 'EMPTY' },
+      intakeStatus: guidedHasInput || session.job.name.trim() || session.job.reference.trim() || session.job.description.trim() ? 'SOURCE_CAPTURED' : 'EMPTY',
+      updatedAt: now(),
+    },
+  }
+}
+
+export function addFacadeFlowProjectNode(session: FacadeFlowAiSession, input: { id: string; kind: FacadeFlowProjectNodeKind; label: string; parentId?: string | null }): FacadeFlowAiSession {
+  return withProjectStructure(session, addProjectStructureNode(session.job.projectStructure, input))
+}
+
+export function selectFacadeFlowProjectNode(session: FacadeFlowAiSession, nodeId: string | null): FacadeFlowAiSession {
+  return withProjectStructure(session, selectProjectStructureNode(session.job.projectStructure, nodeId))
+}
+
+export function removeFacadeFlowProjectNode(session: FacadeFlowAiSession, nodeId: string): FacadeFlowAiSession {
+  return withProjectStructure(session, removeProjectStructureNode(session.job.projectStructure, nodeId))
+}
+
+
 export function updateFacadeFlowGuidedProduct(session: FacadeFlowAiSession, patch: Partial<FacadeFlowGuidedProductDraft>, profiles: CatalogueProfile[]): FacadeFlowAiSession {
   const guidedProduct = updateGuidedProductDraft(session.job.guidedProduct, patch, profiles)
   const guidedId = `${session.job.id}-guided-product`
@@ -82,7 +113,7 @@ export function applyFacadeFlowGuidedDemo(session: FacadeFlowAiSession, profiles
 }
 
 export function prepareFacadeFlowGuidedProduct(session: FacadeFlowAiSession, profiles: CatalogueProfile[]): FacadeFlowAiSession {
-  const specification = guidedProductToSpecification(session.job.guidedProduct, profiles, session.job.id, 'NEEDS_REVIEW')
+  const specification = guidedProductToSpecification(session.job.guidedProduct, profiles, session.job.id, 'NEEDS_REVIEW', projectStructurePathLabels(session.job.projectStructure), session.job.projectStructure.activeNodeId ?? undefined)
   const products = [...session.job.products.filter((product) => product.id !== specification.id), specification]
   return { ...session, job: { ...session.job, guidedProduct: { ...session.job.guidedProduct, status: 'NEEDS_REVIEW', reviewAccepted: false }, products, intakeStatus: 'NEEDS_REVIEW', updatedAt: now() } }
 }
@@ -94,7 +125,7 @@ export function setFacadeFlowGuidedReviewAccepted(session: FacadeFlowAiSession, 
 export function confirmFacadeFlowGuidedProduct(session: FacadeFlowAiSession, profiles: CatalogueProfile[]): FacadeFlowAiSession {
   const unresolved = guidedProductUnresolved(session.job.guidedProduct, profiles)
   if (!session.job.guidedProduct.reviewAccepted || unresolved.length > 0) return session
-  const specification = guidedProductToSpecification(session.job.guidedProduct, profiles, session.job.id, 'HUMAN_CONFIRMED')
+  const specification = guidedProductToSpecification(session.job.guidedProduct, profiles, session.job.id, 'HUMAN_CONFIRMED', projectStructurePathLabels(session.job.projectStructure), session.job.projectStructure.activeNodeId ?? undefined)
   const products = [...session.job.products.filter((product) => product.id !== specification.id), specification]
   return { ...session, job: { ...session.job, guidedProduct: { ...session.job.guidedProduct, status: 'HUMAN_CONFIRMED' }, products, intakeStatus: 'HUMAN_CONFIRMED', updatedAt: now() } }
 }

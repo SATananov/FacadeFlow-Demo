@@ -4,6 +4,27 @@ export type FacadeFlowAiWorkspaceView = 'INTAKE' | 'KNOWLEDGE_BASE'
 export type FacadeFlowAiIntakeStatus = 'EMPTY' | 'SOURCE_CAPTURED' | 'NEEDS_REVIEW' | 'HUMAN_CONFIRMED'
 export type FacadeFlowAiModelStatus = 'NOT_CONNECTED'
 
+export type FacadeFlowProjectNodeKind = 'BUILDING' | 'FLOOR' | 'FACADE' | 'ROOM' | 'ZONE' | 'POSITION' | 'DETAIL'
+
+export interface FacadeFlowProjectStructureNode {
+  id: string
+  kind: FacadeFlowProjectNodeKind
+  label: string
+  parentId: string | null
+  order: number
+  source: 'MANUAL' | 'EXTRACTED'
+  evidence: FacadeFlowEvidenceReference[]
+  status: 'DRAFT' | 'NEEDS_REVIEW' | 'HUMAN_CONFIRMED'
+}
+
+export interface FacadeFlowProjectStructure {
+  mode: 'FLEXIBLE'
+  nodes: FacadeFlowProjectStructureNode[]
+  activeNodeId: string | null
+  sessionOnly: true
+  simulationOnly: true
+}
+
 
 export type FacadeFlowGuidedProductType = '' | 'WINDOW' | 'DOOR'
 export type FacadeFlowGuidedOpeningType = '' | 'FIXED' | 'TURN' | 'TILT' | 'TILT_TURN' | 'DOUBLE_LEAF' | 'SLIDING' | 'OTHER'
@@ -63,6 +84,7 @@ export interface FacadeFlowProductSpecification {
   name: string
   quantity: number
   groupPath: string[]
+  placementNodeId?: string
   dimensions: { width?: number; height?: number }
   system?: string
   profiles: { frame?: string; sash?: string; mullion?: string; transom?: string; threshold?: string }
@@ -102,6 +124,7 @@ export interface FacadeFlowJobDraft {
   products: FacadeFlowProductSpecification[]
   technicalDetails: FacadeFlowTechnicalDetailSpecification[]
   groupLabels: string[]
+  projectStructure: FacadeFlowProjectStructure
   intakeStatus: FacadeFlowAiIntakeStatus
   createdAt: string
   updatedAt: string

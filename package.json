@@ -45,7 +45,8 @@
     "test:phase06c2_2": "vite build --ssr tests/phase06c2_2.test.ts --outDir .facadeflow-runtime/phase06c2_2-tests --emptyOutDir && node --test .facadeflow-runtime/phase06c2_2-tests/phase06c2_2.test.js",
     "test:phase06c2_3": "vite build --ssr tests/phase06c2_3.test.ts --outDir .facadeflow-runtime/phase06c2_3-tests --emptyOutDir && node --test .facadeflow-runtime/phase06c2_3-tests/phase06c2_3.test.js",
     "test:phase06c2_3_1": "vite build --ssr tests/phase06c2_3_1.test.ts --outDir .facadeflow-runtime/phase06c2_3_1-tests --emptyOutDir && node --test .facadeflow-runtime/phase06c2_3_1-tests/phase06c2_3_1.test.js",
-    "audit:nadezhda-evidence": "node scripts/audit-nadezhda-evidence.mjs"
+    "audit:nadezhda-evidence": "node scripts/audit-nadezhda-evidence.mjs",
+    "test:phase06c3": "vite build --ssr tests/phase06c3.test.ts --outDir .facadeflow-runtime/phase06c3-tests --emptyOutDir && node --test .facadeflow-runtime/phase06c3-tests/phase06c3.test.js"
   },
   "dependencies": {
     "@mlightcad/libredwg-web": "0.7.10",
