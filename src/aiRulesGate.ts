@@ -1,3 +1,4 @@
+import { RULE_SOURCE_REVIEW_INVALIDATORS } from './aiRuleSources'
 import type { FacadeFlowRuleGate, FacadeFlowRuleGateRequirement, FacadeFlowRuleGateRequirementId, FacadeFlowUnifiedReviewPacket } from './aiWorkspaceTypes'
 
 const labels: Record<FacadeFlowRuleGateRequirementId, string> = {
@@ -75,6 +76,14 @@ export function buildFacadeFlowDemoRulesGate(packet: FacadeFlowUnifiedReviewPack
     sourcePolicy: 'TRACEABLE_SOURCE_REQUIRED',
     ruleSetRevision: null,
     requirements,
+    sourceRecords: [],
+    sourceRecordCount: 0,
+    humanConfirmedSourceCount: 0,
+    sourceRevisionPolicy: {
+      humanConfirmationRequired: true,
+      ruleSetRevisionRequiresConfirmedSources: true,
+      invalidateOn: [...RULE_SOURCE_REVIEW_INVALIDATORS],
+    },
     realRuleCount: 0,
     validated: false,
     simulationOnly: true,

@@ -130,6 +130,49 @@ export type FacadeFlowRuleGateRequirementId =
 export type FacadeFlowRuleGateRequirementApplicability = 'REQUIRED' | 'DEFERRED' | 'NOT_APPLICABLE'
 export type FacadeFlowRuleGateRequirementState = 'SOURCE_REQUIRED' | 'DEFERRED' | 'NOT_APPLICABLE'
 
+export type FacadeFlowRuleSourceKind =
+  | 'MANUFACTURER_CATALOGUE'
+  | 'PROJECT_SPECIFICATION'
+  | 'TECHNICAL_INSTRUCTION'
+  | 'COMPATIBILITY_MATRIX'
+  | 'HUMAN_EXPERT_RECORD'
+  | 'OTHER'
+export type FacadeFlowRuleSourceReviewStatus = 'NEEDS_REVIEW' | 'HUMAN_CONFIRMED'
+export type FacadeFlowRuleSourceReReviewReason =
+  | 'SOURCE_KIND_CHANGED'
+  | 'SOURCE_REFERENCE_CHANGED'
+  | 'SOURCE_LOCATION_CHANGED'
+  | 'REVISION_CHANGED'
+  | 'SCOPE_CHANGED'
+  | 'SOURCE_DATE_CHANGED'
+
+export interface FacadeFlowRuleSourceRecord {
+  id: string
+  requirementId: FacadeFlowRuleGateRequirementId
+  sourceKind: FacadeFlowRuleSourceKind
+  sourceTitle: string
+  sourceReference: string
+  sourceLocation: string
+  revision: string
+  scope: string
+  sourceDate: string
+  reviewer: string
+  reviewedAt: string | null
+  reviewStatus: FacadeFlowRuleSourceReviewStatus
+  reviewNote: string
+  supersedesSourceId?: string
+  reReviewReasons: FacadeFlowRuleSourceReReviewReason[]
+  evidence: FacadeFlowEvidenceReference[]
+  simulationOnly: true
+  machineReady: false
+}
+
+export interface FacadeFlowRuleSourceRevisionPolicy {
+  humanConfirmationRequired: true
+  ruleSetRevisionRequiresConfirmedSources: true
+  invalidateOn: FacadeFlowRuleSourceReReviewReason[]
+}
+
 export interface FacadeFlowRuleGateRequirement {
   id: FacadeFlowRuleGateRequirementId
   label: string
@@ -145,6 +188,10 @@ export interface FacadeFlowRuleGate {
   sourcePolicy: 'TRACEABLE_SOURCE_REQUIRED'
   ruleSetRevision: null
   requirements: FacadeFlowRuleGateRequirement[]
+  sourceRecords: FacadeFlowRuleSourceRecord[]
+  sourceRecordCount: number
+  humanConfirmedSourceCount: number
+  sourceRevisionPolicy: FacadeFlowRuleSourceRevisionPolicy
   realRuleCount: 0
   validated: false
   simulationOnly: true

@@ -51,7 +51,8 @@
     "test:phase06c3_1_1": "vite build --ssr tests/phase06c3_1_1.test.ts --outDir .facadeflow-runtime/phase06c3_1_1-tests --emptyOutDir && node --test .facadeflow-runtime/phase06c3_1_1-tests/phase06c3_1_1.test.js",
     "test:phase06c3_2": "vite build --ssr tests/phase06c3_2.test.ts --outDir .facadeflow-runtime/phase06c3_2-tests --emptyOutDir && node --test .facadeflow-runtime/phase06c3_2-tests/phase06c3_2.test.js",
     "test:phase06c3_2_1": "vite build --ssr tests/phase06c3_2_1.test.ts --outDir .facadeflow-runtime/phase06c3_2_1-tests --emptyOutDir && node --test .facadeflow-runtime/phase06c3_2_1-tests/phase06c3_2_1.test.js",
-    "test:phase06c3_3": "vite build --ssr tests/phase06c3_3.test.ts --outDir .facadeflow-runtime/phase06c3_3-tests --emptyOutDir && node --test .facadeflow-runtime/phase06c3_3-tests/phase06c3_3.test.js"
+    "test:phase06c3_3": "vite build --ssr tests/phase06c3_3.test.ts --outDir .facadeflow-runtime/phase06c3_3-tests --emptyOutDir && node --test .facadeflow-runtime/phase06c3_3-tests/phase06c3_3.test.js",
+    "test:phase06c3_4": "vite build --ssr tests/phase06c3_4.test.ts --outDir .facadeflow-runtime/phase06c3_4-tests --emptyOutDir && node --test .facadeflow-runtime/phase06c3_4-tests/phase06c3_4.test.js"
   },
   "dependencies": {
     "@mlightcad/libredwg-web": "0.7.10",
