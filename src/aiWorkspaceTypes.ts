@@ -173,6 +173,46 @@ export interface FacadeFlowRuleSourceRevisionPolicy {
   invalidateOn: FacadeFlowRuleSourceReReviewReason[]
 }
 
+export type FacadeFlowRuleApplicabilityProductTarget = 'WINDOW' | 'DOOR' | 'SLIDING_SYSTEM' | 'FACADE' | 'TECHNICAL_DETAIL'
+export type FacadeFlowRuleApplicabilitySystemScopeMode = 'UNRESOLVED' | 'EXACT_SYSTEM' | 'SYSTEM_FAMILY' | 'ANY_SYSTEM'
+export type FacadeFlowRuleApplicabilityProjectScopeMode = 'UNRESOLVED' | 'SINGLE_PRODUCT' | 'STRUCTURED_POSITION' | 'PROJECT_WIDE'
+export type FacadeFlowRuleApplicabilityDecision = 'UNRESOLVED' | 'APPLIES' | 'DOES_NOT_APPLY' | 'CONDITIONAL'
+export type FacadeFlowRuleApplicabilityReviewStatus = 'NEEDS_REVIEW' | 'HUMAN_CONFIRMED'
+
+export interface FacadeFlowRuleApplicabilityRecord {
+  id: string
+  requirementId: FacadeFlowRuleGateRequirementId
+  productTargets: FacadeFlowRuleApplicabilityProductTarget[]
+  systemScopeMode: FacadeFlowRuleApplicabilitySystemScopeMode
+  systemScope: string
+  projectScopeMode: FacadeFlowRuleApplicabilityProjectScopeMode
+  projectScope: string
+  decision: FacadeFlowRuleApplicabilityDecision
+  conditionSummary: string
+  sourceRecordIds: string[]
+  reviewer: string
+  reviewedAt: string | null
+  reviewStatus: FacadeFlowRuleApplicabilityReviewStatus
+  reviewNote: string
+  simulationOnly: true
+  machineReady: false
+}
+
+export interface FacadeFlowRuleApplicabilityFoundation {
+  status: 'FOUNDATION_READY'
+  currentProductTarget: FacadeFlowRuleApplicabilityProductTarget | null
+  currentSystemLabel: string
+  currentProjectScopeMode: FacadeFlowRuleApplicabilityProjectScopeMode
+  currentProjectScopeLabel: string
+  supportedProductTargets: FacadeFlowRuleApplicabilityProductTarget[]
+  rows: FacadeFlowRuleApplicabilityRecord[]
+  realApplicabilityDecisionCount: 0
+  humanConfirmedDecisionCount: 0
+  validated: false
+  simulationOnly: true
+  machineReady: false
+}
+
 export interface FacadeFlowRuleGateRequirement {
   id: FacadeFlowRuleGateRequirementId
   label: string

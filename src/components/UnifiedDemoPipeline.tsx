@@ -2,6 +2,7 @@ import type { CatalogueProfile } from '../profileCatalogueTypes'
 import { completeFacadeFlowDemoHumanReview, prepareFacadeFlowDemoReviewPacket, prepareFacadeFlowDemoRulesGate, setFacadeFlowDemoReviewAccepted } from '../aiWorkspaceState'
 import type { FacadeFlowAiSession, FacadeFlowRuleGateRequirement } from '../aiWorkspaceTypes'
 import { RuleSourceRevisionFoundation } from './RuleSourceRevisionFoundation'
+import { RuleApplicabilityFoundation } from './RuleApplicabilityFoundation'
 
 interface Props {
   session: FacadeFlowAiSession
@@ -40,6 +41,7 @@ export function UnifiedDemoPipeline({ session, profiles, setSession, compact = f
       {reviewed && !rulesReady && <div className="ff-ai-rules-gate-action"><div><span>06C.3.3 · ПРАВИЛА</span><b>Подготви само рамката — без реални правила</b><small>FacadeFlow ще покаже категориите, източниците и приложимостта, които трябва да бъдат попълнени по-късно. Нищо няма да бъде маркирано като проверено.</small></div><button type="button" onClick={() => setSession((current) => prepareFacadeFlowDemoRulesGate(current))}>Подготви рамка за правила</button></div>}
       {packet.ruleGate && <section className="ff-ai-rules-gate" aria-label="Рамка за проверка по правила"><div className="ff-ai-rules-gate-head"><div><span>RULES GATE FOUNDATION</span><h4>Какво трябва да бъде проверено преди преход</h4><p>Това са категории за бъдеща проверка, не инженерни правила. Няма числови ограничения, автоматична валидация или производствено одобрение.</p></div><div><b>РЕАЛНИ ПРАВИЛА: {packet.ruleGate.realRuleCount}</b><small>ИЗТОЧНИКЪТ Е ЗАДЪЛЖИТЕЛЕН · РЕВИЗИЯТА Е ЗАДЪЛЖИТЕЛНА</small></div></div><div className="ff-ai-rules-gate-grid">{packet.ruleGate.requirements.map((item) => <article key={item.id} className={item.state.toLowerCase().replace('_', '-')}><span>{ruleStateLabel(item)}</span><b>{item.label}</b><small>{item.summary}</small><em>Нужен източник: {item.sourceRequirement}</em></article>)}</div><div className="ff-ai-rules-gate-lock"><b>ПРОВЕРКА ПО ПРАВИЛА: НЕ Е ИЗПЪЛНЕНА</b><span>Рамката е готова за бъдещи реални правила. Стъпка 5 остава заключена.</span></div></section>}
       {packet.ruleGate && <RuleSourceRevisionFoundation gate={packet.ruleGate}/>}
+      {packet.ruleGate && <RuleApplicabilityFoundation session={session} gate={packet.ruleGate}/>}
       <footer>СТРУКТУРИРАН ПАКЕТ: ДА · ИЗДЕЛИЕ ПОТВЪРДЕНО ОТ ЧОВЕК: НЕ · ПРАВИЛА ПРОВЕРЕНИ: НЕ · ПРОИЗВОДСТВО: ЗАКЛЮЧЕНО</footer>
     </>}
   </section>
