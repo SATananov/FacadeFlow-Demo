@@ -3,6 +3,7 @@ export type FacadeFlowAiInputMode = 'DOCUMENTS' | 'DESCRIPTION' | 'SKETCH' | 'MA
 export type FacadeFlowAiWorkspaceView = 'INTAKE' | 'KNOWLEDGE_BASE'
 export type FacadeFlowAiIntakeStatus = 'EMPTY' | 'SOURCE_CAPTURED' | 'NEEDS_REVIEW' | 'HUMAN_CONFIRMED'
 export type FacadeFlowAiModelStatus = 'NOT_CONNECTED'
+export type FacadeFlowAiDemoScenario = 'PROJECT_DOCUMENTS' | 'GUIDED_WINDOW' | 'GUIDED_DOOR' | 'SKETCH' | 'MANUAL' | 'KNOWLEDGE_BASE'
 
 export type FacadeFlowProjectNodeKind = 'BUILDING' | 'FLOOR' | 'FACADE' | 'ROOM' | 'ZONE' | 'POSITION' | 'DETAIL'
 
@@ -120,6 +121,7 @@ export interface FacadeFlowJobDraft {
   jobType: FacadeFlowJobType | null
   inputMode: FacadeFlowAiInputMode | null
   description: string
+  demoScenario: FacadeFlowAiDemoScenario | null
   guidedProduct: FacadeFlowGuidedProductDraft
   products: FacadeFlowProductSpecification[]
   technicalDetails: FacadeFlowTechnicalDetailSpecification[]

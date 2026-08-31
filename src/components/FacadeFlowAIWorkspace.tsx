@@ -1,6 +1,6 @@
 import type { Dispatch, SetStateAction } from 'react'
-import { FACADEFLOW_AI_INPUT_LABELS, FACADEFLOW_JOB_TYPE_LABELS, KNOWLEDGE_BASE_SECTIONS, resetFacadeFlowAiIntake, selectFacadeFlowAiInputMode, selectFacadeFlowJobType, setFacadeFlowAiView, updateFacadeFlowJobMetadata } from '../aiWorkspaceState'
-import type { FacadeFlowAiInputMode, FacadeFlowAiSession, FacadeFlowJobType } from '../aiWorkspaceTypes'
+import { FACADEFLOW_AI_DEMO_SCENARIOS, FACADEFLOW_AI_INPUT_LABELS, FACADEFLOW_JOB_TYPE_LABELS, KNOWLEDGE_BASE_SECTIONS, applyFacadeFlowAiDemoScenario, resetFacadeFlowAiIntake, selectFacadeFlowAiInputMode, selectFacadeFlowJobType, setFacadeFlowAiView, updateFacadeFlowJobMetadata } from '../aiWorkspaceState'
+import type { FacadeFlowAiDemoScenario, FacadeFlowAiInputMode, FacadeFlowAiSession, FacadeFlowJobType } from '../aiWorkspaceTypes'
 import { GUIDED_OPENING_LABELS, GUIDED_PRODUCT_TYPE_LABELS, effectiveGuidedProfileSystem, guidedProductCompletion, guidedProductUnresolved } from '../aiGuidedProduct'
 import type { CatalogueProfile } from '../profileCatalogueTypes'
 import { AiBlueprintPreview } from './AiBlueprintPreview'
@@ -23,6 +23,7 @@ interface Props {
 
 const jobTypes = Object.keys(FACADEFLOW_JOB_TYPE_LABELS) as FacadeFlowJobType[]
 const inputModes = Object.keys(FACADEFLOW_AI_INPUT_LABELS) as FacadeFlowAiInputMode[]
+const demoScenarios = Object.keys(FACADEFLOW_AI_DEMO_SCENARIOS) as FacadeFlowAiDemoScenario[]
 
 const jobIcons: Record<FacadeFlowJobType, FacadeFlowIconName> = { BUILDING: 'building', HOUSE: 'house', SMALL_PROJECT: 'small-project', SINGLE_PRODUCT: 'single-product', CUSTOM_ORDER: 'custom-order', TECHNICAL_DETAIL: 'technical-detail' }
 const inputIcons: Record<FacadeFlowAiInputMode, FacadeFlowIconName> = { DOCUMENTS: 'documents', DESCRIPTION: 'description', SKETCH: 'sketch', MANUAL: 'manual' }
@@ -43,7 +44,7 @@ export function FacadeFlowAIWorkspace({ session, onSession, activeProfileCount, 
     />
     <div className="ff-ai-safety"><b>AI моделът още не е свързан.</b> Няма автоматично генерирана геометрия, сървърна логика, мрежово изпращане или производствен изход. Всеки бъдещ AI резултат ще минава през човешка проверка и правила.</div>
     <StatusRail session={session}/>
-    {session.view === 'KNOWLEDGE_BASE' ? <KnowledgeBase activeProfileCount={activeProfileCount} onOpenProfileCatalogue={onOpenProfileCatalogue}/> : <Intake session={session} profiles={profiles} setSession={setSession} onOpenImportCenter={onOpenImportCenter} onOpenProductDesigner={onOpenProductDesigner} onOpenCustomCad={onOpenCustomCad} onOpenProfileCatalogue={onOpenProfileCatalogue}/>}
+    {session.view === 'KNOWLEDGE_BASE' ? <KnowledgeBase activeProfileCount={activeProfileCount} onOpenProfileCatalogue={onOpenProfileCatalogue} demoActive={session.job.demoScenario === 'KNOWLEDGE_BASE'}/> : <Intake session={session} profiles={profiles} setSession={setSession} onOpenImportCenter={onOpenImportCenter} onOpenProductDesigner={onOpenProductDesigner} onOpenCustomCad={onOpenCustomCad} onOpenProfileCatalogue={onOpenProfileCatalogue}/>}
   </section>
 }
 
@@ -61,6 +62,7 @@ function Intake({ session, profiles, setSession, onOpenImportCenter, onOpenProdu
   const selectedJob = session.job.jobType ? FACADEFLOW_JOB_TYPE_LABELS[session.job.jobType] : null
   return <main className="ff-ai-main">
     <section className="ff-ai-intake-column">
+      <AiDemoSuite session={session} profiles={profiles} setSession={setSession}/>
       <div className="ff-ai-launch-hero ff-ai-launch-hero-compact"><div><span className="ff-ai-launch-kicker">НОВА РАБОТА / AI ВХОД</span><h3>Избери контекст и започни изделието</h3><p>Контекстът пази структурата на проекта, но не те спира. След избора FacadeFlow отваря водения продуктов формуляр веднага.</p></div><div className="ff-ai-launch-orbit" aria-hidden="true"><span>2D</span><span>AI</span><span>CAD</span><i/></div></div>
       <div className="ff-ai-section-heading compact"><span>01</span><div><h3>Работен контекст</h3><p>Избери най-близкия сценарий. „Единично изделие“ е директният вход за един прозорец или врата.</p></div></div>
       <div className="ff-ai-context-strip" role="group" aria-label="Работен контекст">{jobTypes.map((jobType) => { const item = FACADEFLOW_JOB_TYPE_LABELS[jobType]; const selected = session.job.jobType === jobType; return <button type="button" key={jobType} className={`ff-ai-job-card ${selected ? 'selected' : ''}`} aria-pressed={selected} onClick={() => setSession((current) => selectFacadeFlowAiInputMode(selectFacadeFlowJobType(current, jobType), 'DESCRIPTION'))}><span className="ff-ai-context-icon"><FacadeFlowIcon name={jobIcons[jobType]}/></span><span><strong>{item.title}</strong><small>{item.groupHint}</small></span><span className="ff-ai-context-blueprint" aria-hidden="true"><AiBlueprintPreview type={jobType}/></span></button> })}</div>
@@ -75,6 +77,15 @@ function Intake({ session, profiles, setSession, onOpenImportCenter, onOpenProdu
     </section>
     <ReviewColumn session={session} profiles={profiles} onReset={() => setSession((current) => resetFacadeFlowAiIntake(current))}/>
   </main>
+}
+
+function AiDemoSuite({ session, profiles, setSession }: { session: FacadeFlowAiSession; profiles: CatalogueProfile[]; setSession: (updater: (current: FacadeFlowAiSession) => FacadeFlowAiSession) => void }) {
+  const active = session.job.demoScenario
+  return <section className="ff-ai-demo-suite" aria-labelledby="ff-ai-demo-suite-title">
+    <div className="ff-ai-demo-suite-head"><div><span>DEMO ЦЕНТЪР · ЦЯЛАТА AI СЕКЦИЯ</span><h3 id="ff-ai-demo-suite-title">Провери всеки режим без реални проектни данни</h3><p>Всяка станция зарежда само ясно означени DEMO стойности. Не се симулира реално качен файл, AI inference, проверка по правила или производствена готовност.</p></div><div><b>6 DEMO станции</b><span>4 режима · прозорец + врата · каталози</span><small>6/6 работни контекста остават достъпни в секция 01.</small></div></div>
+    <div className="ff-ai-demo-suite-grid">{demoScenarios.map((scenario) => { const item = FACADEFLOW_AI_DEMO_SCENARIOS[scenario]; const selected = active === scenario; return <button type="button" key={scenario} className={selected ? 'selected' : ''} aria-pressed={selected} onClick={() => setSession((current) => applyFacadeFlowAiDemoScenario(current, scenario, profiles))}><span>{item.short}</span><strong>{item.title}</strong><small>{item.coverage}</small></button> })}</div>
+    <div className="ff-ai-demo-contexts"><span>КОНТЕКСТИ:</span>{jobTypes.map((jobType) => <b key={jobType}>{FACADEFLOW_JOB_TYPE_LABELS[jobType].title}</b>)}<em>DEMO ONLY · SESSION ONLY · MACHINE READY: NO</em></div>
+  </section>
 }
 
 function InputModePanel({ mode, session, profiles, setSession, onOpenImportCenter, onOpenProductDesigner, onOpenCustomCad, onOpenProfileCatalogue }: { mode: FacadeFlowAiInputMode; session: FacadeFlowAiSession; profiles: CatalogueProfile[]; setSession: (updater: (current: FacadeFlowAiSession) => FacadeFlowAiSession) => void; onOpenImportCenter: () => void; onOpenProductDesigner: () => void; onOpenCustomCad: () => void; onOpenProfileCatalogue: () => void }) {
@@ -108,14 +119,14 @@ function ReviewColumn({ session, profiles, onReset }: { session: FacadeFlowAiSes
       <div className="ff-ai-live-progress"><span><i style={{ width: `${completion}%` }}/></span><small>{completion}% попълнено · {unresolved.length} неуточнени</small></div>
       <em>SIMULATION ONLY · MACHINE READY: NO</em>
     </section>
-    <div className="ff-ai-review-head"><span>AI → ЧОВЕШКА ПРОВЕРКА</span><h3>Подготовка и проверка</h3><p>Воденият формуляр изгражда проверима чернова. AI не избира липсващи стойности и не създава производствен изход.</p></div>
+    <div className="ff-ai-review-head"><span>AI → ЧОВЕШКА ПРОВЕРКА</span><h3>Подготовка и проверка</h3><p>Формулярът „Стъпка по стъпка“ изгражда проверима чернова. AI не избира липсващи стойности и не създава производствен изход.</p></div>
     <ol className="ff-ai-gate-list"><li className={hasScope ? 'done' : ''}><b>1</b><div><strong>Контекст на работата</strong><span>{hasScope ? FACADEFLOW_JOB_TYPE_LABELS[session.job.jobType!].title : 'Не е избран'}</span></div></li><li className={hasInput ? 'done' : ''}><b>2</b><div><strong>Източник / режим</strong><span>{hasInput ? FACADEFLOW_AI_INPUT_LABELS[session.job.inputMode!].title : 'Не е избран'}</span></div></li><li className={hasStructuredProposal || (hasDescription && session.job.inputMode === 'DESCRIPTION') ? 'done' : ''}><b>3</b><div><strong>Структурирана чернова</strong><span>{hasStructuredProposal ? `Подготвено без AI inference · ${guidedProposal?.unresolved.length ?? 0} неуточнени` : 'Попълни изделието и подготви предложение'}</span></div></li><li className={humanConfirmed ? 'done' : ''}><b>4</b><div><strong>Човешко потвърждение</strong><span>{humanConfirmed ? 'Потвърдена симулационна чернова' : 'Задължително'}</span></div></li><li><b>5</b><div><strong>Проверка по правила</strong><span>Задължително — още не е изпълнена</span></div></li><li className={humanConfirmed ? 'ready' : ''}><b>6</b><div><strong>Преход към конструктора</strong><span>{humanConfirmed ? 'Готово за ръчен handoff · правилата остават задължителни' : 'Заключено до HUMAN CONFIRMED'}</span></div></li></ol>
     <div className="ff-ai-review-rules"><h4>Никога не измисляме липсващо</h4><p>Неясните профили, панти, дръжки, стъкло, посоки и размери остават <b>НЕУТОЧНЕНИ</b>, докато човек или надежден източник не ги потвърди.</p></div>
-    <div className="ff-ai-job-summary"><span>Текуща сесия</span><b>{session.job.name || 'Без име'}</b><small>{session.job.reference || 'Без референция'} · {intakeStatusLabels[session.job.intakeStatus]}</small></div>
+    <div className="ff-ai-job-summary"><span>Текуща сесия{session.job.demoScenario ? ' · DEMO' : ''}</span><b>{session.job.name || 'Без име'}</b><small>{session.job.reference || 'Без референция'} · {intakeStatusLabels[session.job.intakeStatus]}</small></div>
     <button type="button" className="ff-ai-reset" onClick={onReset}>Нова AI подготовка</button>
   </aside>
 }
 
-function KnowledgeBase({ activeProfileCount, onOpenProfileCatalogue }: { activeProfileCount: number; onOpenProfileCatalogue: () => void }) {
-  return <main className="ff-ai-kb"><div className="ff-ai-kb-heading"><div><span>ОСНОВА НА БАЗАТА ЗНАНИЯ</span><h3>Данните, които AI ще има право да използва</h3><p>AI няма да „помни“ производствени факти. Той ще проверява тази база, а правилата ще пазят източник и ревизия.</p></div><button type="button" className="primary-button" onClick={onOpenProfileCatalogue}>Отвори сегашния каталог на профилите</button></div><div className="ff-ai-kb-grid">{KNOWLEDGE_BASE_SECTIONS.map((section) => <article key={section.id}><div><span>{section.status === 'FOUNDATION' ? 'ОСНОВА Е НАЛИЦЕ' : 'НУЖНИ СА ТОЧНИ ДАННИ'}</span><h4>{section.title}</h4></div><p>{section.description}</p>{section.id === 'PROFILES' && <small>Активни / демонстрационни записи в текущия каталог: <b>{activeProfileCount}</b></small>}{section.id !== 'PROFILES' && <small>Няма да се попълва с измислени демонстрационни инженерни стойности.</small>}</article>)}</div><section className="ff-ai-kb-source-rule"><h4>Правило за проследимост</h4><code>ФАКТ → ИЗТОЧНИК → СТРАНИЦА / РЕД → РЕВИЗИЯ → ЧОВЕШКА ПРОВЕРКА</code><p>Пример: максимално тегло на крило = 130 kg → каталог на производителя → стр. 47 → рев. 2026-03.</p></section></main>
+function KnowledgeBase({ activeProfileCount, onOpenProfileCatalogue, demoActive }: { activeProfileCount: number; onOpenProfileCatalogue: () => void; demoActive: boolean }) {
+  return <main className="ff-ai-kb">{demoActive && <div className="ff-ai-kb-demo-banner"><b>DEMO СТАНЦИЯ · ДАННИ И КАТАЛОЗИ</b><span>Разглеждаш покритието на базата знания. Непопълнените инженерни секции остават нарочно без измислени стойности.</span></div>}<div className="ff-ai-kb-heading"><div><span>ОСНОВА НА БАЗАТА ЗНАНИЯ</span><h3>Данните, които AI ще има право да използва</h3><p>AI няма да „помни“ производствени факти. Той ще проверява тази база, а правилата ще пазят източник и ревизия.</p></div><button type="button" className="primary-button" onClick={onOpenProfileCatalogue}>Отвори сегашния каталог на профилите</button></div><div className="ff-ai-kb-grid">{KNOWLEDGE_BASE_SECTIONS.map((section) => <article key={section.id}><div><span>{section.status === 'FOUNDATION' ? 'ОСНОВА Е НАЛИЦЕ' : 'НУЖНИ СА ТОЧНИ ДАННИ'}</span><h4>{section.title}</h4></div><p>{section.description}</p>{section.id === 'PROFILES' && <small>Активни / демонстрационни записи в текущия каталог: <b>{activeProfileCount}</b></small>}{section.id !== 'PROFILES' && <small>Няма да се попълва с измислени демонстрационни инженерни стойности.</small>}</article>)}</div><section className="ff-ai-kb-source-rule"><h4>Правило за проследимост</h4><code>ФАКТ → ИЗТОЧНИК → СТРАНИЦА / РЕД → РЕВИЗИЯ → ЧОВЕШКА ПРОВЕРКА</code><p>Пример: максимално тегло на крило = 130 kg → каталог на производителя → стр. 47 → рев. 2026-03.</p></section></main>
 }

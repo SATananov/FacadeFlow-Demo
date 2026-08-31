@@ -1,6 +1,6 @@
 import { createEmptyGuidedProductDraft, createGuidedDemoProductDraft, guidedProductHasInput, guidedProductToSpecification, guidedProductUnresolved, setGuidedProductReviewAccepted, updateGuidedProductDraft } from './aiGuidedProduct'
 import type { CatalogueProfile } from './profileCatalogueTypes'
-import type { FacadeFlowAiInputMode, FacadeFlowAiSession, FacadeFlowGuidedProductDraft, FacadeFlowJobType, FacadeFlowProjectNodeKind, KnowledgeBaseSectionDefinition } from './aiWorkspaceTypes'
+import type { FacadeFlowAiDemoScenario, FacadeFlowAiInputMode, FacadeFlowAiSession, FacadeFlowGuidedProductDraft, FacadeFlowJobType, FacadeFlowProjectNodeKind, KnowledgeBaseSectionDefinition } from './aiWorkspaceTypes'
 import { addProjectStructureNode, createEmptyProjectStructure, projectStructurePathLabels, removeProjectStructureNode, selectProjectStructureNode } from './projectStructure'
 
 export const FACADEFLOW_JOB_TYPE_LABELS: Record<FacadeFlowJobType, { title: string; description: string; groupHint: string }> = {
@@ -14,9 +14,18 @@ export const FACADEFLOW_JOB_TYPE_LABELS: Record<FacadeFlowJobType, { title: stri
 
 export const FACADEFLOW_AI_INPUT_LABELS: Record<FacadeFlowAiInputMode, { title: string; description: string }> = {
   DOCUMENTS: { title: 'Проект / документи', description: 'PDF, изображение, DWG/DXF, XML/LTE или бъдеща таблична спецификация.' },
-  DESCRIPTION: { title: 'Води ме / описание', description: 'Структурирани dropdown-и за изделие, размери, профили, отваряне, стъкло, цвят и обков + свободни бележки.' },
+  DESCRIPTION: { title: 'Стъпка по стъпка / описание', description: 'Структурирани dropdown-и за изделие, размери, профили, отваряне, стъкло, цвят и обков + свободни бележки.' },
   SKETCH: { title: 'Скица / чертеж', description: 'Качена или ръчно изградена скица, която остава доказателствен източник.' },
   MANUAL: { title: 'Ръчно без AI', description: 'Продължаване към сегашния конструктор или CAD работна зона без зависимост от AI.' },
+}
+
+export const FACADEFLOW_AI_DEMO_SCENARIOS: Record<FacadeFlowAiDemoScenario, { title: string; short: string; coverage: string }> = {
+  PROJECT_DOCUMENTS: { title: 'Проект / документи', short: 'DEMO проект', coverage: 'Структура на обект + вход към Import Center' },
+  GUIDED_WINDOW: { title: 'Прозорец · стъпка по стъпка', short: 'DEMO W-01', coverage: 'Размери, профили, отваряне, стъкло, цвят и обков' },
+  GUIDED_DOOR: { title: 'Врата · стъпка по стъпка', short: 'DEMO D-01', coverage: 'Врата, праг, профили, стъкло, цвят и обков' },
+  SKETCH: { title: 'Скица / чертеж', short: 'DEMO sketch', coverage: 'Маршрут с доказателствен източник без измислен файл' },
+  MANUAL: { title: 'Ръчно без AI', short: 'DEMO manual', coverage: 'Конструктор и нестандартен CAD без AI зависимост' },
+  KNOWLEDGE_BASE: { title: 'Данни и каталози', short: 'DEMO data', coverage: 'Профили, обков, стъкло, правила, съвместимости и източници' },
 }
 
 export const KNOWLEDGE_BASE_SECTIONS: readonly KnowledgeBaseSectionDefinition[] = Object.freeze([
@@ -38,7 +47,7 @@ export function createFacadeFlowAiSession(id = 'facadeflow-ai-session'): FacadeF
     id,
     view: 'INTAKE',
     job: {
-      id: `${id}-job`, name: '', reference: '', jobType: null, inputMode: null, description: '', guidedProduct: createEmptyGuidedProductDraft(), products: [], technicalDetails: [], groupLabels: [], projectStructure: createEmptyProjectStructure(),
+      id: `${id}-job`, name: '', reference: '', jobType: null, inputMode: null, description: '', demoScenario: null, guidedProduct: createEmptyGuidedProductDraft(), products: [], technicalDetails: [], groupLabels: [], projectStructure: createEmptyProjectStructure(),
       intakeStatus: 'EMPTY', createdAt: timestamp, updatedAt: timestamp, sessionOnly: true, simulationOnly: true, machineReady: false,
     },
     aiModelStatus: 'NOT_CONNECTED', humanReviewRequired: true, rulesValidationRequired: true, automaticGeometryAllowed: false,
@@ -95,6 +104,64 @@ export function removeFacadeFlowProjectNode(session: FacadeFlowAiSession, nodeId
   return withProjectStructure(session, removeProjectStructureNode(session.job.projectStructure, nodeId))
 }
 
+
+function createDemoProjectStructure(scenario: FacadeFlowAiDemoScenario) {
+  let structure = createEmptyProjectStructure()
+  const add = (id: string, kind: FacadeFlowProjectNodeKind, label: string, parentId?: string) => { structure = addProjectStructureNode(structure, { id, kind, label, parentId }) }
+  if (scenario === 'PROJECT_DOCUMENTS') {
+    add('demo-building', 'BUILDING', 'DEMO · Корпус А')
+    add('demo-floor', 'FLOOR', 'DEMO · Етаж 2', 'demo-building')
+    add('demo-facade', 'FACADE', 'DEMO · Южна фасада', 'demo-floor')
+    add('demo-position', 'POSITION', 'DEMO-W-21', 'demo-facade')
+  } else if (scenario === 'SKETCH') {
+    add('demo-zone', 'ZONE', 'DEMO · Витрина А')
+    add('demo-position', 'POSITION', 'DEMO-S-01', 'demo-zone')
+  } else if (scenario === 'GUIDED_WINDOW') {
+    add('demo-position', 'POSITION', 'DEMO-W-01')
+  } else if (scenario === 'GUIDED_DOOR') {
+    add('demo-position', 'POSITION', 'DEMO-D-01')
+  } else if (scenario === 'MANUAL') {
+    add('demo-detail', 'DETAIL', 'DEMO · Ръчен детайл D-01')
+  }
+  return structure
+}
+
+export function applyFacadeFlowAiDemoScenario(session: FacadeFlowAiSession, scenario: FacadeFlowAiDemoScenario, profiles: CatalogueProfile[]): FacadeFlowAiSession {
+  const fresh = createFacadeFlowAiSession(session.id)
+  if (scenario === 'KNOWLEDGE_BASE') return {
+    ...fresh,
+    view: 'KNOWLEDGE_BASE',
+    job: { ...fresh.job, demoScenario: scenario, name: 'DEMO · Данни и каталози', reference: 'DEMO-DATA-01', intakeStatus: 'SOURCE_CAPTURED', updatedAt: now() },
+  }
+
+  const definitions: Record<Exclude<FacadeFlowAiDemoScenario, 'KNOWLEDGE_BASE'>, { jobType: FacadeFlowJobType; inputMode: FacadeFlowAiInputMode; name: string; reference: string; description: string }> = {
+    PROJECT_DOCUMENTS: { jobType: 'BUILDING', inputMode: 'DOCUMENTS', name: 'DEMO · Обект Алфа', reference: 'DEMO-PROJECT-01', description: '' },
+    GUIDED_WINDOW: { jobType: 'SINGLE_PRODUCT', inputMode: 'DESCRIPTION', name: 'DEMO · Прозорец · стъпка по стъпка', reference: 'DEMO-W-01', description: 'DEMO бележка: примерен прозорец в режим „Стъпка по стъпка“ за проверка на целия структуриран AI формуляр.' },
+    GUIDED_DOOR: { jobType: 'SINGLE_PRODUCT', inputMode: 'DESCRIPTION', name: 'DEMO · Врата · стъпка по стъпка', reference: 'DEMO-D-01', description: 'DEMO бележка: примерна врата в режим „Стъпка по стъпка“ за проверка на праг, отваряне, профили, пълнеж и обков.' },
+    SKETCH: { jobType: 'CUSTOM_ORDER', inputMode: 'SKETCH', name: 'DEMO · Нестандартна витрина', reference: 'DEMO-SKETCH-01', description: '' },
+    MANUAL: { jobType: 'TECHNICAL_DETAIL', inputMode: 'MANUAL', name: 'DEMO · Ръчен режим', reference: 'DEMO-MANUAL-01', description: '' },
+  }
+  const definition = definitions[scenario]
+  const guidedProduct = scenario === 'GUIDED_WINDOW' ? createGuidedDemoProductDraft('WINDOW', profiles) : scenario === 'GUIDED_DOOR' ? createGuidedDemoProductDraft('DOOR', profiles) : createEmptyGuidedProductDraft()
+  return {
+    ...fresh,
+    view: 'INTAKE',
+    job: {
+      ...fresh.job,
+      name: definition.name,
+      reference: definition.reference,
+      jobType: definition.jobType,
+      inputMode: definition.inputMode,
+      description: definition.description,
+      demoScenario: scenario,
+      guidedProduct,
+      groupLabels: [FACADEFLOW_JOB_TYPE_LABELS[definition.jobType].groupHint],
+      projectStructure: createDemoProjectStructure(scenario),
+      intakeStatus: 'SOURCE_CAPTURED',
+      updatedAt: now(),
+    },
+  }
+}
 
 export function updateFacadeFlowGuidedProduct(session: FacadeFlowAiSession, patch: Partial<FacadeFlowGuidedProductDraft>, profiles: CatalogueProfile[]): FacadeFlowAiSession {
   const guidedProduct = updateGuidedProductDraft(session.job.guidedProduct, patch, profiles)
