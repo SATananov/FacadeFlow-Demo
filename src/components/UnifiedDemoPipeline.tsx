@@ -6,6 +6,7 @@ import { RuleApplicabilityFoundation } from './RuleApplicabilityFoundation'
 import { RuleEvaluationFoundation } from './RuleEvaluationFoundation'
 import { RealDataIntakeContractFoundation } from './RealDataIntakeContractFoundation'
 import { RealDataStagingHumanMappingFoundation } from './RealDataStagingHumanMappingFoundation'
+import { RealDataDryRun } from './RealDataDryRun'
 import { RuleValidationAggregationFoundation } from './RuleValidationAggregationFoundation'
 
 interface Props {
@@ -50,6 +51,7 @@ export function UnifiedDemoPipeline({ session, profiles, setSession, compact = f
       {packet.ruleGate && <RuleValidationAggregationFoundation session={session} gate={packet.ruleGate}/>}
       {packet.ruleGate && <RealDataIntakeContractFoundation/>}
       {packet.ruleGate && <RealDataStagingHumanMappingFoundation/>}
+      {packet.ruleGate && <RealDataDryRun/>}
       <footer>СТРУКТУРИРАН ПАКЕТ: ДА · ИЗДЕЛИЕ ПОТВЪРДЕНО ОТ ЧОВЕК: НЕ · ПРАВИЛА ПРОВЕРЕНИ: НЕ · ПРОИЗВОДСТВО: ЗАКЛЮЧЕНО</footer>
     </>}
   </section>

@@ -75,6 +75,7 @@ function App() {
   const [showProductPreview, setShowProductPreview] = useState(false)
   const [showTemplatePicker, setShowTemplatePicker] = useState(false)
   const [showDrawingImport, setShowDrawingImport] = useState(false)
+  const [drawingImportOrigin, setDrawingImportOrigin] = useState<'MAIN' | 'AI'>('MAIN')
   const [showHelp, setShowHelp] = useState(false)
   const [showTour, setShowTour] = useState(false)
   const [importPreview, setImportPreview] = useState<{ product: ProductParameters; project: string; verified: boolean; evidence: ImportedDimensionEvidence[] } | null>(null)
@@ -83,15 +84,42 @@ function App() {
   const [catalogueProfiles, setCatalogueProfiles] = useState<CatalogueProfile[]>(sampleCatalogueProfiles)
   const [activeProfileSelection, setActiveProfileSelection] = useState<ActiveProfileSelection>({ FRAME: 'profile-demo-frame-01', SASH: 'profile-demo-sash-01', MULLION: 'profile-demo-mullion-01' })
   const [showProfileCatalogue, setShowProfileCatalogue] = useState(false)
+  const [profileCatalogueOrigin, setProfileCatalogueOrigin] = useState<'MAIN' | 'AI'>('MAIN')
   const [showDetailDrafting, setShowDetailDrafting] = useState(false)
   const [detailDraftingOrigin, setDetailDraftingOrigin] = useState<'MAIN' | 'AI'>('MAIN')
   const [showAiWorkspace, setShowAiWorkspace] = useState(false)
+  const aiReturnScrollYRef = useRef(0)
   const [aiSession, setAiSession] = useState<FacadeFlowAiSession>(() => createFacadeFlowAiSession(crypto.randomUUID()))
   const [hybridSession, setHybridSession] = useState<HybridProductDesignerSession>(() => createHybridProductDesignerSession(crypto.randomUUID()))
   const hybridSessionRef = useRef(hybridSession)
   const [showCustomDesigner, setShowCustomDesigner] = useState(false)
+  const [customDesignerOrigin, setCustomDesignerOrigin] = useState<'MAIN' | 'AI'>('MAIN')
   const [activeCustomComponentId, setActiveCustomComponentId] = useState<string | null>(null)
   const [customProduct, setCustomProduct] = useState<CustomProduct>(() => { const now = new Date().toISOString(); return { id: crypto.randomUUID(), name: 'Нестандартен прозорец 001', width: 1400, height: 1200, frameProfileId: 'profile-demo-frame-01', frameCreated: false, mullionProfileId: 'profile-demo-mullion-01', geometry: initialGeometry(), status: 'DRAFT', humanReviewConfirmed: false, createdAt: now, updatedAt: now, simulationOnly: true, machineReady: false } })
+
+  const openAiWorkspaceFromMain = () => {
+    aiReturnScrollYRef.current = typeof window === 'undefined' ? 0 : window.scrollY
+    setShowAiWorkspace(true)
+  }
+  const closeAiWorkspaceToPrevious = () => {
+    setShowAiWorkspace(false)
+    if (typeof window !== 'undefined') requestAnimationFrame(() => window.scrollTo({ top: aiReturnScrollYRef.current, behavior: 'auto' }))
+  }
+  const closeDrawingImport = () => {
+    setShowDrawingImport(false)
+    if (drawingImportOrigin === 'AI') setShowAiWorkspace(true)
+    setDrawingImportOrigin('MAIN')
+  }
+  const closeProfileCatalogue = () => {
+    setShowProfileCatalogue(false)
+    if (profileCatalogueOrigin === 'AI') setShowAiWorkspace(true)
+    setProfileCatalogueOrigin('MAIN')
+  }
+  const closeCustomDesigner = () => {
+    setShowCustomDesigner(false)
+    if (customDesignerOrigin === 'AI') setShowAiWorkspace(true)
+    setCustomDesignerOrigin('MAIN')
+  }
 
   const replaceHybridSession = (next: HybridProductDesignerSession) => { hybridSessionRef.current = next; setHybridSession(next) }
   const openDetailDraftingFromMain = () => { setDetailDraftingOrigin('MAIN'); setShowDetailDrafting(true) }
@@ -250,10 +278,10 @@ function App() {
         </div>
         {isLocalApplication && <div className="local-application-badge">ЛОКАЛНО ПРИЛОЖЕНИЕ</div>}
         <nav className="app-header-actions ff-app-dock" aria-label="Основни действия">
-          <button type="button" className="ai-workspace-action" onClick={() => setShowAiWorkspace(true)}><span className="ff-nav-icon"><FacadeFlowIcon name="ai"/></span><span><b>AI</b><small>FacadeFlow</small></span></button>
+          <button type="button" className="ai-workspace-action" onClick={openAiWorkspaceFromMain}><span className="ff-nav-icon"><FacadeFlowIcon name="ai"/></span><span><b>AI</b><small>FacadeFlow</small></span></button>
           <button type="button" className="detail-drafting-action" onClick={openDetailDraftingFromMain}><span className="ff-nav-icon"><FacadeFlowIcon name="designer"/></span><span><b>Конструктор</b><small>Изделие</small></span></button>
-          <button type="button" className="drawing-import-action" data-help-id="unified-import" onClick={() => setShowDrawingImport(true)}><span className="ff-nav-icon"><FacadeFlowIcon name="import"/></span><span><b>Импорт</b><small>Проект / чертеж</small></span></button>
-          <button type="button" className="catalogue-action" onClick={() => setShowProfileCatalogue(true)}><span className="ff-nav-icon"><FacadeFlowIcon name="catalogue"/></span><span><b>Каталог</b><small>Профили</small></span></button>
+          <button type="button" className="drawing-import-action" data-help-id="unified-import" onClick={() => { setDrawingImportOrigin('MAIN'); setShowDrawingImport(true) }}><span className="ff-nav-icon"><FacadeFlowIcon name="import"/></span><span><b>Импорт</b><small>Проект / чертеж</small></span></button>
+          <button type="button" className="catalogue-action" onClick={() => { setProfileCatalogueOrigin('MAIN'); setShowProfileCatalogue(true) }}><span className="ff-nav-icon"><FacadeFlowIcon name="catalogue"/></span><span><b>Каталог</b><small>Профили</small></span></button>
           <button type="button" className="help-action" data-help-id="help-button" onClick={() => setShowHelp(true)}><span className="ff-nav-icon"><FacadeFlowIcon name="help"/></span><span><b>Помощ</b><small>Ръководство</small></span></button>
         </nav>
       </header>
@@ -276,7 +304,7 @@ function App() {
           />
         )}
         {!activeComponent && !activeCustomComponent && hybridSession.productCategory && <section className="product-creation-choices product-context-card" aria-label="Текущо изделие"><div><b>Продължи с изделието</b><span>Категория: {hybridSession.productCategory === 'DOOR' ? 'Врата' : 'Прозорец'}</span><span>{hybridSession.configuration?.productName || 'Без въведено име'}</span><span>{hybridSession.configuration?.overallWidth && hybridSession.configuration.overallHeight ? `${hybridSession.configuration.overallWidth} × ${hybridSession.configuration.overallHeight} mm` : 'Размерите не са въведени'}</span><span>Статус: {hybridSession.configuration?.status === 'HUMAN_CONFIRMED' ? 'Концептуално проверено' : 'Нуждае се от проверка'}</span></div><button type="button" className="primary" onClick={openDetailDraftingFromMain}>Продължи с изделието</button></section>}
-        {!activeComponent && !activeCustomComponent && !hybridSession.productCategory && <section className="product-creation-choices" aria-label="Създаване на изделие"><button type="button" onClick={() => setShowTemplatePicker(true)}>Избери типова схема</button><button type="button" className="primary" onClick={() => product.productCategory === 'WINDOW' ? setShowCustomDesigner(true) : openDetailDraftingFromMain()}>{product.productCategory === 'DOOR' ? 'Начертай нестандартна врата' : product.productCategory === 'WINDOW' ? 'Начертай нестандартен прозорец' : 'Начертай нестандартно изделие'}</button></section>}
+        {!activeComponent && !activeCustomComponent && !hybridSession.productCategory && <section className="product-creation-choices" aria-label="Създаване на изделие"><button type="button" onClick={() => setShowTemplatePicker(true)}>Избери типова схема</button><button type="button" className="primary" onClick={() => { if (product.productCategory === 'WINDOW') { setCustomDesignerOrigin('MAIN'); setShowCustomDesigner(true) } else openDetailDraftingFromMain() }}>{product.productCategory === 'DOOR' ? 'Начертай нестандартна врата' : product.productCategory === 'WINDOW' ? 'Начертай нестандартен прозорец' : 'Начертай нестандартно изделие'}</button></section>}
         <div className="layout">
           <ProfilePanel
             project={project}
@@ -393,11 +421,11 @@ function App() {
           baseProduct={product}
           onPreview={(previewProduct, previewProject) => setImportPreview({ product: previewProduct, project: previewProject, verified: false, evidence: [] })}
           onLoadVerified={loadVerifiedDrawingProduct}
-          onClose={() => setShowDrawingImport(false)}
+          onClose={closeDrawingImport}
         />
       )}
-      {showProfileCatalogue && <ProfileCatalogue profiles={catalogueProfiles} selection={activeProfileSelection} onProfiles={updateCatalogue} onSelection={setActiveProfileSelection} onClose={() => setShowProfileCatalogue(false)}/>}
-      {showAiWorkspace && <FacadeFlowAIWorkspace session={aiSession} onSession={setAiSession} activeProfileCount={catalogueProfiles.filter((item) => item.status !== 'ARCHIVED').length} profiles={catalogueProfiles} onClose={() => setShowAiWorkspace(false)} onOpenImportCenter={() => { setShowAiWorkspace(false); setShowDrawingImport(true) }} onOpenProductDesigner={openConfirmedAiProductInConstructor} onOpenCustomCad={() => { setShowAiWorkspace(false); setShowCustomDesigner(true) }} onOpenProfileCatalogue={() => { setShowAiWorkspace(false); setShowProfileCatalogue(true) }}/>}
+      {showProfileCatalogue && <ProfileCatalogue profiles={catalogueProfiles} selection={activeProfileSelection} onProfiles={updateCatalogue} onSelection={setActiveProfileSelection} onClose={closeProfileCatalogue}/>}
+      {showAiWorkspace && <FacadeFlowAIWorkspace session={aiSession} onSession={setAiSession} activeProfileCount={catalogueProfiles.filter((item) => item.status !== 'ARCHIVED').length} profiles={catalogueProfiles} onClose={closeAiWorkspaceToPrevious} onOpenImportCenter={() => { setDrawingImportOrigin('AI'); setShowAiWorkspace(false); setShowDrawingImport(true) }} onOpenProductDesigner={openConfirmedAiProductInConstructor} onOpenCustomCad={() => { setCustomDesignerOrigin('AI'); setShowAiWorkspace(false); setShowCustomDesigner(true) }} onOpenProfileCatalogue={() => { setProfileCatalogueOrigin('AI'); setShowAiWorkspace(false); setShowProfileCatalogue(true) }}/>}
       {showDetailDrafting && (
         <DetailDraftingPlaceholder
           session={hybridSession}
@@ -409,7 +437,7 @@ function App() {
           onOpenProfileCatalogue={() => setShowProfileCatalogue(true)}
         />
       )}
-      {showCustomDesigner && <CustomProductDesigner initial={customProduct} profiles={catalogueProfiles} activeProfiles={activeProfileSelection} selectedComponentId={activeCustomComponentId} onCommit={commitCustomProduct} onOpenComponent={openCustomComponent} onClose={() => setShowCustomDesigner(false)}/>}
+      {showCustomDesigner && <CustomProductDesigner initial={customProduct} profiles={catalogueProfiles} activeProfiles={activeProfileSelection} selectedComponentId={activeCustomComponentId} onCommit={commitCustomProduct} onOpenComponent={openCustomComponent} onClose={closeCustomDesigner}/>}
       {importPreview && (
         <ProductPreview
           product={importPreview.product}

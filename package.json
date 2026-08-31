@@ -57,6 +57,9 @@
     "test:phase06c3_6": "vite build --ssr tests/phase06c3_6.test.ts --outDir .facadeflow-runtime/phase06c3_6-tests --emptyOutDir && node --test .facadeflow-runtime/phase06c3_6-tests/phase06c3_6.test.js",
     "test:phase06c3_8": "vite build --ssr tests/phase06c3_8.test.ts --outDir .facadeflow-runtime/phase06c3_8-tests --emptyOutDir && node --test .facadeflow-runtime/phase06c3_8-tests/phase06c3_8.test.js",
     "test:phase06c3_9": "vite build --ssr tests/phase06c3_9.test.ts --outDir .facadeflow-runtime/phase06c3_9-tests --emptyOutDir && node --test .facadeflow-runtime/phase06c3_9-tests/phase06c3_9.test.js",
+    "test:phase06c3_9_0": "vite build --ssr tests/phase06c3_9_0.test.ts --outDir .facadeflow-runtime/phase06c3_9_0-tests --emptyOutDir && node --test .facadeflow-runtime/phase06c3_9_0-tests/phase06c3_9_0.test.js",
+    "test:phase06c3_9_1": "vite build --ssr tests/phase06c3_9_1.test.ts --outDir .facadeflow-runtime/phase06c3_9_1-tests --emptyOutDir && node --test .facadeflow-runtime/phase06c3_9_1-tests/phase06c3_9_1.test.js",
+    "test:phase06c3_9_2": "vite build --ssr tests/phase06c3_9_2.test.ts --outDir .facadeflow-runtime/phase06c3_9_2-tests --emptyOutDir && node --test .facadeflow-runtime/phase06c3_9_2-tests/phase06c3_9_2.test.js",
     "test:phase06c3_7": "vite build --ssr tests/phase06c3_7.test.ts --outDir .facadeflow-runtime/phase06c3_7-tests --emptyOutDir && node --test .facadeflow-runtime/phase06c3_7-tests/phase06c3_7.test.js"
   },
   "dependencies": {

@@ -40,6 +40,7 @@ export function FacadeFlowAIWorkspace({ session, onSession, activeProfileCount, 
       title="FacadeFlow AI"
       subtitle="От идея, документ или скица към проверена параметрична подготовка."
       onBack={onClose}
+      backLabel="Назад"
       actions={<button type="button" className={session.view === 'KNOWLEDGE_BASE' ? 'selected' : ''} onClick={() => setSession((current) => setFacadeFlowAiView(current, current.view === 'KNOWLEDGE_BASE' ? 'INTAKE' : 'KNOWLEDGE_BASE'))}><FacadeFlowIcon name="data"/><span>Данни и каталози</span></button>}
       className="ff-ai-unified-header"
     />

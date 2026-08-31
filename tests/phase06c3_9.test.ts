@@ -118,7 +118,7 @@ test('06C.3.9 UI exposes staging and human mapping review while active data, per
   const ui = readFileSync('src/components/RealDataStagingHumanMappingFoundation.tsx', 'utf8')
   const model = readFileSync('src/aiRealDataStaging.ts', 'utf8')
   const pipeline = readFileSync('src/components/UnifiedDemoPipeline.tsx', 'utf8')
-  for (const text of ['STAGING ЗАПИСИ: 0', 'HUMAN MAPPED: 0', 'ACTIVE DATA: 0', 'AUTO-MAPPING: НЕ', 'ACTIVATION REVIEW', 'HUMAN MAPPED ≠ ACTIVE DATA']) assert.match(ui, new RegExp(text))
+  for (const text of ['ЗАПИСИ В КАРАНТИНА: 0', 'СЪПОСТАВЕНИ ОТ ЧОВЕК: 0', 'АКТИВНИ ДАННИ: 0', 'АВТОМАТИЧНО СЪПОСТАВЯНЕ: НЕ', 'ПРЕГЛЕД ЗА АКТИВИРАНЕ', 'СЪПОСТАВЕНО ОТ ЧОВЕК ≠ АКТИВНИ ДАННИ']) assert.match(ui, new RegExp(text))
   assert.match(pipeline, /RealDataStagingHumanMappingFoundation/)
   for (const unsafe of ['fetch(', 'WebSocket', 'localStorage', 'sessionStorage']) assert.doesNotMatch(model + ui, new RegExp(unsafe.replace('(', '\\(')))
   for (const safe of ['acceptedIntoActiveData: false', 'persistenceAllowed: false', 'rulesValidated: false', 'productionLocked: true', 'machineReady: false']) assert.match(model, new RegExp(safe))
