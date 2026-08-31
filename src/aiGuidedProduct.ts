@@ -1,4 +1,5 @@
 import type { CatalogueProfile, ProfileRole } from './profileCatalogueTypes'
+import { catalogueProfileIsReal, catalogueProfileIsSelectable } from './profileCatalogueState'
 import type {
   FacadeFlowGuidedColorMode,
   FacadeFlowGuidedFillType,
@@ -104,7 +105,7 @@ export function createEmptyGuidedProductDraft(): FacadeFlowGuidedProductDraft {
 
 export function createGuidedDemoProductDraft(productType: Exclude<FacadeFlowGuidedProductType, ''>, profiles: CatalogueProfile[]): FacadeFlowGuidedProductDraft {
   const demoSystem = 'DEMO SYSTEM'
-  const demoProfile = (role: ProfileRole) => profiles.find((profile) => profile.status !== 'ARCHIVED' && profile.system === demoSystem && profile.role === role)
+  const demoProfile = (role: ProfileRole) => profiles.find((profile) => catalogueProfileIsSelectable(profile) && profile.system === demoSystem && profile.role === role)
   const frame = demoProfile('FRAME')
   const sash = demoProfile('SASH')
   const mullion = demoProfile('MULLION')
@@ -147,13 +148,24 @@ export function createGuidedDemoProductDraft(productType: Exclude<FacadeFlowGuid
 }
 
 export function activeGuidedProfileSystems(profiles: CatalogueProfile[]) {
-  return [...new Set(profiles.filter((profile) => profile.status !== 'ARCHIVED').map((profile) => profile.system).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'bg'))
+  return [...new Set(profiles.filter(catalogueProfileIsSelectable).map((profile) => profile.system).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'bg'))
 }
 
 export function guidedProfilesForRole(profiles: CatalogueProfile[], system: string, role: ProfileRole) {
   if (!system) return []
   return profiles
-    .filter((profile) => profile.status !== 'ARCHIVED' && profile.system === system && profile.role === role)
+    .filter((profile) => catalogueProfileIsSelectable(profile) && profile.system === system && profile.role === role)
+    .sort((a, b) => a.code.localeCompare(b.code, 'bg', { numeric: true }))
+}
+
+export function activeRealGuidedProfileSystems(profiles: CatalogueProfile[]) {
+  return [...new Set(profiles.filter(catalogueProfileIsReal).map((profile) => profile.system).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'bg'))
+}
+
+export function guidedRealProfilesForRole(profiles: CatalogueProfile[], system: string, role: ProfileRole) {
+  if (!system) return []
+  return profiles
+    .filter((profile) => catalogueProfileIsReal(profile) && profile.system === system && profile.role === role)
     .sort((a, b) => a.code.localeCompare(b.code, 'bg', { numeric: true }))
 }
 
@@ -172,7 +184,7 @@ function validPositiveInteger(value: string) {
 }
 
 function selectedProfile(profiles: CatalogueProfile[], id: string, system: string, role: ProfileRole) {
-  return profiles.find((profile) => profile.id === id && profile.status !== 'ARCHIVED' && profile.system === system && profile.role === role)
+  return profiles.find((profile) => profile.id === id && catalogueProfileIsSelectable(profile) && profile.system === system && profile.role === role)
 }
 
 function profileValue(profiles: CatalogueProfile[], id: string, manual: string, system: string, role: ProfileRole) {
@@ -235,6 +247,12 @@ export function guidedProductWarnings(draft: FacadeFlowGuidedProductDraft, profi
   if (draft.manualFrameProfile.trim() && !selectedProfile(profiles, draft.frameProfileId, draft.profileSystem, 'FRAME')) warnings.push('Кодът на касата е въведен ръчно; съвместимостта остава за проверка по правила.')
   if (draft.manualSashProfile.trim() && !selectedProfile(profiles, draft.sashProfileId, draft.profileSystem, 'SASH')) warnings.push('Кодът на крилото е въведен ръчно; съвместимостта остава за проверка по правила.')
   if (draft.manualMullionProfile.trim() && !selectedProfile(profiles, draft.mullionProfileId, draft.profileSystem, 'MULLION')) warnings.push('Кодът на делителя е въведен ръчно; съвместимостта остава за проверка по правила.')
+  const sourceEvidenceSelections = [
+    selectedProfile(profiles, draft.frameProfileId, draft.profileSystem, 'FRAME'),
+    selectedProfile(profiles, draft.sashProfileId, draft.profileSystem, 'SASH'),
+    selectedProfile(profiles, draft.mullionProfileId, draft.profileSystem, 'MULLION'),
+  ].filter((profile): profile is CatalogueProfile => Boolean(profile?.status === 'SOURCE_EVIDENCE'))
+  if (sourceEvidenceSelections.length > 0) warnings.push('Избран е реален source-evidence профил. Кодът и размерите идват от проект на Надежда, но ролята/системата още изискват експертно потвърждение.')
   return warnings
 }
 

@@ -9,11 +9,13 @@ import {
   GUIDED_OPENING_LABELS,
   GUIDED_PRODUCT_TYPE_LABELS,
   activeGuidedProfileSystems,
+  activeRealGuidedProfileSystems,
   effectiveGuidedProfileSystem,
   guidedProductCompletion,
   guidedProductUnresolved,
   guidedProductWarnings,
   guidedProfilesForRole,
+  guidedRealProfilesForRole,
 } from '../aiGuidedProduct'
 import { applyFacadeFlowGuidedDemo, confirmFacadeFlowGuidedProduct, prepareFacadeFlowGuidedProduct, setFacadeFlowGuidedReviewAccepted, updateFacadeFlowGuidedProduct } from '../aiWorkspaceState'
 import type {
@@ -29,6 +31,7 @@ import type {
   FacadeFlowGuidedProductType,
 } from '../aiWorkspaceTypes'
 import type { CatalogueProfile, ProfileRole } from '../profileCatalogueTypes'
+import { GuidedNadezhdaEvidencePreview } from './GuidedNadezhdaEvidencePreview'
 
 interface Props {
   session: FacadeFlowAiSession
@@ -56,7 +59,8 @@ const validPositive = (value: string) => value.trim() !== '' && Number.isFinite(
 
 export function GuidedAiProductBuilder({ session, profiles, setSession, onOpenProfileCatalogue }: Props) {
   const draft = session.job.guidedProduct
-  const systems = activeGuidedProfileSystems(profiles)
+  const usesDemoCatalogue = draft.name.startsWith('DEMO-') || draft.profileSystem === 'DEMO SYSTEM' || [draft.frameProfileId, draft.sashProfileId, draft.mullionProfileId].some((id) => profiles.some((profile) => profile.id === id && profile.status === 'DEMONSTRATION'))
+  const systems = usesDemoCatalogue ? activeGuidedProfileSystems(profiles) : activeRealGuidedProfileSystems(profiles)
   const unresolved = guidedProductUnresolved(draft, profiles)
   const completion = guidedProductCompletion(draft, profiles)
   const warnings = guidedProductWarnings(draft, profiles)
@@ -65,6 +69,7 @@ export function GuidedAiProductBuilder({ session, profiles, setSession, onOpenPr
   const canConfirm = Boolean(proposal) && draft.reviewAccepted && unresolved.length === 0
   const update = (patch: Partial<FacadeFlowGuidedProductDraft>) => setSession((current) => updateFacadeFlowGuidedProduct(current, patch, profiles))
   const system = effectiveGuidedProfileSystem(draft)
+  const humanConfirmedSourceEvidenceCount = profiles.filter((profile) => profile.status === 'SOURCE_EVIDENCE' && profile.humanRoleReviewStatus === 'HUMAN_CONFIRMED').length
 
   return <section className="ff-guided-builder" aria-labelledby="ff-guided-builder-title">
     <div className="ff-guided-head">
@@ -87,15 +92,16 @@ export function GuidedAiProductBuilder({ session, profiles, setSession, onOpenPr
         <div className="ff-guided-readout"><span>Текущ размер</span><b>{draft.width || '—'} × {draft.height || '—'} mm</b><small>Няма приложени производствени min/max ограничения.</small></div>
       </GuidedGroup>
 
-      <GuidedGroup number="03" title="Профили" hint="Каталогът филтрира каса, крило и делител">
-        <label>Профилна система<select value={draft.profileSystem} onChange={(event) => update({ profileSystem: event.target.value, manualProfileSystem: event.target.value ? '' : draft.manualProfileSystem })}><option value="">Не е избрана от каталога</option>{systems.map((value) => <option key={value} value={value}>{value}</option>)}</select></label>
+      <div data-source-evidence-legacy="НАДЕЖДА · SOURCE EVIDENCE · Няма автоматично разпознаване на каса / крило / делител" data-human-role-summary={`${humanConfirmedSourceEvidenceCount} с HUMAN CONFIRMED роля`}><GuidedGroup number="03" title="Профили" hint="Каталогът филтрира каса, крило и делител">
+        <label>Профилна система<select value={draft.profileSystem} onChange={(event) => update({ profileSystem: event.target.value, manualProfileSystem: event.target.value ? '' : draft.manualProfileSystem })}><option value="">{usesDemoCatalogue ? 'Не е избрана от каталога' : systems.length > 0 ? 'Избери HUMAN CONFIRMED реална система' : 'Няма HUMAN CONFIRMED реална система'}</option>{systems.map((value) => <option key={value} value={value}>{value}</option>)}</select></label>
         <label>Ръчна система / код<input value={draft.manualProfileSystem} disabled={Boolean(draft.profileSystem)} onChange={(event) => update({ manualProfileSystem: event.target.value })} placeholder="Само ако липсва в каталога"/></label>
         <button type="button" className="ff-guided-catalogue-button" onClick={onOpenProfileCatalogue}>Отвори каталога</button>
-        <ProfileField label="Каса" role="FRAME" required draft={draft} profiles={profiles} onUpdate={update}/>
-        <ProfileField label="Крило" role="SASH" draft={draft} profiles={profiles} onUpdate={update}/>
-        <ProfileField label="Делител" role="MULLION" draft={draft} profiles={profiles} onUpdate={update}/>
+        <GuidedNadezhdaEvidencePreview profiles={profiles} onOpenCatalogue={onOpenProfileCatalogue}/>
+        <ProfileField label="Каса" role="FRAME" required draft={draft} profiles={profiles} allowDemonstration={usesDemoCatalogue} onUpdate={update}/>
+        <ProfileField label="Крило" role="SASH" draft={draft} profiles={profiles} allowDemonstration={usesDemoCatalogue} onUpdate={update}/>
+        <ProfileField label="Делител" role="MULLION" draft={draft} profiles={profiles} allowDemonstration={usesDemoCatalogue} onUpdate={update}/>
         {system && !draft.profileSystem && <p className="ff-guided-warning">Ръчно въведената система остава НЕПОТВЪРДЕНА, докато не бъде добавена/сверена в каталога.</p>}
-      </GuidedGroup>
+      </GuidedGroup></div>
 
       <GuidedGroup number="04" title="Функция и отваряемост" hint="Показват се само релевантните полета">
         <label>Тип отваряемост *<select value={draft.openingType} disabled={!draft.productType} onChange={(event) => update({ openingType: event.target.value as FacadeFlowGuidedOpeningType })}><option value="">{draft.productType ? 'Избери отваряемост' : 'Първо избери изделие'}</option>{openingOptions(draft.productType).map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></label>
@@ -141,8 +147,8 @@ function GuidedGroup({ number, title, hint, children }: { number: string; title:
   return <fieldset className="ff-guided-group"><legend><b>{number}</b><span><strong>{title}</strong><small>{hint}</small></span></legend><div className="ff-guided-field-grid">{children}</div></fieldset>
 }
 
-function ProfileField({ label, role, required = false, draft, profiles, onUpdate }: { label: string; role: ProfileRole; required?: boolean; draft: FacadeFlowGuidedProductDraft; profiles: CatalogueProfile[]; onUpdate: (patch: Partial<FacadeFlowGuidedProductDraft>) => void }) {
-  const options = guidedProfilesForRole(profiles, draft.profileSystem, role)
+function ProfileField({ label, role, required = false, draft, profiles, allowDemonstration = false, onUpdate }: { label: string; role: ProfileRole; required?: boolean; draft: FacadeFlowGuidedProductDraft; profiles: CatalogueProfile[]; allowDemonstration?: boolean; onUpdate: (patch: Partial<FacadeFlowGuidedProductDraft>) => void }) {
+  const options = allowDemonstration ? guidedProfilesForRole(profiles, draft.profileSystem, role) : guidedRealProfilesForRole(profiles, draft.profileSystem, role)
   const idKey = role === 'FRAME' ? 'frameProfileId' : role === 'SASH' ? 'sashProfileId' : 'mullionProfileId'
   const manualKey = role === 'FRAME' ? 'manualFrameProfile' : role === 'SASH' ? 'manualSashProfile' : 'manualMullionProfile'
   return <div className="ff-guided-profile-pair"><label>{label}{required ? ' *' : ''}<select value={draft[idKey]} disabled={!draft.profileSystem} onChange={(event) => onUpdate({ [idKey]: event.target.value, [manualKey]: event.target.value ? '' : draft[manualKey] })}><option value="">{draft.profileSystem ? 'Не е избран от каталога' : 'Първо избери каталожна система'}</option>{options.map((profile) => <option key={profile.id} value={profile.id}>{profile.code} — {profile.nameBg}</option>)}</select></label><label>Ръчен код за {label.toLowerCase()}<input value={draft[manualKey]} disabled={Boolean(draft[idKey])} onChange={(event) => onUpdate({ [manualKey]: event.target.value })} placeholder="Ако липсва в каталога"/></label></div>
