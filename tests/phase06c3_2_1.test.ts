@@ -40,7 +40,7 @@ void test('06C.3.2.1 is display-only: HUMAN_REVIEWED still does not confirm the 
   assert.equal(session.job.reviewPacket?.status, 'HUMAN_REVIEWED')
   assert.equal(session.job.guidedProduct.status, 'NEEDS_REVIEW')
   assert.equal(session.productionApproved, false)
-  assert.equal(session.machineReady, false)
+  assert.equal(session.job.machineReady, false)
 })
 
 void test('06C.3.2.1 introduces no network, persistence, automatic geometry or approval path', () => {

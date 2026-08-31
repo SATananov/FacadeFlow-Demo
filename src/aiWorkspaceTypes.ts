@@ -213,6 +213,52 @@ export interface FacadeFlowRuleApplicabilityFoundation {
   machineReady: false
 }
 
+export type FacadeFlowRuleEvaluationResult = 'NEEDS_EVIDENCE' | 'PASS' | 'FAIL' | 'NOT_APPLICABLE'
+export type FacadeFlowRuleEvaluationReviewStatus = 'NEEDS_REVIEW' | 'HUMAN_REVIEWED'
+export type FacadeFlowRuleEvaluationInvalidationReason =
+  | 'RULE_REFERENCE_CHANGED'
+  | 'RULE_REVISION_CHANGED'
+  | 'APPLICABILITY_CHANGED'
+  | 'SOURCE_SET_CHANGED'
+  | 'EVIDENCE_CHANGED'
+  | 'OBSERVATION_CHANGED'
+  | 'RESULT_CHANGED'
+
+export interface FacadeFlowRuleEvaluationRecord {
+  id: string
+  requirementId: FacadeFlowRuleGateRequirementId
+  ruleId: string
+  ruleRevision: string
+  applicabilityRecordId: string
+  applicabilityDecision: FacadeFlowRuleApplicabilityDecision
+  sourceRecordIds: string[]
+  evidence: FacadeFlowEvidenceReference[]
+  observationSummary: string
+  result: FacadeFlowRuleEvaluationResult
+  evaluator: string
+  evaluatedAt: string | null
+  reviewStatus: FacadeFlowRuleEvaluationReviewStatus
+  reviewNote: string
+  invalidationReasons: FacadeFlowRuleEvaluationInvalidationReason[]
+  simulationOnly: true
+  machineReady: false
+}
+
+export interface FacadeFlowRuleEvaluationFoundation {
+  status: 'FOUNDATION_READY'
+  rows: FacadeFlowRuleEvaluationRecord[]
+  resultVocabulary: FacadeFlowRuleEvaluationResult[]
+  realEvaluationCount: 0
+  humanReviewedEvaluationCount: 0
+  passCount: 0
+  failCount: 0
+  notApplicableCount: 0
+  needsEvidenceCount: number
+  rulesValidated: false
+  handoffLocked: true
+  simulationOnly: true
+  machineReady: false
+}
 export interface FacadeFlowRuleGateRequirement {
   id: FacadeFlowRuleGateRequirementId
   label: string
