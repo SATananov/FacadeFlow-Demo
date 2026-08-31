@@ -55,6 +55,7 @@
     "test:phase06c3_4": "vite build --ssr tests/phase06c3_4.test.ts --outDir .facadeflow-runtime/phase06c3_4-tests --emptyOutDir && node --test .facadeflow-runtime/phase06c3_4-tests/phase06c3_4.test.js",
     "test:phase06c3_5": "vite build --ssr tests/phase06c3_5.test.ts --outDir .facadeflow-runtime/phase06c3_5-tests --emptyOutDir && node --test .facadeflow-runtime/phase06c3_5-tests/phase06c3_5.test.js",
     "test:phase06c3_6": "vite build --ssr tests/phase06c3_6.test.ts --outDir .facadeflow-runtime/phase06c3_6-tests --emptyOutDir && node --test .facadeflow-runtime/phase06c3_6-tests/phase06c3_6.test.js",
+    "test:phase06c3_8": "vite build --ssr tests/phase06c3_8.test.ts --outDir .facadeflow-runtime/phase06c3_8-tests --emptyOutDir && node --test .facadeflow-runtime/phase06c3_8-tests/phase06c3_8.test.js",
     "test:phase06c3_7": "vite build --ssr tests/phase06c3_7.test.ts --outDir .facadeflow-runtime/phase06c3_7-tests --emptyOutDir && node --test .facadeflow-runtime/phase06c3_7-tests/phase06c3_7.test.js"
   },
   "dependencies": {
