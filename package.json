@@ -8,6 +8,7 @@
     "build": "tsc -b && vite build",
     "lint": "oxlint --ignore-pattern \"public/ocr/**\"",
     "preview": "vite preview",
+    "test:ai01_1": "vite build --ssr tests/ai01_1ProductIntent.test.ts --outDir .facadeflow-runtime/ai01_1-tests --emptyOutDir && node --test .facadeflow-runtime/ai01_1-tests/ai01_1ProductIntent.test.js",
     "local:serve": "node scripts/local-server.mjs",
     "local": "npm run build && npm run local:serve",
     "local:app": "npm run build && node scripts/windows-local-app.mjs",
