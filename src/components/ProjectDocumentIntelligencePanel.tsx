@@ -4,12 +4,14 @@ import { facadeFlowDocumentIntentToGuidedPatch } from '../aiDocumentGuidedBridge
 import { updateFacadeFlowGuidedProduct } from '../aiWorkspaceState'
 import type { FacadeFlowAiSession } from '../aiWorkspaceTypes'
 import type { CatalogueProfile } from '../profileCatalogueTypes'
+import type { FacadeFlowAi03ParametricProposal } from '../aiParametricConstructionProposal'
 import { ParametricConstructionProposalPanel } from './ParametricConstructionProposalPanel'
 
 interface Props {
   profiles: CatalogueProfile[]
   setSession: (updater: (current: FacadeFlowAiSession) => FacadeFlowAiSession) => void
   onOpenImportCenter: () => void
+  onOpenAi04Constructor: (proposal: FacadeFlowAi03ParametricProposal) => { ok: boolean; message: string }
 }
 
 const statusLabel = {
@@ -21,7 +23,7 @@ const statusLabel = {
 
 const groupLabel = { SINGLE_SOURCE: '1 ИЗТОЧНИК', CORROBORATED: 'СЪВПАДА В НЯКОЛКО ИЗТОЧНИКА', CONFLICT: 'КОНФЛИКТ — HUMAN REVIEW' } as const
 
-export function ProjectDocumentIntelligencePanel({ profiles, setSession, onOpenImportCenter }: Props) {
+export function ProjectDocumentIntelligencePanel({ profiles, setSession, onOpenImportCenter, onOpenAi04Constructor }: Props) {
   const inputRef = useRef<HTMLInputElement>(null)
   const [sources, setSources] = useState<FacadeFlowProjectDocumentSource[]>([])
   const [candidates, setCandidates] = useState<ReturnType<typeof analyzeFacadeFlowDocumentSource>>([])
@@ -89,7 +91,7 @@ export function ProjectDocumentIntelligencePanel({ profiles, setSession, onOpenI
 
     {sources.length > 0 && <section className="ff-ai02-candidates"><div className="ff-ai02-section-title"><div><span>02</span><h4>Разпознати продуктови позиции</h4></div><em>{groups.length} групи · {candidates.length} evidence кандидата</em></div>{groups.length === 0 ? <div className="ff-ai02-empty"><b>Няма безопасно разпознати позиции.</b><p>AI02 V1 търси редове/текстови блокове с изделие или марка плюс общи размери. Не гадае по чертежа и не OCR-ва автоматично сканирани страници.</p></div> : <div className="ff-ai02-group-list">{groups.map((group) => { const intent = group.mergedIntent; const selected = group.id === selectedGroupId; return <article key={group.id} className={`${selected ? 'selected' : ''} ${group.status === 'CONFLICT' ? 'conflict' : ''}`}><header><div><span>{group.mark || 'Без марка'}</span><h5>{intent.category === 'WINDOW' ? 'Прозорец' : intent.category === 'DOOR' ? 'Врата' : 'Тип неуточнен'} · {intent.dimensions.widthMm ?? '—'} × {intent.dimensions.heightMm ?? '—'} mm</h5></div><b>{groupLabel[group.status]}</b></header><div className="ff-ai02-group-meta"><span>Източници: {group.sourceIds.length}</span><span>Evidence: {group.candidateIds.length}</span><span>Система: {intent.profiles.system || 'неуточнена'}</span><span>Количество: {intent.quantity || 'неуточнено'}</span></div>{group.conflicts.length > 0 && <div className="ff-ai02-conflicts"><strong>Конфликти — FacadeFlow не избира победител:</strong>{group.conflicts.map((conflict) => <span key={conflict.field}>{conflict.label}: {conflict.values.join(' ↔ ')}</span>)}</div>}<details><summary>Покажи source evidence</summary>{group.candidates.map((candidate) => <blockquote key={candidate.id}><b>{candidate.sourceName} · стр. {candidate.pageNumber}</b><span>{candidate.excerpt}</span><small>SHA-256 {candidate.sourceSha256.slice(0, 16)}…</small></blockquote>)}</details><button type="button" className={selected ? 'selected' : ''} onClick={() => setSelectedGroupId(selected ? null : group.id)}>{selected ? 'Избрано за Human Review' : 'Избери позицията'}</button></article> })}</div>}</section>}
 
-    {selectedGroup && <ParametricConstructionProposalPanel intent={selectedGroup.mergedIntent} sourceLabel={`Документна позиция ${selectedGroup.mark || selectedGroup.key}`}/>}
+    {selectedGroup && <ParametricConstructionProposalPanel intent={selectedGroup.mergedIntent} sourceLabel={`Документна позиция ${selectedGroup.mark || selectedGroup.key}`} onOpenEditableConstructor={onOpenAi04Constructor}/>}
 
     {selectedGroup && <section className="ff-ai02-transfer"><div><span>04 · SAFE HANDOFF</span><h4>{selectedGroup.mark || 'Избрана позиция'} → структурирания Human Review формуляр</h4><p>Прехвърлят се само съвместими стойности. Конфликтните полета остават неуточнени. AI03 proposal геометрията остава отделна и не се прехвърля автоматично към CAD.</p></div><button type="button" className="primary-button" onClick={transferSelected}>Прехвърли безопасните стойности</button></section>}
 

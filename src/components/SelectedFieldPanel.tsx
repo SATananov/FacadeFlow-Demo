@@ -30,18 +30,23 @@ export function SelectedFieldPanel({ node, fieldWidth, fieldHeight, profiles, er
     <small>{Math.round(fieldWidth)} × {Math.round(fieldHeight)} mm</small>
     {node.kind === 'LEAF' ? <>
       <label>Състояние на полето
-        <select value={node.fieldType === 'OPENING_SASH' ? 'FIXED' : node.fieldType} disabled={node.fieldType === 'OPENING_SASH'} onChange={(event) => onLeaf({ fieldType: event.target.value as 'FIXED' | 'PLACEHOLDER', sashProfileId: undefined, openingDirection: undefined })}>
+        <select value={node.fieldType === 'OPENING_SASH' ? 'FIXED' : node.fieldType} disabled={node.fieldType === 'OPENING_SASH'} onChange={(event) => onLeaf({ fieldType: event.target.value as 'FIXED' | 'PLACEHOLDER', sashProfileId: undefined, openingType: undefined, openingDirection: undefined })}>
           <option value="FIXED">FIXED — Фиксирано остъкляване</option>
           <option value="PLACEHOLDER">PLACEHOLDER — Непотвърдено</option>
         </select>
       </label>
       {node.fieldType !== 'OPENING_SASH' ? <>
-        <button type="button" disabled={!frameReady || !fieldIsValid || !initialSashProfileId} onClick={() => onLeaf({ fieldType: 'OPENING_SASH', sashProfileId: initialSashProfileId, openingDirection: undefined })}>Създай крило в избраното поле</button>
+        <button type="button" disabled={!frameReady || !fieldIsValid || !initialSashProfileId} onClick={() => onLeaf({ fieldType: 'OPENING_SASH', sashProfileId: initialSashProfileId, openingType: undefined, openingDirection: undefined })}>Създай крило в избраното поле</button>
         {!frameReady && <p className="workflow-requirement">Първо създайте външната каса.</p>}
         {frameReady && !fieldIsValid && <p className="workflow-requirement">Полето трябва да е валидно, преди да получи крило.</p>}
         {frameReady && fieldIsValid && !initialSashProfileId && <p className="workflow-requirement">Няма активен профил за крило.</p>}
       </> : <>
         <p className="field-state-note">В това поле има създадено крило.</p>
+        <label>Тип отваряне
+          <select value={node.openingType ?? ''} onChange={(event) => onLeaf({ openingType: event.target.value ? event.target.value as 'TURN' | 'TILT' | 'TILT_TURN' | 'OTHER' : undefined })}>
+            <option value="">Не е потвърден</option><option value="TURN">TURN — стандартно отваряне</option><option value="TILT">TILT — накланяне</option><option value="TILT_TURN">TILT-TURN — комбинирано</option><option value="OTHER">OTHER — друго</option>
+          </select>
+        </label>
         <label>Профил за крило <ContextHelp helpId="profile-sash"/>
           <select value={node.sashProfileId ?? ''} onChange={(event) => onLeaf({ sashProfileId: event.target.value || undefined, openingDirection: undefined })}>
             <option value="">Изберете</option>
@@ -54,7 +59,7 @@ export function SelectedFieldPanel({ node, fieldWidth, fieldHeight, profiles, er
           <label><input type="radio" checked={node.openingDirection === 'right'} onChange={() => onLeaf({ openingDirection: 'right' })}/> RIGHT — дясно</label>
         </fieldset>}
         {!node.sashProfileId && <p className="workflow-requirement">Изберете профил за създаденото крило, преди да зададете посока.</p>}
-        <button type="button" className="danger-button" onClick={() => onLeaf({ fieldType: 'FIXED', sashProfileId: undefined, openingDirection: undefined })}>Премахни крилото</button>
+        <button type="button" className="danger-button" onClick={() => onLeaf({ fieldType: 'FIXED', sashProfileId: undefined, openingType: undefined, openingDirection: undefined })}>Премахни крилото</button>
       </>}
       <div className="split-actions">
         <button onClick={() => onSplit('VERTICAL', fieldWidth / 2)} disabled={!frameReady || fieldWidth < PROVISIONAL_MIN_FIELD_MM * 2}>Раздели вертикално</button>

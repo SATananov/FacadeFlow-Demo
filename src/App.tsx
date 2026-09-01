@@ -56,6 +56,8 @@ import { applyLegacyDemoDimensions, selectLegacyProductTemplate } from './legacy
 import { createFacadeFlowAiSession } from './aiWorkspaceState'
 import { createHybridSessionFromGuidedAi } from './aiConstructorHandoff'
 import type { FacadeFlowAiSession } from './aiWorkspaceTypes'
+import type { FacadeFlowAi03ParametricProposal } from './aiParametricConstructionProposal'
+import { buildFacadeFlowAi04ConstructorHandoff } from './ai04ConstructorHandoff'
 
 function App() {
   const isLocalApplication = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
@@ -135,6 +137,17 @@ function App() {
     setDetailDraftingOrigin('AI')
     setShowAiWorkspace(false)
     setShowDetailDrafting(true)
+  }
+
+  const openReviewedAiProposalInEditableConstructor = (proposal: FacadeFlowAi03ParametricProposal) => {
+    const handoff = buildFacadeFlowAi04ConstructorHandoff(proposal, catalogueProfiles)
+    if (!handoff.customProduct || handoff.status !== 'READY') return { ok: false, message: handoff.blockers.join(' ') || 'AI04 handoff е блокиран.' }
+    setCustomProduct(handoff.customProduct)
+    setActiveCustomComponentId(null)
+    setCustomDesignerOrigin('AI')
+    setShowAiWorkspace(false)
+    setShowCustomDesigner(true)
+    return { ok: true, message: `AI04 създаде editable simulation draft. ${handoff.unresolved.length} стойности остават за проверка в конструктора.` }
   }
 
   const updateHybridSession = (updater: (current: HybridProductDesignerSession) => HybridProductDesignerSession) => {
@@ -425,7 +438,7 @@ function App() {
         />
       )}
       {showProfileCatalogue && <ProfileCatalogue profiles={catalogueProfiles} selection={activeProfileSelection} onProfiles={updateCatalogue} onSelection={setActiveProfileSelection} onClose={closeProfileCatalogue}/>}
-      {showAiWorkspace && <FacadeFlowAIWorkspace session={aiSession} onSession={setAiSession} activeProfileCount={catalogueProfiles.filter((item) => item.status !== 'ARCHIVED').length} profiles={catalogueProfiles} onClose={closeAiWorkspaceToPrevious} onOpenImportCenter={() => { setDrawingImportOrigin('AI'); setShowAiWorkspace(false); setShowDrawingImport(true) }} onOpenProductDesigner={openConfirmedAiProductInConstructor} onOpenCustomCad={() => { setCustomDesignerOrigin('AI'); setShowAiWorkspace(false); setShowCustomDesigner(true) }} onOpenProfileCatalogue={() => { setProfileCatalogueOrigin('AI'); setShowAiWorkspace(false); setShowProfileCatalogue(true) }}/>}
+      {showAiWorkspace && <FacadeFlowAIWorkspace session={aiSession} onSession={setAiSession} activeProfileCount={catalogueProfiles.filter((item) => item.status !== 'ARCHIVED').length} profiles={catalogueProfiles} onClose={closeAiWorkspaceToPrevious} onOpenImportCenter={() => { setDrawingImportOrigin('AI'); setShowAiWorkspace(false); setShowDrawingImport(true) }} onOpenProductDesigner={openConfirmedAiProductInConstructor} onOpenCustomCad={() => { setCustomDesignerOrigin('AI'); setShowAiWorkspace(false); setShowCustomDesigner(true) }} onOpenProfileCatalogue={() => { setProfileCatalogueOrigin('AI'); setShowAiWorkspace(false); setShowProfileCatalogue(true) }} onOpenAi04Constructor={openReviewedAiProposalInEditableConstructor}/>}
       {showDetailDrafting && (
         <DetailDraftingPlaceholder
           session={hybridSession}

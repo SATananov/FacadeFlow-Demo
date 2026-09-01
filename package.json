@@ -76,7 +76,12 @@
     "test:phase06c3_9_1": "vite build --ssr tests/phase06c3_9_1.test.ts --outDir .facadeflow-runtime/phase06c3_9_1-tests --emptyOutDir && node --test .facadeflow-runtime/phase06c3_9_1-tests/phase06c3_9_1.test.js",
     "test:phase06c3_9_2": "vite build --ssr tests/phase06c3_9_2.test.ts --outDir .facadeflow-runtime/phase06c3_9_2-tests --emptyOutDir && node --test .facadeflow-runtime/phase06c3_9_2-tests/phase06c3_9_2.test.js",
     "test:phase06c3_7": "vite build --ssr tests/phase06c3_7.test.ts --outDir .facadeflow-runtime/phase06c3_7-tests --emptyOutDir && node --test .facadeflow-runtime/phase06c3_7-tests/phase06c3_7.test.js",
-    "test:ai03_5": "vite build --ssr tests/ai03_5VisualPolish.test.ts --outDir .facadeflow-runtime/ai03_5-tests --emptyOutDir && node --test .facadeflow-runtime/ai03_5-tests/ai03_5VisualPolish.test.js"
+    "test:ai03_5": "vite build --ssr tests/ai03_5VisualPolish.test.ts --outDir .facadeflow-runtime/ai03_5-tests --emptyOutDir && node --test .facadeflow-runtime/ai03_5-tests/ai03_5VisualPolish.test.js",
+    "test:ai04_1": "vite build --ssr tests/ai04_1ConstructorHandoff.test.ts --outDir .facadeflow-runtime/ai04_1-tests --emptyOutDir && node --test .facadeflow-runtime/ai04_1-tests/ai04_1ConstructorHandoff.test.js",
+    "test:ai04_2": "vite build --ssr tests/ai04_2ProfileAndOpeningPreservation.test.ts --outDir .facadeflow-runtime/ai04_2-tests --emptyOutDir && node --test .facadeflow-runtime/ai04_2-tests/ai04_2ProfileAndOpeningPreservation.test.js",
+    "test:ai04_3": "vite build --ssr tests/ai04_3SafetyBoundary.test.ts --outDir .facadeflow-runtime/ai04_3-tests --emptyOutDir && node --test .facadeflow-runtime/ai04_3-tests/ai04_3SafetyBoundary.test.js",
+    "test:ai04_4": "vite build --ssr tests/ai04_4WorkspaceIntegration.test.ts --outDir .facadeflow-runtime/ai04_4-tests --emptyOutDir && node --test .facadeflow-runtime/ai04_4-tests/ai04_4WorkspaceIntegration.test.js",
+    "test:ai04": "npm run test:ai04_1 && npm run test:ai04_2 && npm run test:ai04_3 && npm run test:ai04_4"
   },
   "dependencies": {
     "@mlightcad/libredwg-web": "0.7.10",

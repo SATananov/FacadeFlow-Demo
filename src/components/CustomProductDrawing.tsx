@@ -7,7 +7,7 @@ import {
   modelToDrawingPoint,
   type ModelCoordinates,
 } from '../customDrawingCoordinates'
-import type { CustomProduct } from '../customGeometryTypes'
+import type { CustomLeafNode, CustomProduct } from '../customGeometryTypes'
 import type { CustomDrawingLine, CustomDrawingLineEndpoint } from '../customDrawingLines'
 import type { DimensionAnnotation, DimensionVisibility } from '../dimensionTypes'
 import { defaultDimensionVisibility } from '../dimensionTypes'
@@ -15,6 +15,14 @@ import { OpeningSymbol } from './OpeningSymbol'
 import { ProductDimensions2D } from './ProductDimensions2D'
 import { CustomSnapMarker } from './CustomSnapMarker'
 import { CadCrosshair } from './CadCrosshair'
+
+function openingNotationForLeaf(node: CustomLeafNode) {
+  if (node.openingType === 'TILT') return 'TILT_PLACEHOLDER' as const
+  if (node.openingType === 'TILT_TURN') return 'TILT_TURN_PLACEHOLDER' as const
+  if (node.openingDirection === 'right') return 'SIDE_TRIANGLE_LEFT' as const
+  if (node.openingDirection === 'left') return 'SIDE_TRIANGLE_RIGHT' as const
+  return null
+}
 
 interface Props {
   product: CustomProduct
@@ -147,7 +155,7 @@ export function CustomProductDrawing({ product, selectedFieldId, onSelectField, 
     {product.frameCreated && <rect x={ox} y={oy} width={width} height={height} className="custom-frame"/>}
     {leaves.map(({ node, rect }) => node.kind === 'LEAF' && <g key={node.id} role="button" tabIndex={0} aria-label={`Поле ${node.id}, ${node.fieldType}`} onClick={() => { onClearDrawingLineSelection?.(); onSelectField(node.id) }} onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); onClearDrawingLineSelection?.(); onSelectField(node.id) } }}>
       <rect x={rect.x + 5} y={rect.y + 5} width={Math.max(0, rect.width - 10)} height={Math.max(0, rect.height - 10)} className={`custom-field ${node.fieldType.toLowerCase()} ${selectedFieldId === node.id ? 'selected' : ''}`}/>
-      {node.fieldType === 'OPENING_SASH' && <><rect x={rect.x + 12} y={rect.y + 12} width={Math.max(0, rect.width - 24)} height={Math.max(0, rect.height - 24)} className="custom-sash-outline"/>{node.openingDirection && <OpeningSymbol x={rect.x + 13} y={rect.y + 13} width={Math.max(0, rect.width - 26)} height={Math.max(0, rect.height - 26)} notation={node.openingDirection === 'right' ? 'SIDE_TRIANGLE_LEFT' : 'SIDE_TRIANGLE_RIGHT'} openingDirection={node.openingDirection} directionConfirmed/>}</>}
+      {node.fieldType === 'OPENING_SASH' && (() => { const notation = openingNotationForLeaf(node); return <><rect x={rect.x + 12} y={rect.y + 12} width={Math.max(0, rect.width - 24)} height={Math.max(0, rect.height - 24)} className="custom-sash-outline"/>{notation && <OpeningSymbol x={rect.x + 13} y={rect.y + 13} width={Math.max(0, rect.width - 26)} height={Math.max(0, rect.height - 26)} notation={notation} openingDirection={node.openingDirection} directionConfirmed={Boolean(node.openingDirection)}/>}</> })()}
       <text x={rect.x + rect.width / 2} y={rect.y + rect.height / 2 + 4} className="custom-field-id">{node.id}</text>
     </g>)}
     {splits.map(({ node, rect }) => node.kind === 'SPLIT' && <g key={node.id}>{node.orientation === 'VERTICAL' ? <line x1={rect.x + node.position * scale} y1={rect.y} x2={rect.x + node.position * scale} y2={rect.y + rect.height} className="custom-divider"/> : <line x1={rect.x} y1={rect.y + node.position * scale} x2={rect.x + rect.width} y2={rect.y + node.position * scale} className="custom-divider"/>}<text x={node.orientation === 'VERTICAL' ? rect.x + node.position * scale + 7 : rect.x + 7} y={node.orientation === 'VERTICAL' ? rect.y + 17 : rect.y + node.position * scale - 7} className="custom-divider-label">{Math.round(node.position)} mm</text></g>)}

@@ -95,22 +95,27 @@ function ProposalDrawing({ proposal }: { proposal: FacadeFlowAi03ParametricPropo
   </svg>
 }
 
-export function ParametricConstructionProposalPanel({ intent, sourceLabel }: { intent: FacadeFlowProductIntent; sourceLabel: string }) {
+export function ParametricConstructionProposalPanel({ intent, sourceLabel, onOpenEditableConstructor }: { intent: FacadeFlowProductIntent; sourceLabel: string; onOpenEditableConstructor?: (proposal: FacadeFlowAi03ParametricProposal) => { ok: boolean; message: string } }) {
   const baseProposal = useMemo(() => buildFacadeFlowParametricConstructionProposal(intent), [intent])
   const fingerprint = useMemo(() => proposalFingerprint(baseProposal), [baseProposal])
   const [reviewFingerprint, setReviewFingerprint] = useState('')
   const [topologyCheckedState, setTopologyCheckedState] = useState(false)
   const [assumptionsAcceptedState, setAssumptionsAcceptedState] = useState(false)
+  const [handoffFingerprint, setHandoffFingerprint] = useState('')
+  const [handoffMessage, setHandoffMessage] = useState('')
   const isCurrentReview = reviewFingerprint === fingerprint
   const topologyChecked = isCurrentReview && topologyCheckedState
   const assumptionsAccepted = isCurrentReview && assumptionsAcceptedState
   const proposal = humanReviewFacadeFlowParametricProposal(baseProposal, { topologyChecked, assumptionsAccepted })
+  const handoffAcknowledged = handoffFingerprint === fingerprint
   const setReview = (patch: { topologyChecked?: boolean; assumptionsAccepted?: boolean }) => {
     const nextTopology = isCurrentReview ? topologyCheckedState : false
     const nextAssumptions = isCurrentReview ? assumptionsAcceptedState : false
     setReviewFingerprint(fingerprint)
     setTopologyCheckedState(patch.topologyChecked ?? nextTopology)
     setAssumptionsAcceptedState(patch.assumptionsAccepted ?? nextAssumptions)
+    setHandoffFingerprint('')
+    setHandoffMessage('')
   }
 
   return <section className={`ff-ai03-proposal status-${proposal.status.toLowerCase()}`} aria-labelledby={`${proposal.id}-title`}>
@@ -150,6 +155,14 @@ export function ParametricConstructionProposalPanel({ intent, sourceLabel }: { i
       {proposal.assumptions.length > 0 && <label><input type="checkbox" checked={assumptionsAccepted} onChange={(event) => setReview({ assumptionsAccepted: event.target.checked })}/> Приемам изрично показаните предположения само като концептуална топология за следваща ръчна стъпка.</label>}
       <p>AI03 не прехвърля тази геометрия автоматично към конструктора. Следващият handoff остава отделен и експлицитен.</p>
     </div>}
+
+    {proposal.status === 'HUMAN_REVIEWED' && <section className="ff-ai04-handoff-gate" aria-label="AI04 explicit constructor handoff">
+      <div><span>AI04 · ЕКСПЛИЦИТЕН ПРЕХОД КЪМ РЕДАКТИРУЕМА ГЕОМЕТРИЯ</span><strong>Прегледаното предложение може да стане нова editable simulation чернова.</strong><p>AI04 копира само прегледаната геометрия и доказаните съвместими стойности. Не приема профили по подразбиране, не валидира правила и не създава machine-ready модел.</p></div>
+      <label><input type="checkbox" checked={handoffAcknowledged} onChange={(event) => { setHandoffFingerprint(event.target.checked ? fingerprint : ''); setHandoffMessage('') }}/> Потвърждавам отделния преход: искам тази човешки прегледана топология да се създаде като редактируема чернова в конструктора.</label>
+      <button type="button" className="primary-button" disabled={!handoffAcknowledged || !onOpenEditableConstructor} onClick={() => { if (!onOpenEditableConstructor) return; const result = onOpenEditableConstructor(proposal); setHandoffMessage(result.message) }}>Създай редактируема геометрия в конструктора</button>
+      {handoffMessage && <p className="ff-ai04-handoff-message" role="status">{handoffMessage}</p>}
+      <footer>AUTOMATIC CONSTRUCTOR HANDOFF: NO · HUMAN-APPROVED PROPOSAL: YES · RULES VALIDATED: NO · MACHINE READY: NO</footer>
+    </section>}
 
     <footer data-safety={AI03_SAFETY_MARKERS}>AI03 предложение: ДА · Автоматично приемане: НЕ · Преход към конструктора: НЕ · Правила валидирани: НЕ · Готово за машина: НЕ</footer>
   </section>

@@ -5,12 +5,14 @@ import { updateFacadeFlowGuidedProduct } from '../aiWorkspaceState'
 import type { FacadeFlowAiSession } from '../aiWorkspaceTypes'
 import type { CatalogueProfile } from '../profileCatalogueTypes'
 import { FacadeFlowIcon } from './FacadeFlowIcons'
+import type { FacadeFlowAi03ParametricProposal } from '../aiParametricConstructionProposal'
 import { ParametricConstructionProposalPanel } from './ParametricConstructionProposalPanel'
 
-export function PromptInterpretationPanel({ session, profiles, setSession }: {
+export function PromptInterpretationPanel({ session, profiles, setSession, onOpenAi04Constructor }: {
   session: FacadeFlowAiSession
   profiles: CatalogueProfile[]
   setSession: (updater: (current: FacadeFlowAiSession) => FacadeFlowAiSession) => void
+  onOpenAi04Constructor: (proposal: FacadeFlowAi03ParametricProposal) => { ok: boolean; message: string }
 }) {
   const [result, setResult] = useState<FacadeFlowPromptInterpretationResult | null>(null)
   const sourceText = session.job.description.trim()
@@ -33,7 +35,7 @@ export function PromptInterpretationPanel({ session, profiles, setSession }: {
       {result.unresolved.length > 0 && <div className="ff-ai-prompt-unresolved"><b>НЕУТОЧНЕНО</b><div>{result.unresolved.map((item) => <span key={item}>{item}</span>)}</div></div>}
       {result.warnings.length > 0 && <details className="ff-ai-prompt-warnings"><summary>Предупреждения / граници ({result.warnings.length})</summary><ul>{result.warnings.map((item) => <li key={item}>{item}</li>)}</ul></details>}
       <div className="ff-ai-prompt-bridge"><button type="button" className="primary-button" disabled={stale || !result.validForHumanReview || result.recognized.length === 0} onClick={apply}>Прехвърли разпознатото към формуляра</button><span>{bridge ? `${bridge.transferred.length} съвместими стойности могат да се прехвърлят. ${bridge.notTransferred.length ? 'Топологията остава за отделна човешка/геометрична стъпка.' : ''}` : 'Първо разчети актуалния текст.'}</span></div>
-      {!stale && result.validForHumanReview && result.recognized.length > 0 && <ParametricConstructionProposalPanel intent={result.intent} sourceLabel="Свободно описание"/>}
+      {!stale && result.validForHumanReview && result.recognized.length > 0 && <ParametricConstructionProposalPanel intent={result.intent} sourceLabel="Свободно описание" onOpenEditableConstructor={onOpenAi04Constructor}/>}
       <em className="ff-ai-prompt-safety">AUTOMATIC GEOMETRY: NO · RULES VALIDATED: NO · MACHINE READY: NO</em>
       {!stale && result.validForHumanReview && result.recognized.length > 0 && <small className="ff-ai03-legacy-safety-note">AI03 preview е proposal-only; „AUTOMATIC GEOMETRY: NO“ означава без автоматично приета или прехвърлена CAD геометрия.</small>}
     </div>}
