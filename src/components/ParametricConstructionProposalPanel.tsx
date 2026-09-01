@@ -7,12 +7,26 @@ import {
 } from '../aiParametricConstructionProposal'
 import type { FacadeFlowProductIntent } from '../aiProductIntent'
 
+const AI03_SAFETY_MARKERS = 'AUTO-GENERATED PROPOSAL: YES · AUTOMATIC ACCEPTANCE: NO · CONSTRUCTOR HANDOFF: NO · RULES VALIDATED: NO · MACHINE READY: NO'
+
 const roleLabel: Record<FacadeFlowAi03ProposalField['role'], string> = {
-  FIXED: 'FIXED',
+  FIXED: 'ФИКСИРАНО',
   OPENING_SASH: 'ОТВАРЯЕМО',
   SLIDING_SASH: 'ПЛЪЗГАЩО',
   PANEL: 'ПАНЕЛ',
   UNRESOLVED: 'НЕУТОЧНЕНО',
+}
+
+const statusLabel: Record<FacadeFlowAi03ParametricProposal['status'], string> = {
+  BLOCKED: 'Блокирано',
+  NEEDS_REVIEW: 'Нуждае се от преглед',
+  HUMAN_REVIEWED: 'Прегледано от човек',
+}
+
+function geometryBasisLabel(basis: FacadeFlowAi03ParametricProposal['geometryBasis']) {
+  if (basis === 'EQUAL_DISTRIBUTION_PROPOSAL') return 'Равномерно разпределение (предложение)'
+  if (basis === 'EXPLICIT_DIVIDERS') return 'Делители от доказателствата'
+  return 'Неуточнена'
 }
 
 function proposalFingerprint(proposal: FacadeFlowAi03ParametricProposal) {
@@ -101,26 +115,42 @@ export function ParametricConstructionProposalPanel({ intent, sourceLabel }: { i
 
   return <section className={`ff-ai03-proposal status-${proposal.status.toLowerCase()}`} aria-labelledby={`${proposal.id}-title`}>
     <header className="ff-ai03-head">
-      <div><span>AI03 · PARAMETRIC CONSTRUCTION PROPOSAL</span><h4 id={`${proposal.id}-title`}>{proposal.mark || sourceLabel} → концептуална параметрична конструкция</h4><p>FacadeFlow може да построи видимо 2D предложение от доказаните Product Intent данни. Предложената геометрия не се приема автоматично и не е производствен модел.</p></div>
-      <b>{proposal.status === 'BLOCKED' ? 'BLOCKED' : proposal.status === 'HUMAN_REVIEWED' ? 'HUMAN REVIEWED' : 'NEEDS REVIEW'}</b>
+      <div className="ff-ai03-head-copy">
+        <span>AI03 · ПАРАМЕТРИЧНО ПРЕДЛОЖЕНИЕ</span>
+        <div className="ff-ai03-title-row">
+          <h4 id={`${proposal.id}-title`}>{proposal.mark || sourceLabel}</h4>
+          <b>{statusLabel[proposal.status]}</b>
+        </div>
+        <p><strong>Концептуална параметрична конструкция</strong> · 2D предложение от доказаните Product Intent данни. Геометрията не се приема автоматично и не е производствен модел.</p>
+      </div>
     </header>
 
     {proposal.blockers.length > 0 ? <div className="ff-ai03-blocked"><strong>Няма достатъчно доказателства за безопасно геометрично предложение.</strong><ul>{proposal.blockers.map((item) => <li key={item}>{item}</li>)}</ul></div> : <div className="ff-ai03-layout">
-      <div className="ff-ai03-canvas"><ProposalDrawing proposal={proposal}/><small>{proposal.geometryBasis === 'EQUAL_DISTRIBUTION_PROPOSAL' ? 'Пунктирани делители = AI03 предложение за равномерно разпределение, не доказан проектен размер.' : 'Плътни делители = позиция от Product Intent evidence.'}</small></div>
+      <section className="ff-ai03-canvas" aria-label="2D предложение">
+        <div className="ff-ai03-card-heading"><span>2D ПРЕДЛОЖЕНИЕ</span><b>{proposal.dimensions.widthMm} × {proposal.dimensions.heightMm} mm</b></div>
+        <ProposalDrawing proposal={proposal}/>
+        <small>{proposal.geometryBasis === 'EQUAL_DISTRIBUTION_PROPOSAL' ? 'Пунктираните делители са предложение за равномерно разпределение, а не доказани проектни размери.' : 'Плътните делители са позиционирани според наличните Product Intent доказателства.'}</small>
+      </section>
       <aside className="ff-ai03-summary">
-        <dl><div><dt>Източник</dt><dd>{sourceLabel}</dd></div><div><dt>Evidence</dt><dd>{proposal.evidenceCount}</dd></div><div><dt>Основа</dt><dd>{proposal.geometryBasis || '—'}</dd></div><div><dt>Полета</dt><dd>{proposal.fields.length}</dd></div><div><dt>Система</dt><dd>{proposal.profileSummary.system || 'неуточнена'}</dd></div><div><dt>Стъкло</dt><dd>{proposal.glazing.description || 'неуточнено'}</dd></div><div><dt>Панти</dt><dd>{proposal.hardwareSummary.hingeQuantity ?? 'неуточнени'}</dd></div><div><dt>Дръжка</dt><dd>{proposal.hardwareSummary.handle || 'неуточнена'}</dd></div></dl>
-        {proposal.assumptions.length > 0 && <section className="ff-ai03-assumptions"><strong>ПРЕДПОЛОЖЕНИЯ ЗА ПРИЕМАНЕ ОТ ЧОВЕК</strong>{proposal.assumptions.map((item) => <div key={item.id}><b>{item.label}</b><span>{item.detail}</span></div>)}</section>}
-        {proposal.unresolved.length > 0 && <details open className="ff-ai03-unresolved"><summary>Неуточнено ({proposal.unresolved.length})</summary><ul>{proposal.unresolved.map((item) => <li key={item}>{item}</li>)}</ul></details>}
-        {proposal.warnings.length > 0 && <details className="ff-ai03-warnings"><summary>Предупреждения ({proposal.warnings.length})</summary><ul>{proposal.warnings.map((item) => <li key={item}>{item}</li>)}</ul></details>}
+        <section className="ff-ai03-facts">
+          <div className="ff-ai03-card-heading"><span>КЛЮЧОВИ ДАННИ</span><b>{proposal.fields.length} полета</b></div>
+          <dl><div><dt>Източник</dt><dd>{sourceLabel}</dd></div><div><dt>Доказателства</dt><dd>{proposal.evidenceCount}</dd></div><div className="wide"><dt>Основа на геометрията</dt><dd>{geometryBasisLabel(proposal.geometryBasis)}</dd></div><div><dt>Профилна система</dt><dd>{proposal.profileSummary.system || 'неуточнена'}</dd></div><div><dt>Стъкло / пълнеж</dt><dd>{proposal.glazing.description || 'неуточнено'}</dd></div><div><dt>Панти</dt><dd>{proposal.hardwareSummary.hingeQuantity ?? 'неуточнени'}</dd></div><div><dt>Дръжка</dt><dd>{proposal.hardwareSummary.handle || 'неуточнена'}</dd></div></dl>
+        </section>
+        {proposal.assumptions.length > 0 && <section className="ff-ai03-assumptions"><strong>Предположения за приемане от човек</strong>{proposal.assumptions.map((item) => <div key={item.id}><b>{item.label}</b><span>{item.detail}</span></div>)}</section>}
+        <div className="ff-ai03-review-details">
+          {proposal.unresolved.length > 0 && <details open className="ff-ai03-unresolved"><summary>Неуточнено ({proposal.unresolved.length})</summary><ul>{proposal.unresolved.map((item) => <li key={item}>{item}</li>)}</ul></details>}
+          {proposal.warnings.length > 0 && <details className="ff-ai03-warnings"><summary>Предупреждения ({proposal.warnings.length})</summary><ul>{proposal.warnings.map((item) => <li key={item}>{item}</li>)}</ul></details>}
+        </div>
       </aside>
     </div>}
 
     {!proposal.blockers.length && <div className="ff-ai03-human-gate">
+      <div className="ff-ai03-human-gate-head"><span>ЧОВЕШКА ПРОВЕРКА</span><strong>{proposal.status === 'HUMAN_REVIEWED' ? '✓ Предложението е прегледано' : 'Потвърждението е задължително'}</strong></div>
       <label><input type="checkbox" checked={topologyChecked} onChange={(event) => setReview({ topologyChecked: event.target.checked })}/> Проверих визуално броя полета, ролите и общите размери на предложението.</label>
       {proposal.assumptions.length > 0 && <label><input type="checkbox" checked={assumptionsAccepted} onChange={(event) => setReview({ assumptionsAccepted: event.target.checked })}/> Приемам изрично показаните предположения само като концептуална топология за следваща ръчна стъпка.</label>}
-      <div><strong>{proposal.status === 'HUMAN_REVIEWED' ? '✓ Концептуалното предложение е прегледано от човек.' : 'Human Review е задължителен.'}</strong><span>AI03 не прехвърля тази геометрия автоматично към конструктора. Това ще бъде отделен, експлицитен handoff gate.</span></div>
+      <p>AI03 не прехвърля тази геометрия автоматично към конструктора. Следващият handoff остава отделен и експлицитен.</p>
     </div>}
 
-    <footer>AUTO-GENERATED PROPOSAL: YES · AUTOMATIC ACCEPTANCE: NO · CONSTRUCTOR HANDOFF: NO · RULES VALIDATED: NO · MACHINE READY: NO</footer>
+    <footer data-safety={AI03_SAFETY_MARKERS}>AI03 предложение: ДА · Автоматично приемане: НЕ · Преход към конструктора: НЕ · Правила валидирани: НЕ · Готово за машина: НЕ</footer>
   </section>
 }
