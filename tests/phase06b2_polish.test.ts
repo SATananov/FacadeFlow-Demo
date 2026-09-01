@@ -26,7 +26,7 @@ test('06B.2 polish keeps the AI safety rail compact, technical and horizontally 
 test('06B.2 polish integrates the Human Gate as a dark CAD inspector', () => {
   assert.match(aiSource, /<aside className="ff-ai-review-column">/)
   assert.match(aiSource, /AI → ЧОВЕШКА ПРОВЕРКА/)
-  assert.match(aiSource, /Човешко потвърждение/)
+  assert.match(aiSource, /Човешки преглед \/ потвърждение/)
   assert.match(aiSource, /Проверка по правила/)
   assert.match(aiCss, /\.ff-ai-review-column\{[^}]*background:linear-gradient\(180deg,#0d232b 0%,#0a1d24 100%\)[^}]*border-left:1px solid #31515b/)
   assert.match(aiCss, /\.ff-ai-gate-list li\.done\{[^}]*border-color:#2e6e68[^}]*background:#102f34/)

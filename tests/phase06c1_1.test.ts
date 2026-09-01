@@ -36,7 +36,7 @@ test('06C.1.1 right inspector is a live product summary before proposal creation
   assert.match(source, /guidedProductCompletion/)
   assert.match(source, /guidedProductUnresolved/)
   assert.match(source, /НЕПОТВЪРДЕНО/)
-  assert.match(source, /SIMULATION ONLY · MACHINE READY: NO/)
+  assert.match(source, /СИМУЛАЦИЯ · ГОТОВО ЗА МАШИНА: НЕ/)
 })
 
 test('06C.1.1 replaces oversized context cards with responsive compact controls', () => {

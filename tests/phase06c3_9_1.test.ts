@@ -88,7 +88,7 @@ test('06C.3.9.1 dry run never uses a real Nadezhda profile code or source file a
 test('06C.3.9.1 UI exposes the complete dry-run path while active data and production remain locked', () => {
   const ui = readFileSync('src/components/RealDataDryRun.tsx', 'utf8')
   const pipeline = readFileSync('src/components/UnifiedDemoPipeline.tsx', 'utf8')
-  for (const text of ['КОНТРОЛЕН DRY RUN', 'Зареди тестов запис', 'Премести в карантина', 'Подготви тестовите решения', 'Потвърди човешкото съпоставяне', 'Създай кандидат за преглед за активиране', 'АКТИВНИ ДАННИ: 0', 'АВТОМАТИЧНО СЪПОСТАВЯНЕ: НЕ', 'ПРОИЗВОДСТВО: ЗАКЛЮЧЕНО']) assert.match(ui, new RegExp(text))
+  for (const text of ['КОНТРОЛЕН ТЕСТОВ МАРШРУТ', 'Зареди тестов запис', 'Премести в карантина', 'Подготви тестовите решения', 'Потвърди човешкото съпоставяне', 'Създай кандидат за преглед за активиране', 'АКТИВНИ ДАННИ: 0', 'АВТОМАТИЧНО СЪПОСТАВЯНЕ: НЕ', 'ПРОИЗВОДСТВО: ЗАКЛЮЧЕНО']) assert.match(ui, new RegExp(text))
   assert.match(pipeline, /RealDataDryRun/)
   for (const unsafe of ['fetch(', 'WebSocket', 'localStorage', 'sessionStorage', 'acceptedIntoActiveData: true', 'machineReady: true']) assert.doesNotMatch(ui + readFileSync('src/aiRealDataDryRun.ts', 'utf8'), new RegExp(unsafe.replace('(', '\\(')))
 })
