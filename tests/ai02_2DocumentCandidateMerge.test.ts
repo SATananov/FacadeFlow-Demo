@@ -46,6 +46,50 @@ test('AI02.2 exposes dimension conflicts and refuses to choose a winner', () => 
   assert.equal(group.machineReady, false)
 })
 
+
+test('AI02.2 treats Bulgarian and English glazing synonyms as semantic equivalents', () => {
+  const bg = analyzeFacadeFlowDocumentSource(source('bg', 'prompt-derived.txt', 'W-31 window 2400x1500 mm, system SYS-90, троен стъклопакет', 'd'))
+  const en = analyzeFacadeFlowDocumentSource(source('en', 'technical-spec.txt', 'W-31 window 2400x1500 mm, system SYS-90, triple glazing', 'e'))
+  const group = buildFacadeFlowDocumentCandidateGroups([...bg, ...en])[0]!
+  assert.equal(group.status, 'CORROBORATED')
+  assert.equal(group.conflicts.some((conflict) => conflict.field === 'GLAZING'), false)
+  assert.ok(group.mergedIntent.glazing.description)
+})
+
+test('AI02.2 still exposes a real glazing conflict when semantic classes differ', () => {
+  const double = analyzeFacadeFlowDocumentSource(source('double', 'schedule.txt', 'W-41 window 1800x1400 mm, double glazing', 'f'))
+  const triple = analyzeFacadeFlowDocumentSource(source('triple', 'spec.txt', 'W-41 window 1800x1400 mm, triple glazing', '0'))
+  const group = buildFacadeFlowDocumentCandidateGroups([...double, ...triple])[0]!
+  assert.equal(group.status, 'CONFLICT')
+  assert.deepEqual(group.conflicts.filter((conflict) => conflict.field === 'GLAZING').map((conflict) => conflict.values), [['double glazing', 'triple glazing']])
+  assert.equal(group.mergedIntent.glazing.description, undefined)
+  assert.ok(group.mergedIntent.unresolved.some((item) => /КОНФЛИКТ: Стъкло \/ пълнеж/.test(item)))
+})
+
+
+test('AI03 Human Audit sample does not report a false glazing conflict for Bulgarian versus English triple glazing', () => {
+  const bg = analyzeFacadeFlowDocumentSource(source('bg-sample', 'AI03_SAMPLE_PROMPT_BG.txt', 'Направи прозорец W-31 2400x1500, три полета, лявото фиксирано, средното tilt-turn, дясното фиксирано, система SYS-90, RAL 7016, черна дръжка, две панти, троен стъклопакет.', '1'))
+  const en = analyzeFacadeFlowDocumentSource(source('en-sample', 'AI03_SAMPLE_TOPOLOGY_SPEC.txt', 'W-31 window 2400x1500 mm, 3 fields, left fixed, middle tilt-turn, right fixed, system SYS-90, RAL 7016, black handle, 2 hinges, triple glazing', '2'))
+  const group = buildFacadeFlowDocumentCandidateGroups([...bg, ...en])[0]!
+  assert.equal(group.mark, 'W-31')
+  assert.equal(group.status, 'CORROBORATED')
+  assert.deepEqual(group.conflicts, [])
+  assert.equal(group.mergedIntent.dimensions.widthMm, 2400)
+  assert.equal(group.mergedIntent.fields.length, 3)
+  assert.equal(group.mergedIntent.profiles.system, 'SYS-90')
+  assert.ok(group.mergedIntent.glazing.description)
+  assert.ok(group.mergedIntent.hardwareDefaults.handle)
+})
+
+test('AI03 Human Audit sample preserves the bilingual handle', () => {
+  const bg = analyzeFacadeFlowDocumentSource(source('bg-handle-sample', 'AI03_SAMPLE_PROMPT_BG.txt', 'Направи прозорец W-31 2400x1500, три полета, лявото фиксирано, средното tilt-turn, дясното фиксирано, система SYS-90, RAL 7016, черна дръжка, две панти, троен стъклопакет.', '7'))
+  const en = analyzeFacadeFlowDocumentSource(source('en-handle-sample', 'AI03_SAMPLE_TOPOLOGY_SPEC.txt', 'W-31 window 2400x1500 mm, 3 fields, left fixed, middle tilt-turn, right fixed, system SYS-90, RAL 7016, black handle, 2 hinges, triple glazing', '8'))
+  const group = buildFacadeFlowDocumentCandidateGroups([...bg, ...en])[0]!
+  assert.equal(group.status, 'CORROBORATED')
+  assert.equal(group.conflicts.some((conflict) => conflict.field === 'HANDLE'), false)
+  assert.ok(group.mergedIntent.hardwareDefaults.handle)
+})
+
 test('AI02.2 sample package merges into exactly three product groups and keeps only the intended W-22 width conflict', () => {
   const schedule = analyzeFacadeFlowDocumentSource(source('schedule', 'AI02_SAMPLE_SCHEDULE.csv', [
     'mark,type,dimensions,quantity',
@@ -79,4 +123,24 @@ test('AI02.2 sample package merges into exactly three product groups and keeps o
   assert.equal(d04.conflicts.length, 0)
   assert.equal(d04.mergedIntent.category, 'DOOR')
   assert.equal(d04.mergedIntent.profiles.system, 'DOOR-75')
+})
+
+
+test('AI02.2 treats Bulgarian and English black-handle descriptions as semantic equivalents', () => {
+  const bg = analyzeFacadeFlowDocumentSource(source('bg-handle', 'prompt-bg.txt', 'W-51 window 2400x1500 mm, черна дръжка', '3'))
+  const en = analyzeFacadeFlowDocumentSource(source('en-handle', 'spec-en.txt', 'W-51 window 2400x1500 mm, black handle', '4'))
+  const group = buildFacadeFlowDocumentCandidateGroups([...bg, ...en])[0]!
+  assert.equal(group.status, 'CORROBORATED')
+  assert.equal(group.conflicts.some((conflict) => conflict.field === 'HANDLE'), false)
+  assert.ok(group.mergedIntent.hardwareDefaults.handle)
+})
+
+test('AI02.2 exposes a real handle conflict instead of silently dropping it', () => {
+  const black = analyzeFacadeFlowDocumentSource(source('black-handle', 'black.txt', 'W-52 window 1800x1400 mm, black handle', '5'))
+  const white = analyzeFacadeFlowDocumentSource(source('white-handle', 'white.txt', 'W-52 window 1800x1400 mm, white handle', '6'))
+  const group = buildFacadeFlowDocumentCandidateGroups([...black, ...white])[0]!
+  assert.equal(group.status, 'CONFLICT')
+  assert.equal(group.conflicts.some((conflict) => conflict.field === 'HANDLE'), true)
+  assert.equal(group.mergedIntent.hardwareDefaults.handle, undefined)
+  assert.ok(group.mergedIntent.unresolved.some((item) => /КОНФЛИКТ: Дръжка/.test(item)))
 })

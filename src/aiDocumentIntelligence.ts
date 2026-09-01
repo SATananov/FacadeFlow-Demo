@@ -56,7 +56,7 @@ export interface FacadeFlowDocumentCandidate {
 }
 
 export interface FacadeFlowDocumentConflict {
-  field: 'CATEGORY' | 'WIDTH' | 'HEIGHT' | 'QUANTITY' | 'SYSTEM' | 'FINISH' | 'GLAZING' | 'FIELD_TOPOLOGY'
+  field: 'CATEGORY' | 'WIDTH' | 'HEIGHT' | 'QUANTITY' | 'SYSTEM' | 'FINISH' | 'GLAZING' | 'HANDLE' | 'FIELD_TOPOLOGY'
   label: string
   values: string[]
   candidateIds: string[]
@@ -328,8 +328,36 @@ export function analyzeFacadeFlowDocumentSource(source: FacadeFlowProjectDocumen
   return candidates
 }
 
-function distinct(values: Array<string | number | undefined>) {
-  return [...new Set(values.filter((value): value is string | number => value !== undefined && value !== '').map(String))]
+function distinct(values: Array<string | number | undefined>, serialize: (value: string | number) => string = (value) => String(value)) {
+  const unique = new Map<string, string>()
+  for (const value of values) {
+    if (value === undefined || value === '') continue
+    const display = String(value)
+    const key = serialize(value)
+    if (!unique.has(key)) unique.set(key, display)
+  }
+  return [...unique.values()]
+}
+
+function canonicalGlazingKey(value: string | number) {
+  const normalized = compact(String(value)).toLocaleLowerCase('bg').replace(/[–—]/g, '-')
+  if (/(?:троен\s+стъклопакет|triple\s+glaz(?:ing|ed\s+unit)|3\s*[- ]?pane|three\s*[- ]?pane)/i.test(normalized)) return 'GLAZING:TRIPLE'
+  if (/(?:двоен\s+стъклопакет|double\s+glaz(?:ing|ed\s+unit)|2\s*[- ]?pane|two\s*[- ]?pane)/i.test(normalized)) return 'GLAZING:DOUBLE'
+  if (/(?:единич(?:но|ен)\s+(?:стъкло|остъкляване)|single\s+glaz(?:ing|ed)|1\s*[- ]?pane|one\s*[- ]?pane)/i.test(normalized)) return 'GLAZING:SINGLE'
+  return `GLAZING:RAW:${normalized}`
+}
+
+function canonicalHandleKey(value: string | number) {
+  const normalized = compact(String(value)).toLocaleLowerCase('bg').replace(/[–—]/g, '-')
+  const color = /(?:черн(?:а|о|и)|black)/i.test(normalized) ? 'BLACK'
+    : /(?:бял(?:а|о|и)|white)/i.test(normalized) ? 'WHITE'
+    : /(?:сив(?:а|о|и)|gr[ae]y)/i.test(normalized) ? 'GREY'
+    : /(?:сребрист(?:а|о|и)|silver)/i.test(normalized) ? 'SILVER'
+    : undefined
+  const keyed = /(?:с\s*ключ|ключалк|keyed|with\s+key)/i.test(normalized) ? 'KEYED' : undefined
+  if (color || keyed) return `HANDLE:${color || 'UNSPECIFIED'}:${keyed || 'STANDARD'}`
+  if (/(?:дръжка|handle)/i.test(normalized)) return `HANDLE:RAW:${normalized.replace(/(?:дръжка|handle)/gi, '').trim() || 'GENERIC'}`
+  return `HANDLE:RAW:${normalized}`
 }
 
 function topologySignature(intent: FacadeFlowProductIntent) {
@@ -338,18 +366,19 @@ function topologySignature(intent: FacadeFlowProductIntent) {
 }
 
 function conflictsFor(candidates: FacadeFlowDocumentCandidate[]): FacadeFlowDocumentConflict[] {
-  const definitions: Array<[FacadeFlowDocumentConflict['field'], string, (candidate: FacadeFlowDocumentCandidate) => string | number | undefined]> = [
+  const definitions: Array<[FacadeFlowDocumentConflict['field'], string, (candidate: FacadeFlowDocumentCandidate) => string | number | undefined, ((value: string | number) => string)?]> = [
     ['CATEGORY', 'Тип изделие', (candidate) => candidate.intent.category === 'UNRESOLVED' ? undefined : candidate.intent.category],
     ['WIDTH', 'Ширина', (candidate) => candidate.intent.dimensions.widthMm],
     ['HEIGHT', 'Височина', (candidate) => candidate.intent.dimensions.heightMm],
     ['QUANTITY', 'Количество', (candidate) => candidate.intent.quantity],
     ['SYSTEM', 'Профилна система', (candidate) => candidate.intent.profiles.system],
     ['FINISH', 'Цвят / покритие', (candidate) => candidate.intent.finish.exterior],
-    ['GLAZING', 'Стъкло / пълнеж', (candidate) => candidate.intent.glazing.description],
+    ['GLAZING', 'Стъкло / пълнеж', (candidate) => candidate.intent.glazing.description, canonicalGlazingKey],
+    ['HANDLE', 'Дръжка', (candidate) => candidate.intent.hardwareDefaults.handle, canonicalHandleKey],
     ['FIELD_TOPOLOGY', 'Полета / отваряемост', (candidate) => topologySignature(candidate.intent)],
   ]
-  return definitions.flatMap(([field, label, getter]) => {
-    const values = distinct(candidates.map(getter))
+  return definitions.flatMap(([field, label, getter, serialize]) => {
+    const values = distinct(candidates.map(getter), serialize)
     return values.length > 1 ? [{ field, label, values, candidateIds: candidates.filter((candidate) => getter(candidate) !== undefined).map((candidate) => candidate.id) }] : []
   })
 }
@@ -377,9 +406,9 @@ function mergeCandidateGroup(groupId: string, candidates: FacadeFlowDocumentCand
   merged.profiles.threshold = consensus(candidates.map((candidate) => candidate.intent.profiles.threshold), (value) => value.toLocaleLowerCase('bg'))
   merged.finish.exterior = consensus(candidates.map((candidate) => candidate.intent.finish.exterior), (value) => value.toLocaleLowerCase('bg'))
   merged.finish.interior = consensus(candidates.map((candidate) => candidate.intent.finish.interior), (value) => value.toLocaleLowerCase('bg'))
-  merged.glazing.description = consensus(candidates.map((candidate) => candidate.intent.glazing.description), (value) => value.toLocaleLowerCase('bg'))
+  merged.glazing.description = consensus(candidates.map((candidate) => candidate.intent.glazing.description), canonicalGlazingKey)
   merged.glazing.thicknessMm = consensus(candidates.map((candidate) => candidate.intent.glazing.thicknessMm))
-  merged.hardwareDefaults.handle = consensus(candidates.map((candidate) => candidate.intent.hardwareDefaults.handle), (value) => value.toLocaleLowerCase('bg'))
+  merged.hardwareDefaults.handle = consensus(candidates.map((candidate) => candidate.intent.hardwareDefaults.handle), canonicalHandleKey)
   merged.hardwareDefaults.hinges = consensus(candidates.map((candidate) => candidate.intent.hardwareDefaults.hinges), (value) => value.toLocaleLowerCase('bg'))
   merged.hardwareDefaults.hingeQuantity = consensus(candidates.map((candidate) => candidate.intent.hardwareDefaults.hingeQuantity))
   merged.hardwareDefaults.mechanism = consensus(candidates.map((candidate) => candidate.intent.hardwareDefaults.mechanism), (value) => value.toLocaleLowerCase('bg'))

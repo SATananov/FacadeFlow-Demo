@@ -46,7 +46,7 @@ export function FacadeFlowAIWorkspace({ session, onSession, activeProfileCount, 
       actions={<button type="button" className={session.view === 'KNOWLEDGE_BASE' ? 'selected' : ''} onClick={() => setSession((current) => setFacadeFlowAiView(current, current.view === 'KNOWLEDGE_BASE' ? 'INTAKE' : 'KNOWLEDGE_BASE'))}><FacadeFlowIcon name="data"/><span>Данни и каталози</span></button>}
       className="ff-ai-unified-header"
     />
-    <div className="ff-ai-safety"><b>AI моделът още не е свързан.</b> Няма автоматично генерирана геометрия, сървърна логика, мрежово изпращане или производствен изход. Всеки бъдещ AI резултат ще минава през човешка проверка и правила.</div>
+    <div className="ff-ai-safety"><b>AI моделът още не е свързан.</b> AI03 може локално да генерира само концептуално параметрично предложение. Няма автоматично приемане или handoff на геометрия, сървърна логика, мрежово изпращане или производствен изход. Всеки резултат минава през човешка проверка и правила.</div>
     <StatusRail session={session}/>
     {session.view === 'KNOWLEDGE_BASE' ? <KnowledgeBase session={session} profiles={profiles} setSession={setSession} activeProfileCount={activeProfileCount} onOpenProfileCatalogue={onOpenProfileCatalogue} demoActive={session.job.demoScenario === 'KNOWLEDGE_BASE'}/> : <Intake session={session} profiles={profiles} setSession={setSession} onOpenImportCenter={onOpenImportCenter} onOpenProductDesigner={onOpenProductDesigner} onOpenCustomCad={onOpenCustomCad} onOpenProfileCatalogue={onOpenProfileCatalogue}/>}
   </section>
