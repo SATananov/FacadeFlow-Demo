@@ -62,7 +62,7 @@ function parseDimensions(text: string) {
 
 function parseQuantity(text: string) {
   const patterns = [
-    /\b(?:qty|quantity|количество)\s*[:=]?\s*(\d{1,4})\b/i,
+    /(?:qty|quantity|количество)\s*[:=]?\s*(\d{1,4})\b/i,
     /\b(\d{1,4})\s*(?:бр\.?|броя|pieces?|pcs?)\b/i,
   ]
   for (const pattern of patterns) {
