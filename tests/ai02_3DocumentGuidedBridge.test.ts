@@ -20,7 +20,7 @@ test('AI02.3 bridges only compatible document values to the guided human-review 
   assert.equal(bridge.patch.exteriorColor, 'RAL 7016')
   assert.equal(bridge.patch.openingType, undefined)
   assert.ok(bridge.notTransferred.some((item) => /Топологията/.test(item)))
-  assert.match(bridge.patch.notes ?? '', /AI02 DOCUMENT SOURCE/)
+  assert.match(bridge.patch.notes ?? '', /ДОКУМЕНТЕН ИЗТОЧНИК/)
   assert.match(bridge.patch.notes ?? '', /window-schedule\.txt/)
   assert.equal(bridge.patch.reviewAccepted, false)
   assert.equal(bridge.patch.status, 'NEEDS_REVIEW')

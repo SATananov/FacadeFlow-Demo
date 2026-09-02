@@ -40,7 +40,7 @@ export function canCreateGuidedConstructorHandoff(session: FacadeFlowAiSession) 
 function buildHandoffEvidence(session: FacadeFlowAiSession, profiles: CatalogueProfile[]): HybridGuidedAiHandoff {
   const draft = session.job.guidedProduct
   const proposal = session.job.products.find((product) => product.id === `${session.job.id}-guided-product`)
-  if (!proposal || !draft.productType) throw new Error('Confirmed guided product proposal is required for constructor handoff.')
+  if (!proposal || !draft.productType) throw new Error('За преход към конструктора е нужно потвърдено от човек продуктово предложение.')
   const system = effectiveGuidedProfileSystem(draft)
   const frame = profileCode(profiles, draft.frameProfileId, 'FRAME') || draft.manualFrameProfile.trim()
   const sash = profileCode(profiles, draft.sashProfileId, 'SASH') || draft.manualSashProfile.trim()

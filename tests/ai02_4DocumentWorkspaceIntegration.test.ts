@@ -8,7 +8,7 @@ const intelligence = readFileSync('src/aiDocumentIntelligence.ts', 'utf8')
 
 test('AI02.4 replaces the future-document placeholder with the project document intelligence panel', () => {
   assert.match(workspace, /ProjectDocumentIntelligencePanel/)
-  assert.match(workspace, /ПРОЕКТ \/ ДОКУМЕНТИ · AI02/)
+  assert.match(workspace, /ПРОЕКТНИ ДОКУМЕНТИ · ЛОКАЛНО РАЗЧИТАНЕ/)
   assert.match(panel, /Пусни проектни документи тук/)
   assert.match(panel, /Прехвърли безопасните стойности/)
 })

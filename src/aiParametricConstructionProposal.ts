@@ -161,10 +161,10 @@ export function buildFacadeFlowParametricConstructionProposal(intent: FacadeFlow
   const assumptions: FacadeFlowAi03Assumption[] = []
   const unresolved = [...intent.unresolved]
 
-  if (intent.category !== 'WINDOW' && intent.category !== 'DOOR') blockers.push('AI03 V1 supports WINDOW or DOOR product proposals only.')
-  if (!finitePositive(intent.dimensions.widthMm)) blockers.push('Overall width is required before a proportional geometry proposal can be generated.')
-  if (!finitePositive(intent.dimensions.heightMm)) blockers.push('Overall height is required before a proportional geometry proposal can be generated.')
-  if (!intent.fields.length) blockers.push('Field topology is unresolved; AI03 will not assume that the product has one field.')
+  if (intent.category !== 'WINDOW' && intent.category !== 'DOOR') blockers.push('AI03 V1 поддържа предложения само за прозорец или врата.')
+  if (!finitePositive(intent.dimensions.widthMm)) blockers.push('Нужна е обща ширина, преди да се генерира пропорционално геометрично предложение.')
+  if (!finitePositive(intent.dimensions.heightMm)) blockers.push('Нужна е обща височина, преди да се генерира пропорционално геометрично предложение.')
+  if (!intent.fields.length) blockers.push('Топологията на полетата не е уточнена; AI03 няма да приема, че изделието има едно поле.')
 
   const widthMm = finitePositive(intent.dimensions.widthMm) ? intent.dimensions.widthMm : 1
   const heightMm = finitePositive(intent.dimensions.heightMm) ? intent.dimensions.heightMm : 1
@@ -176,7 +176,7 @@ export function buildFacadeFlowParametricConstructionProposal(intent: FacadeFlow
     if (intent.fields.length === 1) {
       fields = [proposalField(intent.fields[0]!, { xRatio: 0, yRatio: 0, widthRatio: 1, heightRatio: 1 })]
       geometryBasis = 'SINGLE_EXPLICIT_FIELD'
-      if (intent.dividers.length) warnings.push('Divider evidence exists for a single-field intent and was not projected automatically.')
+      if (intent.dividers.length) warnings.push('Има доказателство за делител при изделие с едно поле и то не е проектирано автоматично.')
     } else {
       const explicit = explicitLinearLayout(intent.fields, intent.dividers, widthMm, heightMm)
       if (explicit) {
@@ -196,7 +196,7 @@ export function buildFacadeFlowParametricConstructionProposal(intent: FacadeFlow
         })
         unresolved.push('Точни позиции / размери на делителите')
       } else {
-        blockers.push('Divider topology cannot be projected safely: mixed, incomplete or invalid divider positions require human geometry input.')
+        blockers.push('Топологията на делителите не може да се проектира безопасно: смесени, непълни или невалидни позиции изискват човешко въвеждане на геометрия.')
       }
     }
   }

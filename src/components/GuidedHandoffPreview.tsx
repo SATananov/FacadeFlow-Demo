@@ -38,6 +38,6 @@ export function GuidedHandoffPreview({ handoff }: { handoff: HybridGuidedAiHando
         <text x={x + drawingWidth / 2} y={y + drawingHeight / 2 + 24} textAnchor="middle">{[direction, handoff.opening.inwardOutward].filter(Boolean).join(' · ')}</text>
       </g>}
     </svg>
-    <figcaption><span>Пропорцията, размерът и отваряемостта са само визуално отражение на HUMAN CONFIRMED данните.</span>{hasMullionWithoutPosition && <strong>Делител {handoff.profileEvidence.mullion}: позицията е неуточнена и затова не е начертан.</strong>}</figcaption>
+    <figcaption><span>Пропорцията, размерът и отваряемостта са само визуално отражение на данните, потвърдени от човек.</span>{hasMullionWithoutPosition && <strong>Делител {handoff.profileEvidence.mullion}: позицията е неуточнена и затова не е начертан.</strong>}</figcaption>
   </figure>
 }

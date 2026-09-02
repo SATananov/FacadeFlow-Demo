@@ -1,4 +1,5 @@
 import { createFacadeFlowProductIntent, validateFacadeFlowProductIntent, type FacadeFlowIntentField, type FacadeFlowIntentOpeningDirection, type FacadeFlowIntentOpeningType, type FacadeFlowIntentSwing, type FacadeFlowProductIntent } from './aiProductIntent'
+import { aiUiMessageBg } from './aiUiLanguageBg'
 
 export type FacadeFlowPromptInterpreterMode = 'LOCAL_DETERMINISTIC'
 
@@ -196,6 +197,29 @@ function createFields(text: string, count: number | null, evidenceId: string): F
   return fields
 }
 
+
+const openingTypeDisplay: Record<FacadeFlowIntentOpeningType, string> = {
+  FIXED: 'Фиксирано',
+  TURN: 'Отваряемо',
+  TILT: 'Падащо',
+  TILT_TURN: 'Осово-откидно',
+  SLIDING: 'Плъзгащо',
+  OTHER: 'Друго',
+  UNRESOLVED: 'Неуточнено',
+}
+
+const openingDirectionDisplay: Record<FacadeFlowIntentOpeningDirection, string> = {
+  LEFT: 'Ляво',
+  RIGHT: 'Дясно',
+  UNRESOLVED: 'Неуточнено',
+}
+
+const swingDisplay: Record<FacadeFlowIntentSwing, string> = {
+  INWARD: 'Навътре',
+  OUTWARD: 'Навън',
+  UNRESOLVED: 'Неуточнено',
+}
+
 function recognition(id: string, label: string, value: string, excerpt: string, confidence: 'HIGH' | 'MEDIUM' = 'HIGH'): FacadeFlowPromptRecognition {
   return { id, label, value, excerpt, confidence }
 }
@@ -244,10 +268,10 @@ export function interpretFacadeFlowPrompt(sourceText: string, intentId = 'prompt
   const operable = parseOperableSignal(text)
   const direction = parseOpeningDirection(text)
   const swing = parseSwing(text)
-  if (opening) recognized.push(recognition('opening', 'Отваряемост', opening.type, opening.excerpt))
+  if (opening) recognized.push(recognition('opening', 'Отваряемост', openingTypeDisplay[opening.type], opening.excerpt))
   else if (operable) recognized.push(recognition('opening', 'Отваряемост', 'ОТВАРЯЕМО · тип неуточнен', operable.excerpt, 'MEDIUM'))
-  if (direction) recognized.push(recognition('direction', 'Посока', direction.direction, direction.excerpt))
-  if (swing) recognized.push(recognition('swing', 'Навътре / навън', swing.swing, swing.excerpt))
+  if (direction) recognized.push(recognition('direction', 'Посока', openingDirectionDisplay[direction.direction], direction.excerpt))
+  if (swing) recognized.push(recognition('swing', 'Навътре / навън', swingDisplay[swing.swing], swing.excerpt))
 
   if (intent.fields.length === 1 && (opening || operable || direction || swing)) {
     const current = intent.fields[0]
@@ -308,8 +332,8 @@ export function interpretFacadeFlowPrompt(sourceText: string, intentId = 'prompt
   intent.status = 'NEEDS_REVIEW'
 
   const validation = validateFacadeFlowProductIntent(intent)
-  const warnings = [...validation.warnings]
-  if (recognized.some((item) => item.confidence === 'MEDIUM')) warnings.push('Някои стойности са извлечени от свободен текст с локални deterministic правила и изискват човешка проверка.')
+  const warnings = validation.warnings.map(aiUiMessageBg)
+  if (recognized.some((item) => item.confidence === 'MEDIUM')) warnings.push('Някои стойности са извлечени от свободен текст с локални детерминистични правила и изискват човешка проверка.')
   if (/(?:\ball\b|всички)/i.test(normalized) && intent.fields.length > 1 && opening) warnings.push('Общото описание за отваряемост не се прилага автоматично към всички полета.')
 
   return {

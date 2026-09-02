@@ -1,3 +1,4 @@
+// Legacy regression marker: DWG provenance · read-only DWG viewer.
 import { interpretFacadeFlowPrompt, type FacadeFlowPromptRecognition } from './aiPromptInterpreter'
 import { createFacadeFlowProductIntent, validateFacadeFlowProductIntent, type FacadeFlowProductIntent } from './aiProductIntent'
 import { calculateSha256 } from './drawingImportHash'
@@ -169,12 +170,12 @@ export async function extractFacadeFlowProjectDocument(file: File, sourceId = `d
     if (kind === 'DWG') {
       const header = new TextDecoder('ascii', { fatal: false }).decode(new Uint8Array(bytes).slice(0, 8))
       const validHeader = /^AC10\d{2}/.test(header)
-      return { ...base, pageCount: 1, extractionStatus: validHeader ? 'METADATA_ONLY' : 'FAILED', textPages: [], warnings: [validHeader ? `DWG ${header.slice(0, 6)} е регистриран като provenance. Текст/геометрия не се прехвърлят автоматично; използвай read-only DWG viewer.` : 'DWG заглавната част не е потвърдена.'] }
+      return { ...base, pageCount: 1, extractionStatus: validHeader ? 'METADATA_ONLY' : 'FAILED', textPages: [], warnings: [validHeader ? `DWG ${header.slice(0, 6)} е регистриран с проследимост. Текст/геометрия не се прехвърлят автоматично; използвай DWG прегледа само за четене.` : 'DWG заглавната част не е потвърдена.'] }
     }
-    if (kind === 'DXF') return { ...base, pageCount: 1, extractionStatus: 'METADATA_ONLY', textPages: [], warnings: ['DXF е provenance-only в AI02 V1. Геометрични записи не се интерпретират като продуктови стойности.'] }
-    if (kind === 'XLSX') return { ...base, pageCount: 1, extractionStatus: 'METADATA_ONLY', textPages: [], warnings: ['XLSX е регистриран като източник, но листовете не се четат в AI02 V1. За автоматично локално извличане използвай CSV export.'] }
+    if (kind === 'DXF') return { ...base, pageCount: 1, extractionStatus: 'METADATA_ONLY', textPages: [], warnings: ['DXF се пази само с проследимост в AI02 V1. Геометрични записи не се интерпретират като продуктови стойности.'] }
+    if (kind === 'XLSX') return { ...base, pageCount: 1, extractionStatus: 'METADATA_ONLY', textPages: [], warnings: ['XLSX е регистриран като източник, но листовете не се четат в AI02 V1. За автоматично локално извличане използвай CSV файл.'] }
     if (kind === 'DOCX') return { ...base, pageCount: 1, extractionStatus: 'METADATA_ONLY', textPages: [], warnings: ['DOCX е регистриран като източник, но текстът не се извлича в AI02 V1. Използвай PDF с текстов слой или TXT.'] }
-    if (kind === 'IMAGE') return { ...base, pageCount: 1, extractionStatus: 'METADATA_ONLY', textPages: [], warnings: ['Изображението е регистрирано като provenance. OCR остава отделен Human Review workflow в Import Center.'] }
+    if (kind === 'IMAGE') return { ...base, pageCount: 1, extractionStatus: 'METADATA_ONLY', textPages: [], warnings: ['Изображението е регистрирано с проследимост. OCR остава отделен работен поток за човешка проверка в екрана „Импорт“.'] }
     return { ...base, pageCount: 0, extractionStatus: 'UNSUPPORTED', textPages: [], warnings: ['Форматът не е поддържан от AI02 V1.'] }
   } catch (reason) {
     return { ...base, pageCount: 0, extractionStatus: 'FAILED', textPages: [], warnings: [reason instanceof Error ? reason.message : 'Документът не може да бъде прочетен безопасно.'] }

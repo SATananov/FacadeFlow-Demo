@@ -109,7 +109,7 @@ test('endpoint drag remains Line-only and cannot mutate product geometry or prod
 test('helper Lines remain session-only and export boundary is unchanged', () => {
   assert.match(acceptance, /session-only/i)
   assert.match(acceptance, /simulation export/i)
-  assert.match(designer, />Експортирай custom simulation JSON</)
+  assert.match(designer, />Експортирай JSON на симулационната чернова</)
   assert.doesNotMatch(lines, /exportCustomProduct|fetch|localStorage|sessionStorage/)
 })
 

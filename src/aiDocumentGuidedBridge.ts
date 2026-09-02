@@ -22,7 +22,7 @@ export function facadeFlowDocumentIntentToGuidedPatch(intent: FacadeFlowProductI
   const notTransferred = [...base.notTransferred]
   if (intent.unresolved.length) notTransferred.push(`НЕУТОЧНЕНО ОТ ДОКУМЕНТИТЕ: ${intent.unresolved.join('; ')}`)
   const notes = [
-    'AI02 DOCUMENT SOURCE — локално deterministic извличане; изисква човешка проверка.',
+    'ДОКУМЕНТЕН ИЗТОЧНИК — локално детерминистично извличане; изисква човешка проверка.',
     sourceSummary,
     intent.sourceText,
     notTransferred.length ? `НЕПРЕХВЪРЛЕНО: ${notTransferred.join(' ')}` : '',
@@ -30,7 +30,7 @@ export function facadeFlowDocumentIntentToGuidedPatch(intent: FacadeFlowProductI
   return {
     schemaVersion: 'AI02.3',
     patch: { ...base.patch, notes, reviewAccepted: false, status: 'NEEDS_REVIEW' },
-    transferred: [...base.transferred.filter((item) => item !== 'Източник / бележки'), 'Документален provenance / бележки'],
+    transferred: [...base.transferred.filter((item) => item !== 'Източник / бележки'), 'Документална проследимост / бележки'],
     notTransferred,
     humanReviewRequired: true,
     sourceEvidenceRequired: true,

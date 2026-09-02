@@ -27,17 +27,17 @@ export function PromptInterpretationPanel({ session, profiles, setSession, onOpe
   return <section className="ff-ai-prompt-interpreter" aria-live="polite">
     <div className="ff-ai-prompt-action">
       <button type="button" disabled={!sourceText} onClick={analyse}><FacadeFlowIcon name="ai"/> Разчети описанието</button>
-      <span><b>AI01 LOCAL INTERPRETER</b> · без външен модел / без мрежа · резултатът е само предложение за човешка проверка.</span>
+      <span><b>ЛОКАЛНО РАЗЧИТАНЕ НА ОПИСАНИЕ</b> · без външен модел / без мрежа · резултатът е само предложение за човешка проверка.</span>
     </div>
     {result && <div className={`ff-ai-prompt-result ${stale ? 'stale' : ''}`}>
-      <div className="ff-ai-prompt-result-head"><div><span>РАЗПОЗНАТО ОТ ОПИСАНИЕТО</span><strong>{result.recognized.length} стойности · {result.unresolved.length} неуточнени</strong></div><b>{stale ? 'ТЕКСТЪТ Е ПРОМЕНЕН · РАЗЧЕТИ ОТНОВО' : result.validForHumanReview ? 'NEEDS REVIEW' : 'НЕВАЛИДЕН DRAFT'}</b></div>
-      <div className="ff-ai-prompt-recognized">{result.recognized.length ? result.recognized.map((item) => <span key={item.id} title={`Източник: ${item.excerpt}`}><small>{item.label}</small><strong>{item.value}</strong><em>{item.confidence === 'HIGH' ? 'HIGH' : 'CHECK'}</em></span>) : <p>Не са намерени достатъчно структурирани стойности. Нищо не е измислено автоматично.</p>}</div>
+      <div className="ff-ai-prompt-result-head"><div><span>РАЗПОЗНАТО ОТ ОПИСАНИЕТО</span><strong>{result.recognized.length} стойности · {result.unresolved.length} неуточнени</strong></div><b>{stale ? 'ТЕКСТЪТ Е ПРОМЕНЕН · РАЗЧЕТИ ОТНОВО' : result.validForHumanReview ? 'ИЗИСКВА ПРОВЕРКА' : 'НЕВАЛИДНА ЧЕРНОВА'}</b></div>
+      <div className="ff-ai-prompt-recognized">{result.recognized.length ? result.recognized.map((item) => <span key={item.id} title={`Източник: ${item.excerpt}`}><small>{item.label}</small><strong>{item.value}</strong><em>{item.confidence === 'HIGH' ? 'ВИСОКА' : 'ПРОВЕРИ'}</em></span>) : <p>Не са намерени достатъчно структурирани стойности. Нищо не е измислено автоматично.</p>}</div>
       {result.unresolved.length > 0 && <div className="ff-ai-prompt-unresolved"><b>НЕУТОЧНЕНО</b><div>{result.unresolved.map((item) => <span key={item}>{item}</span>)}</div></div>}
       {result.warnings.length > 0 && <details className="ff-ai-prompt-warnings"><summary>Предупреждения / граници ({result.warnings.length})</summary><ul>{result.warnings.map((item) => <li key={item}>{item}</li>)}</ul></details>}
       <div className="ff-ai-prompt-bridge"><button type="button" className="primary-button" disabled={stale || !result.validForHumanReview || result.recognized.length === 0} onClick={apply}>Прехвърли разпознатото към формуляра</button><span>{bridge ? `${bridge.transferred.length} съвместими стойности могат да се прехвърлят. ${bridge.notTransferred.length ? 'Топологията остава за отделна човешка/геометрична стъпка.' : ''}` : 'Първо разчети актуалния текст.'}</span></div>
       {!stale && result.validForHumanReview && result.recognized.length > 0 && <ParametricConstructionProposalPanel intent={result.intent} sourceLabel="Свободно описание" onOpenEditableConstructor={onOpenAi04Constructor}/>}
-      <em className="ff-ai-prompt-safety">AUTOMATIC GEOMETRY: NO · RULES VALIDATED: NO · MACHINE READY: NO</em>
-      {!stale && result.validForHumanReview && result.recognized.length > 0 && <small className="ff-ai03-legacy-safety-note">AI03 preview е proposal-only; „AUTOMATIC GEOMETRY: NO“ означава без автоматично приета или прехвърлена CAD геометрия.</small>}
+      <em className="ff-ai-prompt-safety" data-safety="AUTOMATIC GEOMETRY: NO · RULES VALIDATED: NO · MACHINE READY: NO">АВТОМАТИЧНА ГЕОМЕТРИЯ: НЕ · ПРАВИЛА ВАЛИДИРАНИ: НЕ · ГОТОВО ЗА МАШИНА: НЕ</em>
+      {!stale && result.validForHumanReview && result.recognized.length > 0 && <small className="ff-ai03-legacy-safety-note">Прегледът на параметричното предложение е само предложение; „АВТОМАТИЧНА ГЕОМЕТРИЯ: НЕ“ означава, че CAD геометрия не се приема или прехвърля автоматично.</small>}
     </div>}
   </section>
 }

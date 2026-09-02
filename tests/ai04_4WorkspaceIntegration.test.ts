@@ -8,7 +8,7 @@ const read = (filePath: string) => fs.readFileSync(path.resolve(process.cwd(), f
 test('AI04 UI exposes handoff only from HUMAN_REVIEWED proposal with a separate acknowledgement', () => {
   const panel = read('src/components/ParametricConstructionProposalPanel.tsx')
   assert.match(panel, /proposal\.status === 'HUMAN_REVIEWED'/)
-  assert.match(panel, /ЕКСПЛИЦИТЕН ПРЕХОД КЪМ РЕДАКТИРУЕМА ГЕОМЕТРИЯ/)
+  assert.match(panel, /ПРОДЪЛЖИ В КОНСТРУКТОРА/)
   assert.match(panel, /handoffAcknowledged/)
   assert.match(panel, /AUTOMATIC CONSTRUCTOR HANDOFF: NO/)
 })
@@ -24,7 +24,7 @@ test('AI04 is wired from AI workspace to App and opens Custom Product Designer d
 
 test('Custom Product Designer visibly preserves AI04 provenance and safety status', () => {
   const designer = read('src/components/CustomProductDesigner.tsx')
-  assert.match(designer, /AI04 · РЕДАКТИРУЕМА ГЕОМЕТРИЯ ОТ ЧОВЕШКИ ПРЕГЛЕДАНО ПРЕДЛОЖЕНИЕ/)
+  assert.match(designer, /РЕДАКТИРУЕМА ГЕОМЕТРИЯ ОТ ПРЕГЛЕДАНО ПРЕДЛОЖЕНИЕ/)
   assert.match(designer, /Правила валидирани/)
   assert.match(designer, /Готово за машина/)
 })

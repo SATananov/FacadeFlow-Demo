@@ -6,6 +6,7 @@ import {
   type FacadeFlowAi03ProposalField,
 } from '../aiParametricConstructionProposal'
 import type { FacadeFlowProductIntent } from '../aiProductIntent'
+import { aiUiMessageBg } from '../aiUiLanguageBg'
 
 const AI03_SAFETY_MARKERS = 'AUTO-GENERATED PROPOSAL: YES · AUTOMATIC ACCEPTANCE: NO · CONSTRUCTOR HANDOFF: NO · RULES VALIDATED: NO · MACHINE READY: NO'
 
@@ -69,7 +70,7 @@ function ProposalDrawing({ proposal }: { proposal: FacadeFlowAi03ParametricPropo
   const x = canvas.left + (availableWidth - width) / 2
   const y = canvas.top + (availableHeight - height) / 2
 
-  return <svg className="ff-ai03-drawing" viewBox={`0 0 ${canvas.width} ${canvas.height}`} role="img" aria-label={`AI03 концептуално параметрично предложение ${proposal.dimensions.widthMm} на ${proposal.dimensions.heightMm} милиметра`}>
+  return <svg className="ff-ai03-drawing" viewBox={`0 0 ${canvas.width} ${canvas.height}`} role="img" aria-label={`Концептуално параметрично предложение ${proposal.dimensions.widthMm} на ${proposal.dimensions.heightMm} милиметра`}>
     <rect className="ff-ai03-frame" x={x} y={y} width={width} height={height}/>
     {proposal.fields.map((field) => {
       const fx = x + field.rect.xRatio * width
@@ -121,30 +122,30 @@ export function ParametricConstructionProposalPanel({ intent, sourceLabel, onOpe
   return <section className={`ff-ai03-proposal status-${proposal.status.toLowerCase()}`} aria-labelledby={`${proposal.id}-title`}>
     <header className="ff-ai03-head">
       <div className="ff-ai03-head-copy">
-        <span>AI03 · ПАРАМЕТРИЧНО ПРЕДЛОЖЕНИЕ</span>
+        <span>ПРЕГЛЕД НА ПРЕДЛОЖЕНИЕТО</span>
         <div className="ff-ai03-title-row">
           <h4 id={`${proposal.id}-title`}>{proposal.mark || sourceLabel}</h4>
           <b>{statusLabel[proposal.status]}</b>
         </div>
-        <p><strong>Концептуална параметрична конструкция</strong> · 2D предложение от доказаните Product Intent данни. Геометрията не се приема автоматично и не е производствен модел.</p>
+        <p><strong>Концептуална параметрична конструкция</strong> · 2D предложение от доказаните структурирани продуктови данни. Геометрията не се приема автоматично и не е производствен модел.</p>
       </div>
     </header>
 
-    {proposal.blockers.length > 0 ? <div className="ff-ai03-blocked"><strong>Няма достатъчно доказателства за безопасно геометрично предложение.</strong><ul>{proposal.blockers.map((item) => <li key={item}>{item}</li>)}</ul></div> : <div className="ff-ai03-layout">
+    {proposal.blockers.length > 0 ? <div className="ff-ai03-blocked"><strong>Няма достатъчно доказателства за безопасно геометрично предложение.</strong><ul>{proposal.blockers.map((item) => <li key={item}>{aiUiMessageBg(item)}</li>)}</ul></div> : <div className="ff-ai03-layout">
       <section className="ff-ai03-canvas" aria-label="2D предложение">
         <div className="ff-ai03-card-heading"><span>2D ПРЕДЛОЖЕНИЕ</span><b>{proposal.dimensions.widthMm} × {proposal.dimensions.heightMm} mm</b></div>
         <ProposalDrawing proposal={proposal}/>
-        <small>{proposal.geometryBasis === 'EQUAL_DISTRIBUTION_PROPOSAL' ? 'Пунктираните делители са предложение за равномерно разпределение, а не доказани проектни размери.' : 'Плътните делители са позиционирани според наличните Product Intent доказателства.'}</small>
+        <small>{proposal.geometryBasis === 'EQUAL_DISTRIBUTION_PROPOSAL' ? 'Пунктираните делители са предложение за равномерно разпределение, а не доказани проектни размери.' : 'Плътните делители са позиционирани според наличните доказателства в структурираните продуктови данни.'}</small>
       </section>
       <aside className="ff-ai03-summary">
         <section className="ff-ai03-facts">
           <div className="ff-ai03-card-heading"><span>КЛЮЧОВИ ДАННИ</span><b>{proposal.fields.length} полета</b></div>
           <dl><div><dt>Източник</dt><dd>{sourceLabel}</dd></div><div><dt>Доказателства</dt><dd>{proposal.evidenceCount}</dd></div><div className="wide"><dt>Основа на геометрията</dt><dd>{geometryBasisLabel(proposal.geometryBasis)}</dd></div><div><dt>Профилна система</dt><dd>{proposal.profileSummary.system || 'неуточнена'}</dd></div><div><dt>Стъкло / пълнеж</dt><dd>{proposal.glazing.description || 'неуточнено'}</dd></div><div><dt>Панти</dt><dd>{proposal.hardwareSummary.hingeQuantity ?? 'неуточнени'}</dd></div><div><dt>Дръжка</dt><dd>{proposal.hardwareSummary.handle || 'неуточнена'}</dd></div></dl>
         </section>
-        {proposal.assumptions.length > 0 && <section className="ff-ai03-assumptions"><strong>Предположения за приемане от човек</strong>{proposal.assumptions.map((item) => <div key={item.id}><b>{item.label}</b><span>{item.detail}</span></div>)}</section>}
+        {proposal.assumptions.length > 0 && <section className="ff-ai03-assumptions"><strong>Предположения за приемане от човек</strong>{proposal.assumptions.map((item) => <div key={item.id}><b>{item.label}</b><span>{aiUiMessageBg(item.detail)}</span></div>)}</section>}
         <div className="ff-ai03-review-details">
           {proposal.unresolved.length > 0 && <details open className="ff-ai03-unresolved"><summary>Неуточнено ({proposal.unresolved.length})</summary><ul>{proposal.unresolved.map((item) => <li key={item}>{item}</li>)}</ul></details>}
-          {proposal.warnings.length > 0 && <details className="ff-ai03-warnings"><summary>Предупреждения ({proposal.warnings.length})</summary><ul>{proposal.warnings.map((item) => <li key={item}>{item}</li>)}</ul></details>}
+          {proposal.warnings.length > 0 && <details className="ff-ai03-warnings"><summary>Предупреждения ({proposal.warnings.length})</summary><ul>{proposal.warnings.map((item) => <li key={item}>{aiUiMessageBg(item)}</li>)}</ul></details>}
         </div>
       </aside>
     </div>}
@@ -153,17 +154,17 @@ export function ParametricConstructionProposalPanel({ intent, sourceLabel, onOpe
       <div className="ff-ai03-human-gate-head"><span>ЧОВЕШКА ПРОВЕРКА</span><strong>{proposal.status === 'HUMAN_REVIEWED' ? '✓ Предложението е прегледано' : 'Потвърждението е задължително'}</strong></div>
       <label><input type="checkbox" checked={topologyChecked} onChange={(event) => setReview({ topologyChecked: event.target.checked })}/> Проверих визуално броя полета, ролите и общите размери на предложението.</label>
       {proposal.assumptions.length > 0 && <label><input type="checkbox" checked={assumptionsAccepted} onChange={(event) => setReview({ assumptionsAccepted: event.target.checked })}/> Приемам изрично показаните предположения само като концептуална топология за следваща ръчна стъпка.</label>}
-      <p>AI03 не прехвърля тази геометрия автоматично към конструктора. Следващият handoff остава отделен и експлицитен.</p>
+      <p>Това предложение не се прехвърля автоматично към конструктора. Следващият преход остава отделен и изричен.</p>
     </div>}
 
-    {proposal.status === 'HUMAN_REVIEWED' && <section className="ff-ai04-handoff-gate" aria-label="AI04 explicit constructor handoff">
-      <div><span>AI04 · ЕКСПЛИЦИТЕН ПРЕХОД КЪМ РЕДАКТИРУЕМА ГЕОМЕТРИЯ</span><strong>Прегледаното предложение може да стане нова editable simulation чернова.</strong><p>AI04 копира само прегледаната геометрия и доказаните съвместими стойности. Не приема профили по подразбиране, не валидира правила и не създава machine-ready модел.</p></div>
+    {proposal.status === 'HUMAN_REVIEWED' && <section className="ff-ai04-handoff-gate" aria-label="Изричен преход към конструктора">
+      <div><span>ПРОДЪЛЖИ В КОНСТРУКТОРА</span><strong>Прегледаното предложение може да стане нова редактируема симулационна чернова.</strong><p>Към конструктора се прехвърлят само прегледаната геометрия и доказаните съвместими стойности. Не приема профили по подразбиране, не валидира правила и не създава модел, готов за машина.</p></div>
       <label><input type="checkbox" checked={handoffAcknowledged} onChange={(event) => { setHandoffFingerprint(event.target.checked ? fingerprint : ''); setHandoffMessage('') }}/> Потвърждавам отделния преход: искам тази човешки прегледана топология да се създаде като редактируема чернова в конструктора.</label>
       <button type="button" className="primary-button" disabled={!handoffAcknowledged || !onOpenEditableConstructor} onClick={() => { if (!onOpenEditableConstructor) return; const result = onOpenEditableConstructor(proposal); setHandoffMessage(result.message) }}>Създай редактируема геометрия в конструктора</button>
       {handoffMessage && <p className="ff-ai04-handoff-message" role="status">{handoffMessage}</p>}
-      <footer>AUTOMATIC CONSTRUCTOR HANDOFF: NO · HUMAN-APPROVED PROPOSAL: YES · RULES VALIDATED: NO · MACHINE READY: NO</footer>
+      <footer data-safety="AUTOMATIC CONSTRUCTOR HANDOFF: NO · HUMAN-APPROVED PROPOSAL: YES · RULES VALIDATED: NO · MACHINE READY: NO">АВТОМАТИЧЕН ПРЕХОД КЪМ КОНСТРУКТОРА: НЕ · ПРЕДЛОЖЕНИЕТО Е ОДОБРЕНО ОТ ЧОВЕК: ДА · ПРАВИЛА ВАЛИДИРАНИ: НЕ · ГОТОВО ЗА МАШИНА: НЕ</footer>
     </section>}
 
-    <footer data-safety={AI03_SAFETY_MARKERS}>AI03 предложение: ДА · Автоматично приемане: НЕ · Преход към конструктора: НЕ · Правила валидирани: НЕ · Готово за машина: НЕ</footer>
+    <footer data-safety={AI03_SAFETY_MARKERS}>ГЕОМЕТРИЧНО ПРЕДЛОЖЕНИЕ: ДА · АВТОМАТИЧНО ПРИЕМАНЕ: НЕ · АВТОМАТИЧЕН ПРЕХОД КЪМ КОНСТРУКТОРА: НЕ · ПРАВИЛА ВАЛИДИРАНИ: НЕ · ГОТОВО ЗА МАШИНА: НЕ</footer>
   </section>
 }

@@ -11,7 +11,7 @@ test('AI04 blocks semantic roles that current editable constructor cannot repres
   const proposal = humanReviewFacadeFlowParametricProposal(buildFacadeFlowParametricConstructionProposal(intent), { topologyChecked: true, assumptionsAccepted: true })
   const result = buildFacadeFlowAi04ConstructorHandoff(proposal, [])
   assert.equal(result.status, 'BLOCKED')
-  assert.match(result.blockers.join(' '), /SLIDING_SASH/)
+  assert.match(result.blockers.join(' '), /плъзгащо крило/)
 })
 
 test('AI04 output remains simulation-only and never production-approved', () => {

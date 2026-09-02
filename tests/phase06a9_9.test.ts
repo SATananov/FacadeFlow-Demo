@@ -122,7 +122,7 @@ test('whole-Line dragging remains Line-only and cannot mutate product geometry/h
 test('session-only export boundary and dependencies remain unchanged', () => {
   assert.match(acceptance, /session-only/i)
   assert.match(acceptance, /simulation export/i)
-  assert.match(designer, />Експортирай custom simulation JSON</)
+  assert.match(designer, />Експортирай JSON на симулационната чернова</)
   assert.equal(packageJson.scripts['test:phase06a9_9'].includes('phase06a9_9.test.ts'), true)
   assert.deepEqual(Object.keys(packageJson.dependencies).sort(), ['@mlightcad/libredwg-web','@react-three/fiber','pdfjs-dist','react','react-dom','tesseract.js','three'].sort())
 })

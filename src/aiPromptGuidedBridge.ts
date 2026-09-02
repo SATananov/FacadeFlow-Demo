@@ -96,7 +96,7 @@ export function facadeFlowPromptIntentToGuidedPatch(intent: FacadeFlowProductInt
     if (field.openingDirection === 'LEFT' || field.openingDirection === 'RIGHT') transfer('openingDirection', field.openingDirection, 'Посока ляво / дясно')
     if (field.swing === 'INWARD' || field.swing === 'OUTWARD') transfer('inwardOutward', field.swing, 'Навътре / навън')
   } else if (intent.fields.length > 1) {
-    notTransferred.push('Топологията и индивидуалната отваряемост на много полета остават само в Product Intent; guided form няма право да ги превръща в автоматична геометрия.')
+    notTransferred.push('Топологията и индивидуалната отваряемост на много полета остават само в структурираните продуктови данни; воденият формуляр няма право да ги превръща в автоматична геометрия.')
   }
 
   const fill = fillType(intent.glazing.description)
@@ -116,7 +116,7 @@ export function facadeFlowPromptIntentToGuidedPatch(intent: FacadeFlowProductInt
   if (intent.hardwareDefaults.hingeQuantity) transfer('hingeQuantity', String(intent.hardwareDefaults.hingeQuantity), 'Количество панти')
 
   const noteParts = [
-    'AI01 PROMPT SOURCE — локално deterministic разчитане; изисква човешка проверка.',
+    'ИЗТОЧНИК ОТ ОПИСАНИЕ — локално детерминистично разчитане; изисква човешка проверка.',
     intent.sourceText,
     notTransferred.length ? `НЕПРЕХВЪРЛЕНО: ${notTransferred.join(' ')}` : '',
   ].filter(Boolean)

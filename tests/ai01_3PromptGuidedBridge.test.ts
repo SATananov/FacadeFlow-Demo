@@ -54,7 +54,7 @@ test('AI01.3 transfers finish and glazing only as NEEDS_REVIEW guided values', (
 test('AI01.3 preserves prompt provenance in notes', () => {
   const prompt = 'window 1000x1000, 1 field, fixed, system SYS-90'
   const result = facadeFlowPromptIntentToGuidedPatch(interpretFacadeFlowPrompt(prompt).intent, profiles)
-  assert.match(result.patch.notes ?? '', /AI01 PROMPT SOURCE/)
+  assert.match(result.patch.notes ?? '', /ИЗТОЧНИК ОТ ОПИСАНИЕ/)
   assert.match(result.patch.notes ?? '', /window 1000x1000/)
 })
 

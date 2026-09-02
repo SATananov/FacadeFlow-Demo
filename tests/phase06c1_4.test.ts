@@ -66,7 +66,7 @@ test('06C.1.4 UI exposes one-click DEMO fill and a visible sample-data warning',
   assert.match(ui, /applyFacadeFlowGuidedDemo/)
   assert.match(ui, /ДЕМО · \{draft\.productType === 'DOOR' \? 'ВРАТА' : 'ПРОЗОРЕЦ'\}/)
   assert.match(ui, /ДЕМО ДАННИ/)
-  assert.match(ui, /Human Gate остава задължителен/)
+  assert.match(ui, /ЧОВЕШКА ПРОВЕРКА/)
   assert.match(css, /ff-guided-demo-button/)
   assert.match(css, /ff-guided-demo-banner/)
 })

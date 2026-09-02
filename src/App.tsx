@@ -61,6 +61,7 @@ import { createHybridSessionFromGuidedAi } from './aiConstructorHandoff'
 import type { FacadeFlowAiSession } from './aiWorkspaceTypes'
 import type { FacadeFlowAi03ParametricProposal } from './aiParametricConstructionProposal'
 import { buildFacadeFlowAi04ConstructorHandoff } from './ai04ConstructorHandoff'
+import { aiUiMessageBg } from './aiUiLanguageBg'
 import { createEmptyProjectLibraryState, type ProjectLibraryState } from './projectLifecycle'
 
 function App() {
@@ -147,13 +148,13 @@ function App() {
 
   const openReviewedAiProposalInEditableConstructor = (proposal: FacadeFlowAi03ParametricProposal) => {
     const handoff = buildFacadeFlowAi04ConstructorHandoff(proposal, catalogueProfiles)
-    if (!handoff.customProduct || handoff.status !== 'READY') return { ok: false, message: handoff.blockers.join(' ') || 'AI04 handoff е блокиран.' }
+    if (!handoff.customProduct || handoff.status !== 'READY') return { ok: false, message: handoff.blockers.map(aiUiMessageBg).join(' ') || 'Преходът към конструктора е блокиран.' }
     setCustomProduct(handoff.customProduct)
     setActiveCustomComponentId(null)
     setCustomDesignerOrigin('AI')
     setShowAiWorkspace(false)
     setShowCustomDesigner(true)
-    return { ok: true, message: `AI04 създаде editable simulation draft. ${handoff.unresolved.length} стойности остават за проверка в конструктора.` }
+    return { ok: true, message: `Създадена е редактируема симулационна чернова в конструктора. ${handoff.unresolved.length} стойности остават за проверка.` }
   }
 
   const updateHybridSession = (updater: (current: HybridProductDesignerSession) => HybridProductDesignerSession) => {

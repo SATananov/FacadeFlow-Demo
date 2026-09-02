@@ -73,8 +73,8 @@ export function GuidedAiProductBuilder({ session, profiles, setSession, onOpenPr
 
   return <section className="ff-guided-builder" aria-labelledby="ff-guided-builder-title">
     <div className="ff-guided-head">
-      <div><span>ВОДЕНА AI СПЕЦИФИКАЦИЯ · БЕЗ AI INFERENCE</span><h3 id="ff-guided-builder-title">Води ме стъпка по стъпка</h3><p>Попълни изделието структурирано. FacadeFlow използва само въведеното от теб и активния каталог; липсващото остава неуточнено.</p></div>
-      <div className="ff-guided-head-tools"><button type="button" className="ff-guided-demo-button" onClick={() => setSession((current) => applyFacadeFlowGuidedDemo(current, profiles))}>ДЕМО · {draft.productType === 'DOOR' ? 'ВРАТА' : 'ПРОЗОРЕЦ'}</button><small>Попълва примерни стойности само за тест. Human Gate остава задължителен.</small><div className="ff-guided-progress" aria-label={`Попълване ${completion}%`}><b>{completion}%</b><span><i style={{ width: `${completion}%` }}/></span><small>{unresolved.length === 0 ? 'Готово за човешка проверка' : `${unresolved.length} неуточнени полета`}</small></div></div>
+      <div><span>ВОДЕНА AI СПЕЦИФИКАЦИЯ · БЕЗ АВТОМАТИЧНО AI ИЗВЕЖДАНЕ</span><h3 id="ff-guided-builder-title">Води ме стъпка по стъпка</h3><p>Попълни изделието структурирано. FacadeFlow използва само въведеното от теб и активния каталог; липсващото остава неуточнено.</p></div>
+      <div className="ff-guided-head-tools"><button type="button" className="ff-guided-demo-button" onClick={() => setSession((current) => applyFacadeFlowGuidedDemo(current, profiles))}>ДЕМО · {draft.productType === 'DOOR' ? 'ВРАТА' : 'ПРОЗОРЕЦ'}</button><small>Попълва примерни стойности само за тест. Човешката проверка остава задължителна.</small><div className="ff-guided-progress" aria-label={`Попълване ${completion}%`}><b>{completion}%</b><span><i style={{ width: `${completion}%` }}/></span><small>{unresolved.length === 0 ? 'Готово за човешка проверка' : `${unresolved.length} неуточнени полета`}</small></div></div>
     </div>
 
     {draft.name.startsWith('DEMO-') && <div className="ff-guided-demo-banner"><b>ДЕМО ДАННИ</b><span>Примерът е попълнен автоматично за бърза проверка. Не е реален проект, не е проверен по правила и не е готов за машина.</span></div>}
@@ -93,7 +93,7 @@ export function GuidedAiProductBuilder({ session, profiles, setSession, onOpenPr
       </GuidedGroup>
 
       <div data-source-evidence-legacy="НАДЕЖДА · SOURCE EVIDENCE · Няма автоматично разпознаване на каса / крило / делител" data-human-role-summary={`${humanConfirmedSourceEvidenceCount} с HUMAN CONFIRMED роля`}><GuidedGroup number="03" title="Профили" hint="Каталогът филтрира каса, крило и делител">
-        <label>Профилна система<select value={draft.profileSystem} onChange={(event) => update({ profileSystem: event.target.value, manualProfileSystem: event.target.value ? '' : draft.manualProfileSystem })}><option value="">{usesDemoCatalogue ? 'Не е избрана от каталога' : systems.length > 0 ? 'Избери HUMAN CONFIRMED реална система' : 'Няма HUMAN CONFIRMED реална система'}</option>{systems.map((value) => <option key={value} value={value}>{value}</option>)}</select></label>
+        <label>Профилна система<select value={draft.profileSystem} onChange={(event) => update({ profileSystem: event.target.value, manualProfileSystem: event.target.value ? '' : draft.manualProfileSystem })}><option value="">{usesDemoCatalogue ? 'Не е избрана от каталога' : systems.length > 0 ? 'Избери реална система с човешки потвърдена роля' : 'Няма реална система с човешки потвърдена роля'}</option>{systems.map((value) => <option key={value} value={value}>{value}</option>)}</select></label>
         <label>Ръчна система / код<input value={draft.manualProfileSystem} disabled={Boolean(draft.profileSystem)} onChange={(event) => update({ manualProfileSystem: event.target.value })} placeholder="Само ако липсва в каталога"/></label>
         <button type="button" className="ff-guided-catalogue-button" onClick={onOpenProfileCatalogue}>Отвори каталога</button>
         <GuidedNadezhdaEvidencePreview profiles={profiles} onOpenCatalogue={onOpenProfileCatalogue}/>
@@ -131,14 +131,14 @@ export function GuidedAiProductBuilder({ session, profiles, setSession, onOpenPr
     </div>
 
     <section className="ff-guided-review-box">
-      <div><span>HUMAN GATE</span><h4>Подготви структурирана чернова</h4><p>Това не създава геометрия и не активира AI. Създава само симулационна спецификация за проверка.</p></div>
+      <div><span>ЧОВЕШКА ПРОВЕРКА</span><h4>Подготви структурирана чернова</h4><p>Това не създава геометрия и не активира AI. Създава само симулационна спецификация за проверка.</p></div>
       <button type="button" className="primary-button" disabled={!canPrepare} onClick={() => setSession((current) => prepareFacadeFlowGuidedProduct(current, profiles))}>Подготви за човешка проверка</button>
       {!canPrepare && <small>За начало са нужни тип изделие и положителни общи размери.</small>}
       {proposal && <div className="ff-guided-proposal" aria-live="polite"><strong>Черновата е подготвена.</strong><span>Статус: {proposal.status === 'HUMAN_CONFIRMED' ? 'ПОТВЪРДЕНА ОТ ЧОВЕК' : 'ИЗИСКВА ПРОВЕРКА'}</span><span>Неуточнени: {unresolved.length}</span>{unresolved.length > 0 && <ul>{unresolved.map((item) => <li key={item}>{item}</li>)}</ul>}{warnings.length > 0 && <div className="ff-guided-proposal-warnings"><b>Ще останат за проверка по правила:</b>{warnings.map((item) => <span key={item}>{item}</span>)}</div>}</div>}
       {proposal && <label className="ff-guided-human-check"><input type="checkbox" checked={draft.reviewAccepted} onChange={(event) => setSession((current) => setFacadeFlowGuidedReviewAccepted(current, event.target.checked))}/> Проверих всички въведени стойности и разбирам, че това остава симулационна чернова.</label>}
       {proposal && <button type="button" className="ff-guided-confirm" disabled={!canConfirm} onClick={() => setSession((current) => confirmFacadeFlowGuidedProduct(current, profiles))}>Потвърди човешката чернова</button>}
       {proposal && unresolved.length === 0 && !draft.reviewAccepted && <small>Отбележи човешката проверка, за да потвърдиш черновата.</small>}
-      {draft.status === 'HUMAN_CONFIRMED' && <div className="ff-guided-confirmed"><b>✓ HUMAN CONFIRMED</b><span>Правилата и производствената готовност остават отделно заключени.</span></div>}
+      {draft.status === 'HUMAN_CONFIRMED' && <div className="ff-guided-confirmed"><b>✓ ПОТВЪРДЕНО ОТ ЧОВЕК</b><span>Правилата и производствената готовност остават отделно заключени.</span></div>}
     </section>
   </section>
 }

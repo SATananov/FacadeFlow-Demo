@@ -59,5 +59,5 @@ test('06C.1.1 adds no network, persistence, AI inference or machine-output behav
   const source = workspace()
   assert.doesNotMatch(source, /fetch\(|WebSocket|XMLHttpRequest|localStorage|indexedDB/i)
   assert.match(source, /AI моделът още не е свързан/)
-  assert.match(source, /MACHINE READY: NO/)
+  assert.match(source, /ГОТОВО ЗА МАШИНА: НЕ/)
 })

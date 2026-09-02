@@ -335,7 +335,7 @@ export function guidedProductToSpecification(draft: FacadeFlowGuidedProductDraft
     glazing: { description: fill },
     finish: { exterior: colorExterior, interior: colorInterior },
     notes: draft.notes.trim() || undefined,
-    evidence: [{ id: `${jobId}-guided-manual-evidence`, sourceName: 'Guided AI Product Builder', sourceKind: 'MANUAL', note: 'Структурирано човешко въвеждане. Няма AI inference и няма автоматично производствено решение.' }],
+    evidence: [{ id: `${jobId}-guided-manual-evidence`, sourceName: 'Воден AI конструктор на изделие', sourceKind: 'MANUAL', note: 'Структурирано човешко въвеждане. Няма автоматично AI извеждане и няма автоматично производствено решение.' }],
     unresolved: guidedProductUnresolved(draft, profiles),
     status,
     simulationOnly: true,

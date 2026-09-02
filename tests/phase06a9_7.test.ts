@@ -130,5 +130,5 @@ test('phase adds no dependency and keeps accepted 06A.9.6 CAD foundation intact'
   assert.match(designer, /<CadWorkbenchGridLayer/)
   assert.match(designer, /<CadWorkbenchGuideLayer/)
   assert.match(designer, /<CadStatusBar/)
-  assert.match(designer, />Експортирай custom simulation JSON</)
+  assert.match(designer, />Експортирай JSON на симулационната чернова</)
 })

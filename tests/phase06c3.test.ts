@@ -70,7 +70,7 @@ void test('06C.3 UI exposes optional manual hierarchy and direct-product fallbac
   const css = readFileSync('src/aiWorkspace.css', 'utf8')
   const model = readFileSync('src/projectStructure.ts', 'utf8')
   assert.match(workspace, /ProjectStructureBuilder/)
-  assert.match(builder, /СТРУКТУРА · OPTIONAL/)
+  assert.match(builder, /СТРУКТУРА · ПО ЖЕЛАНИЕ/)
   assert.match(builder, /Без структура \/ директно изделие/)
   assert.match(model, /Сграда \/ корпус/)
   assert.match(model, /Етаж/)

@@ -91,11 +91,11 @@ export function buildFacadeFlowAi04ConstructorHandoff(
   const transferred: string[] = []
 
   if (proposal.status !== 'HUMAN_REVIEWED' || !proposal.proposalGeometryHumanReviewed) blockers.push('AI04 изисква AI03 предложението да е изрично прегледано от човек.')
-  if (proposal.blockers.length) blockers.push(...proposal.blockers.map((item) => `AI03 blocker: ${item}`))
-  if (!Number.isFinite(proposal.dimensions.widthMm) || proposal.dimensions.widthMm <= 0 || !Number.isFinite(proposal.dimensions.heightMm) || proposal.dimensions.heightMm <= 0) blockers.push('Общите размери не са валидни за editable constructor draft.')
+  if (proposal.blockers.length) blockers.push(...proposal.blockers.map((item) => `Блокираща причина от AI03: ${item}`))
+  if (!Number.isFinite(proposal.dimensions.widthMm) || proposal.dimensions.widthMm <= 0 || !Number.isFinite(proposal.dimensions.heightMm) || proposal.dimensions.heightMm <= 0) blockers.push('Общите размери не са валидни за редактируема чернова в конструктора.')
   const geometryBasis = proposal.geometryBasis
   if (!proposal.fields.length || !geometryBasis) blockers.push('Липсва прегледана геометрична основа.')
-  if (proposal.fields.some((field) => field.role === 'SLIDING_SASH' || field.role === 'PANEL')) blockers.push('AI04 V1 не прехвърля SLIDING_SASH или PANEL към Custom Product Designer, защото тези роли нямат еквивалент в текущия editable geometry model.')
+  if (proposal.fields.some((field) => field.role === 'SLIDING_SASH' || field.role === 'PANEL')) blockers.push('AI04 V1 не прехвърля плъзгащо крило или панел към конструктора за нестандартни изделия, защото тези роли нямат еквивалент в текущия модел за редактируема геометрия.')
 
   const exactFrame = profileByExactEvidence(profiles, 'FRAME', proposal.profileSummary.system, proposal.profileSummary.frame)
   const exactSash = profileByExactEvidence(profiles, 'SASH', proposal.profileSummary.system, proposal.profileSummary.sash)
@@ -108,10 +108,10 @@ export function buildFacadeFlowAi04ConstructorHandoff(
   if (proposal.dividers.length && !proposal.profileSummary.mullion) unresolved.push('Точният профил за делител остава за избор в конструктора.')
 
   const unsupportedOpeningTypes = unique(proposal.fields.flatMap((field) => field.role === 'OPENING_SASH' && field.openingType && !['TURN', 'TILT', 'TILT_TURN', 'OTHER', 'UNRESOLVED'].includes(field.openingType) ? [field.openingType] : []))
-  if (unsupportedOpeningTypes.length) warnings.push(`Неподдържани opening types остават само като provenance: ${unsupportedOpeningTypes.join(', ')}.`)
+  if (unsupportedOpeningTypes.length) warnings.push(`Неподдържаните типове отваряемост остават само като проследимост: ${unsupportedOpeningTypes.join(', ')}.`)
 
   const geometry = blockers.length ? null : buildLinearGeometry(proposal, exactSash?.id)
-  if (!geometry && !blockers.length) blockers.push('AI04 не успя да преобразува прегледаната линейна топология към editable CustomGeometry tree без загуба на позиции.')
+  if (!geometry && !blockers.length) blockers.push('AI04 не успя да преобразува прегледаната линейна топология към редактируемото дърво CustomGeometry без загуба на позиции.')
 
   if (blockers.length || !geometry || !geometryBasis) return {
     schemaVersion: 'AI04.1', status: 'BLOCKED', customProduct: null, transferred, unresolved: unique(unresolved), warnings: unique(warnings), blockers: unique(blockers),
@@ -140,7 +140,7 @@ export function buildFacadeFlowAi04ConstructorHandoff(
   }
   const customProduct: CustomProduct = {
     id: productId,
-    name: proposal.mark ? `${proposal.mark} · AI04 editable draft` : 'AI04 editable constructor draft',
+    name: proposal.mark ? `${proposal.mark} · редактируема чернова` : 'Редактируема чернова в конструктора',
     width: proposal.dimensions.widthMm,
     height: proposal.dimensions.heightMm,
     frameProfileId: exactFrame?.id ?? '',
@@ -155,13 +155,13 @@ export function buildFacadeFlowAi04ConstructorHandoff(
     machineReady: false,
     ai04Handoff: metadata,
   }
-  transferred.push('Общи размери', 'Външна каса като editable geometry boundary', `${proposal.fields.length} полета`, `${proposal.dividers.length} делители`)
+  transferred.push('Общи размери', 'Външна каса като граница на редактируемата геометрия', `${proposal.fields.length} полета`, `${proposal.dividers.length} делители`)
   if (exactFrame) transferred.push(`Каса: ${exactFrame.code}`)
   if (exactSash) transferred.push(`Крило: ${exactSash.code}`)
   if (exactMullion) transferred.push(`Делител: ${exactMullion.code}`)
-  if (proposal.fields.some((field) => field.role === 'OPENING_SASH')) transferred.push('Роли на отваряемите полета и доказаните LEFT/RIGHT посоки')
-  warnings.push('AI04 създава редактируема симулационна чернова. Всяка последваща промяна нулира VERIFIED статуса и изисква нова човешка проверка.')
-  if (proposal.profileSummary.system && !exactFrame && !exactSash && !exactMullion) warnings.push(`Системата ${proposal.profileSummary.system} е provenance контекст, но AI04 не избира профили само по име на система.`)
+  if (proposal.fields.some((field) => field.role === 'OPENING_SASH')) transferred.push('Роли на отваряемите полета и доказаните посоки ляво/дясно')
+  warnings.push('AI04 създава редактируема симулационна чернова. Всяка последваща промяна нулира статуса „Проверено“ и изисква нова човешка проверка.')
+  if (proposal.profileSummary.system && !exactFrame && !exactSash && !exactMullion) warnings.push(`Системата ${proposal.profileSummary.system} е контекст за проследимост, но AI04 не избира профили само по име на система.`)
 
   return {
     schemaVersion: 'AI04.1', status: 'READY', customProduct, transferred, unresolved: unique(unresolved), warnings: unique(warnings), blockers: [],

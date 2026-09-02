@@ -47,7 +47,7 @@ test('AI03 blocks geometry rather than inventing a single field when topology is
   const proposal = buildFacadeFlowParametricConstructionProposal(intent)
   assert.equal(proposal.status, 'BLOCKED')
   assert.equal(proposal.fields.length, 0)
-  assert.ok(proposal.blockers.some((item) => item.includes('Field topology is unresolved')))
+  assert.ok(proposal.blockers.some((item) => item.includes('Топологията на полетата не е уточнена')))
 })
 
 test('AI03 blocks a proposal when a conflict has removed a required overall dimension', () => {
@@ -57,5 +57,5 @@ test('AI03 blocks a proposal when a conflict has removed a required overall dime
   intent.fields = [{ id: 'f1', order: 0, role: 'FIXED', evidenceIds: [], unresolved: [] }]
   const proposal = buildFacadeFlowParametricConstructionProposal(intent)
   assert.equal(proposal.status, 'BLOCKED')
-  assert.ok(proposal.blockers.some((item) => item.includes('Overall width')))
+  assert.ok(proposal.blockers.some((item) => item.includes('Нужна е обща ширина')))
 })

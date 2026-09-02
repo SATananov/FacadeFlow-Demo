@@ -15,15 +15,15 @@ export function GuidedNadezhdaEvidencePreview({ profiles, onOpenCatalogue }: Pro
   return <section className="ff-guided-catalogue-sources" aria-label="Реален и демонстрационен каталог">
     <section className="ff-guided-real-catalogue-preview" aria-labelledby="ff-guided-real-catalogue-title" data-legacy-label="РЕАЛЕН КАТАЛОГ · SOURCE EVIDENCE">
       <div className="ff-guided-real-catalogue-head">
-        <div><span>РЕАЛЕН КАТАЛОГ · НАДЕЖДА</span><b id="ff-guided-real-catalogue-title">Вадим-2 · source evidence</b><small>Реалните кодове са видими винаги. Само HUMAN CONFIRMED ролите могат да влязат в нормалните dropdown-и.</small></div>
-        <div className="ff-guided-real-catalogue-kpi"><b>{available}/{rows.length}</b><span>HUMAN CONFIRMED</span></div>
+        <div><span>РЕАЛЕН КАТАЛОГ · НАДЕЖДА</span><b id="ff-guided-real-catalogue-title">Вадим-2 · доказателства от източника</b><small>Реалните кодове са видими винаги. Само ролите, потвърдени от човек, могат да влязат в нормалните списъци за избор.</small></div>
+        <div className="ff-guided-real-catalogue-kpi"><b>{available}/{rows.length}</b><span>ПОТВЪРДЕНО ОТ ЧОВЕК</span></div>
       </div>
       <div className="ff-guided-real-catalogue-grid">
         {rows.map((row) => <article key={row.evidenceId} className={row.state === 'AVAILABLE' ? 'available' : 'locked'}>
           <div className="ff-guided-real-code"><b>{row.code}</b><span>{row.section}</span></div>
           <strong>{row.state === 'AVAILABLE' && row.role ? `ДОСТЪПЕН · ${roleLabels[row.role].toUpperCase()}` : 'ЗАКЛЮЧЕН · РОЛЯ НЕПОТВЪРДЕНА'}</strong>
           <small>XML / LTE: {row.xmlPieceCount} / {row.lteRecordCount}</small>
-          {row.state === 'AVAILABLE' ? <small>HUMAN CONFIRMED{row.humanConfirmedBy ? ` · ${row.humanConfirmedBy}` : ''}</small> : <small>Не се предлага за избор в Каса / Крило / Делител.</small>}
+          {row.state === 'AVAILABLE' ? <small>ПОТВЪРДЕНО ОТ ЧОВЕК{row.humanConfirmedBy ? ` · ${row.humanConfirmedBy}` : ''}</small> : <small>Не се предлага за избор в Каса / Крило / Делител.</small>}
         </article>)}
       </div>
       <div className="ff-guided-real-catalogue-foot">
@@ -33,7 +33,7 @@ export function GuidedNadezhdaEvidencePreview({ profiles, onOpenCatalogue }: Pro
     </section>
 
     <aside className="ff-guided-demo-catalogue" aria-label="Демо каталог само за тест">
-      <div><span>ДЕМО КАТАЛОГ · САМО ЗА ТЕСТ</span><b>{demoProfiles.length} placeholder профила</b><small>Не участва в нормалните dropdown-и. Зарежда се само от бутона ДЕМО и никога не замества реален HUMAN CONFIRMED профил.</small></div>
+      <div><span>ДЕМО КАТАЛОГ · САМО ЗА ТЕСТ</span><b>{demoProfiles.length} временни демонстрационни профила</b><small>Не участва в нормалните списъци за избор. Зарежда се само от бутона ДЕМО и никога не замества реален профил с човешки потвърдена роля.</small></div>
       <div className="ff-guided-demo-codes">{demoProfiles.map((profile) => <span key={profile.id}>{profile.code} · {roleLabels[profile.role]}</span>)}</div>
     </aside>
   </section>

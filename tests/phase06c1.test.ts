@@ -82,7 +82,7 @@ test('06C.1 prepares one structured simulation specification with manual evidenc
   assert.equal(product.dimensions.width, 1400)
   assert.equal(product.dimensions.height, 1200)
   assert.equal(product.evidence[0]?.sourceKind, 'MANUAL')
-  assert.match(product.evidence[0]?.note ?? '', /Няма AI inference/)
+  assert.match(product.evidence[0]?.note ?? '', /Няма автоматично AI извеждане/)
   assert.equal(session.productionApproved, false)
 })
 

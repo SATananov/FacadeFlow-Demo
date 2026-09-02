@@ -42,7 +42,7 @@ test('06C.2.3 UI explicitly separates real Nadezhda and DEMO catalogue zones', (
   const css = read('src/aiWorkspace.css') + read('src/customDesigner.css')
   assert.match(preview, /РЕАЛЕН КАТАЛОГ · НАДЕЖДА/)
   assert.match(preview, /ДЕМО КАТАЛОГ · САМО ЗА ТЕСТ/)
-  assert.match(preview, /Не участва в нормалните dropdown-и/)
+  assert.match(preview, /Не участва в нормалните списъци за избор/)
   assert.match(builder, /activeRealGuidedProfileSystems/)
   assert.match(builder, /usesDemoCatalogue/)
   assert.match(catalogue, /РЕАЛЕН КАТАЛОГ · НОРМАЛИЗИРАНИ/)
