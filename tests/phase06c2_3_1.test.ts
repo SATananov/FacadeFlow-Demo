@@ -5,13 +5,13 @@ import test from 'node:test'
 const read = (path: string) => readFileSync(path, 'utf8')
 
 const catalogue = read('src/components/ProfileCatalogue.tsx')
-const css = read('src/customDesigner.css')
+const css = read('src/customDesigner.css') + read('src/projectsWorkspace.css')
 const state = read('src/profileCatalogueState.ts')
 
 void test('06C.2.3.1 keeps the manual editor closed until an explicit catalogue action opens it', () => {
   assert.match(catalogue, /useState<CatalogueProfile \| null>\(null\)/)
   assert.match(catalogue, /\+ Добави ръчен профил/)
-  assert.match(catalogue, /editing && !editing\.sourceEvidenceId/)
+  assert.match(catalogue, /editing &&/)
   assert.match(catalogue, /catalogue-only/)
   assert.match(catalogue, /catalogue-manual-editor-shell/)
 })
@@ -30,10 +30,11 @@ void test('06C.2.3.1 leaves demo profiles selectable for explicit demo workflows
   assert.doesNotMatch(catalogue, /kind === 'demo'[\s\S]{0,500}type="radio"/)
 })
 
-void test('06C.2.3.1 preserves the human-reviewed source-evidence flow', () => {
-  assert.match(catalogue, /catalogue-human-review-panel/)
-  assert.match(catalogue, /HUMAN REVIEW/)
-  assert.match(catalogue, /createPendingCatalogueProfileReviewFromNadezhdaEvidence/)
+void test('06C.2.3.1 preserves the human-reviewed source-evidence flow in Projects', () => {
+  const evidence = read('src/components/ProjectSourceEvidence.tsx')
+  assert.match(evidence, /project-source-review-panel/)
+  assert.match(evidence, /HUMAN REVIEW/)
+  assert.match(evidence, /createPendingCatalogueProfileReviewFromNadezhdaEvidence/)
   assert.match(catalogue, /catalogueProfileIsSelectable/)
 })
 

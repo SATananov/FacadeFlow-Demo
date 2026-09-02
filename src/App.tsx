@@ -19,6 +19,7 @@ import './aiWorkspace.css'
 import './workspaceShell.css'
 import './workspaceUnifiedPolish.css'
 import './projectsWorkspace.css'
+import './workspaceVisualAlignment.css'
 import { OperationsPanel } from './components/OperationsPanel'
 import { ProfilePanel } from './components/ProfilePanel'
 import { ProfileWorkspace } from './components/ProfileWorkspace'
@@ -441,8 +442,8 @@ function App() {
           onClose={closeDrawingImport}
         />
       )}
-      {showProjects && <ProjectsWorkspace onClose={() => setShowProjects(false)}/>}
-      {showProfileCatalogue && <ProfileCatalogue profiles={catalogueProfiles} selection={activeProfileSelection} onProfiles={updateCatalogue} onSelection={setActiveProfileSelection} onClose={closeProfileCatalogue}/>}
+      {showProjects && <ProjectsWorkspace profiles={catalogueProfiles} onProfiles={updateCatalogue} onOpenCatalogue={() => { setShowProjects(false); setProfileCatalogueOrigin('MAIN'); setShowProfileCatalogue(true) }} onClose={() => setShowProjects(false)}/>}
+      {showProfileCatalogue && <ProfileCatalogue profiles={catalogueProfiles} selection={activeProfileSelection} onProfiles={updateCatalogue} onSelection={setActiveProfileSelection} onOpenProjects={() => { setShowProfileCatalogue(false); setProfileCatalogueOrigin('MAIN'); setShowProjects(true) }} onClose={closeProfileCatalogue}/>}
       {showAiWorkspace && <FacadeFlowAIWorkspace session={aiSession} onSession={setAiSession} activeProfileCount={catalogueProfiles.filter((item) => item.status !== 'ARCHIVED').length} profiles={catalogueProfiles} onClose={closeAiWorkspaceToPrevious} onOpenImportCenter={() => { setDrawingImportOrigin('AI'); setShowAiWorkspace(false); setShowDrawingImport(true) }} onOpenProductDesigner={openConfirmedAiProductInConstructor} onOpenCustomCad={() => { setCustomDesignerOrigin('AI'); setShowAiWorkspace(false); setShowCustomDesigner(true) }} onOpenProfileCatalogue={() => { setProfileCatalogueOrigin('AI'); setShowAiWorkspace(false); setShowProfileCatalogue(true) }} onOpenAi04Constructor={openReviewedAiProposalInEditableConstructor}/>}
       {showDetailDrafting && (
         <DetailDraftingPlaceholder

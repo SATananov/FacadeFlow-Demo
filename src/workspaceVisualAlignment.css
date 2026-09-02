@@ -1,0 +1,97 @@
+/* UI01.2 — visual alignment for the light FacadeFlow engineering workspaces.
+   Styling only: no data lifecycle, persistence, AI decisions, geometry or production authority. */
+
+:root{
+  --ff-light-workspace-bg:#eef3f4;
+  --ff-light-workspace-grid:rgba(61,103,113,.075);
+  --ff-light-workspace-grid-size:32px;
+  --ff-light-content-max:1280px;
+  --ff-light-panel:#f9fbfb;
+  --ff-light-card:#fff;
+  --ff-light-border:#c4d3d7;
+}
+
+/* One quiet technical background across Constructor, Import, Projects, Catalogue and Help. */
+.detail-drafting>.hybrid-screen,
+.drawing-import-content,
+.catalogue-workspace-content,
+.help-workspace-content,
+.projects-workspace-body{
+  background-color:var(--ff-light-workspace-bg)!important;
+  background-image:
+    linear-gradient(var(--ff-light-workspace-grid) 1px,transparent 1px),
+    linear-gradient(90deg,var(--ff-light-workspace-grid) 1px,transparent 1px)!important;
+  background-size:var(--ff-light-workspace-grid-size) var(--ff-light-workspace-grid-size)!important;
+  background-position:0 0!important;
+}
+
+/* Constructor: same project-library rhythm instead of cards floating in an endless grid. */
+.detail-drafting>.hybrid-screen{padding:38px 24px 60px!important}
+.hybrid-screen-heading{max-width:920px!important;margin:0 auto 28px!important;padding:4px 18px;text-align:center}
+.hybrid-screen-heading h3{font-size:25px!important;font-weight:500!important;letter-spacing:.1px}
+.hybrid-screen-heading p{font-size:12px!important;line-height:1.55!important}
+.hybrid-route-grid{width:min(var(--ff-light-content-max),100%)!important;max-width:none!important;gap:16px!important;margin:0 auto!important}
+.hybrid-route-card{
+  min-height:226px!important;padding:24px!important;border:1px solid var(--ff-light-border)!important;
+  border-radius:8px!important;background:var(--ff-light-card)!important;
+  box-shadow:0 8px 22px rgba(23,56,66,.065)!important;
+}
+.hybrid-route-card:hover,.hybrid-route-card:focus-visible{border-color:#4d9aa8!important;box-shadow:0 11px 28px rgba(23,83,95,.12)!important}
+.hybrid-route-card>span{letter-spacing:.4px!important}
+
+/* Import: use the same centered content width and card language as Constructor/Projects. */
+.import-format-chooser{width:min(var(--ff-light-content-max),calc(100% - 40px))!important;max-width:none!important;margin:0 auto!important;padding:32px 0 56px!important}
+.import-format-chooser h3{margin-bottom:18px!important;font-size:18px!important;font-weight:600!important}
+.import-format-grid{gap:12px!important}
+.import-format-card{
+  min-height:184px!important;padding:18px!important;border:1px solid var(--ff-light-border)!important;
+  border-radius:8px!important;background:var(--ff-light-card)!important;
+  box-shadow:0 7px 20px rgba(23,56,66,.055)!important;
+}
+.import-format-card:hover,.import-format-card:focus-visible{border-color:#4d9aa8!important;background:#fbfdfd!important;box-shadow:0 10px 26px rgba(23,83,95,.1)!important}
+
+/* Projects: wider desktop composition, clearer tabs and lighter secondary policy block. */
+.projects-content{width:min(var(--ff-light-content-max),calc(100% - 40px))!important;padding:32px 0 58px!important;gap:16px!important}
+.projects-intro,.projects-policy{border-color:var(--ff-light-border)!important;background:var(--ff-light-panel)!important;box-shadow:0 5px 16px rgba(23,56,66,.035)}
+.projects-summary-card{border-color:var(--ff-light-border)!important;box-shadow:0 4px 14px rgba(23,56,66,.035)}
+.projects-tabs{gap:2px!important;padding:7px 8px 0!important;background:#e7eef0!important}
+.projects-tabs button{min-height:38px!important;padding:7px 14px 9px!important;border-radius:5px 5px 0 0!important;color:#526a71!important}
+.projects-tabs button[aria-selected="true"]{
+  background:#fff!important;border-color:#bdced2!important;border-bottom-color:#fff!important;color:#173943!important;
+  box-shadow:inset 0 3px #20aabd!important;
+}
+.projects-tabs button:hover{background:#f8fbfb!important;color:#244751!important}
+.projects-empty-state{min-height:238px!important}
+.projects-policy{padding:16px 18px!important}
+.projects-policy>div{margin-bottom:12px!important}
+.projects-policy ol{gap:8px!important}
+.projects-policy li{padding:11px 11px 11px 41px!important;background:#fff!important}
+.projects-policy li:before{left:10px!important;top:10px!important}
+.projects-workspace .ff-workspace-actions button:disabled{
+  opacity:.52!important;border-style:dashed!important;background:#0a2028!important;color:#88a0a6!important;
+}
+
+/* Help: keep documentation calm but place it on the same centered engineering canvas. */
+.help-toolbar,
+.help-layout{width:min(var(--ff-light-content-max),calc(100% - 40px))!important;box-sizing:border-box!important;margin-left:auto!important;margin-right:auto!important}
+.help-toolbar{margin-top:20px!important;border:1px solid var(--ff-light-border)!important;border-bottom:0!important;border-radius:8px 8px 0 0!important;background:#f8fbfb!important}
+.help-layout{margin-bottom:44px!important;border:1px solid var(--ff-light-border)!important;border-radius:0 0 8px 8px!important;background:#fff!important;box-shadow:0 6px 20px rgba(23,56,66,.045)!important}
+.help-layout nav{background:#f5f8f8!important}
+.help-content{background:#fff!important}
+.help-content section{max-width:980px}
+
+/* Catalogue remains data-dense and full width; only the page field belongs to the shared visual system. */
+.catalogue-workspace-content{background-color:var(--ff-light-workspace-bg)!important}
+
+@media(max-width:900px){
+  .detail-drafting>.hybrid-screen{padding:26px 12px 44px!important}
+  .import-format-chooser,.projects-content,.help-toolbar,.help-layout{width:min(100% - 24px,var(--ff-light-content-max))!important}
+  .projects-content{padding-top:24px!important}
+  .help-toolbar{margin-top:12px!important}
+}
+
+@media(max-width:560px){
+  .import-format-chooser,.projects-content,.help-toolbar,.help-layout{width:min(100% - 18px,var(--ff-light-content-max))!important}
+  .projects-tabs button{padding-inline:10px!important}
+  .projects-policy{padding:14px!important}
+}

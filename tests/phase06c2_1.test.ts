@@ -42,7 +42,7 @@ test('06C.2.1 keeps 06C.2 explicit-role helper backward compatible and human-con
 })
 
 test('06C.2.1 UI requires named human review before source evidence is added', () => {
-  const catalogue = read('src/components/ProfileCatalogue.tsx')
+  const catalogue = read('src/components/ProjectSourceEvidence.tsx')
   const editor = read('src/components/ProfileEditor.tsx')
   assert.match(catalogue, /createPendingCatalogueProfileReviewFromNadezhdaEvidence/)
   assert.match(catalogue, /HUMAN CONFIRMED/)
@@ -74,7 +74,7 @@ test('06C.2.1 preserves source/production safety boundaries and adds no persiste
   const files = [
     read('src/nadezhdaCatalogueEvidence.ts'),
     read('src/profileCatalogueState.ts'),
-    read('src/components/ProfileCatalogue.tsx'),
+    read('src/components/ProjectSourceEvidence.tsx'),
     read('src/components/ProfileEditor.tsx'),
     read('src/aiGuidedProduct.ts'),
   ].join('\n')

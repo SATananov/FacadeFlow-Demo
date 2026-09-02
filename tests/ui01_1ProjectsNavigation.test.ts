@@ -18,7 +18,7 @@ test('UI01.1 adds Projects to the unified main navigation in the intended order'
     previous = index
   }
   assert.match(app, /showProjects/)
-  assert.match(app, /<ProjectsWorkspace onClose=/)
+  assert.match(app, /<ProjectsWorkspace[\s\S]*?onClose=/)
   assert.match(icons, /'projects'/)
 })
 
