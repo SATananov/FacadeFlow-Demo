@@ -1,4 +1,44 @@
-# FacadeFlow Demo — Phase 01–06A.1 · локална симулация
+# FacadeFlow Demo — текуща архитектура · локална симулация
+
+## Текущ архитектурен checkpoint
+
+FacadeFlow е локална, human-gated среда за симулация, технически преглед и подготовка на структурирани продуктови данни. Текущият checkpoint включва архитектурата до AI04, Phase 06C rule foundations, REAL DATA BATCH 01 / WP78 и затворената RP01 foundation. Историческите секции по-долу остават като подробен phase-specific запис.
+
+### AI01 → AI04 — human-authority pipeline
+
+1. **AI01 — Prompt Intelligence**: локална детерминирана интерпретация на natural-language вход към общия `FacadeFlowProductIntent`. Липсващи/нееднозначни стойности остават unresolved; няма LLM/API/model call, automatic Human Confirm или production output.
+2. **AI02 — Project Document Intelligence**: source-bound document intake, provenance, explicit product candidates, corroboration и conflict review към същия canonical Product Intent. Противоречащи evidence стойности не се разрешават автоматично и AI02 не създава автоматично geometry.
+3. **AI03 — Parametric Construction Proposal**: от Product Intent се създава пропорционално концептуално предложение с полета, делители, налична opening semantics, assumptions и unresolved engineering/details. AI03.5 е UI-only closure polish и не променя inference/evidence/geometry logic. Предложението може да бъде `BLOCKED`, `NEEDS_REVIEW` или `HUMAN_REVIEWED`, но AI03 не го приема автоматично и не го записва директно в конструктора.
+4. **Human Review**: човешкото потвърждение е задължителната authority boundary между AI предложение и editable constructor geometry.
+5. **AI04 — Human-Approved Proposal → Editable Constructor Geometry**: editable Custom Product Designer draft се създава само след `HUMAN_REVIEWED` AI03 proposal и отделно explicit human acknowledgement. Поддържат се само semantics, които AI04 V1 може да представи безопасно; profile transfer се допуска само при exact selectable catalogue match. След handoff нормалните constructor validation и human review продължават.
+
+AI04 handoff **не** означава engineering или production approval: `rulesValidated=false`, `machineReady=false` и `productionApproved=false` остават заключени. Няма automatic constructor handoff и няма machine output.
+
+### Phase 06C — guided review, catalogue evidence и rule gates
+
+Phase 06C добавя Guided Product Builder, explicit AI→constructor review UX, human-confirmed profile roles, real/demo catalogue visibility, project/product data model и детерминирани rule-source / applicability / evaluation / aggregation foundations. Aggregate state `REVIEWED_COMPLETE` означава само, че наличният evaluation set е прегледан от човек без reviewed `FAIL`; той **не** е синоним на `rulesValidated` и не отключва handoff, production или machine readiness.
+
+### REAL DATA BATCH 01 / WP78 и RP01
+
+WP78 свързва project-system evidence, catalogue visibility, evidence-aware rule review и context-level human decisions. Дори `VALIDATED_FOR_CONTEXT` остава context-only и не създава generic validation, production approval или machine readiness.
+
+RP01.21 затваря и консолидира RP01.1–RP01.20. Текущият real corpus съдържа един реален проект (`Вадим-2`), затова real cross-project corroboration не се твърди. RP01 остава ограничен до `EVIDENCE_ONLY`, `SIMULATION_ONLY` и `READ_ONLY` authority groups; не дава engineering authority, production executable state или machine integration. След RP01.21 следваща major фаза изисква нов explicit human plan и отделна acceptance boundary.
+
+### Clean verification gate
+
+За чиста локална проверка на текущите AI closure граници:
+
+```bash
+npm ci
+npm run test:ai01_prompt
+npm run test:ai02_documents
+npm run test:ai03
+npm run test:ai03_5
+npm run test:ai04
+npm run lint
+npm run build
+git diff --check
+```
 
 ## Профилен каталог и нестандартен прозорец
 
