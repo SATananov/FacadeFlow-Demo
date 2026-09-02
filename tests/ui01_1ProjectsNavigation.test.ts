@@ -34,7 +34,7 @@ test('UI01.1 Projects is a first-class unified workspace with four zero-state pr
 test('UI01.1 keeps Projects as a visual foundation without persistence, network or production authority', () => {
   assert.doesNotMatch(projects, /localStorage|sessionStorage|indexedDB|fetch\(|WebSocket|EventSource/i)
   assert.doesNotMatch(projects, /machineReady\s*:\s*true|productionApproved\s*:\s*true/i)
-  assert.match(projects, /Няма backend, записване, AI similarity, автоматично копиране или production unlock/)
+  assert.match(projects, /Няма сървър \/ база, постоянно записване, AI търсене по сходство, автоматично копиране или производствено отключване/)
 })
 
 test('UI01.1 Projects layout is responsive and follows the shared workspace shell', () => {

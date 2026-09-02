@@ -7,8 +7,8 @@ const read = (path: string) => readFileSync(path, 'utf8')
 test('06C.2.1.1 evidence role click exposes a visible inline human review panel in Projects', () => {
   const evidence = read('src/components/ProjectSourceEvidence.tsx')
   assert.match(evidence, /project-source-review-panel/)
-  assert.match(evidence, /HUMAN REVIEW/)
-  assert.match(evidence, /Source evidence остава неизменен/)
+  assert.match(evidence, /ЧОВЕШКИ ПРЕГЛЕД/)
+  assert.match(evidence, /Данните от източника остават неизменни/)
 })
 
 test('06C.2.1.1 selected evidence card and role button show immediate review feedback', () => {

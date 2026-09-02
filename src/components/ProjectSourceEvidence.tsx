@@ -14,6 +14,12 @@ interface Props {
 
 const reviewRoles: ProfileRole[] = ['FRAME', 'SASH', 'MULLION']
 
+const wp78BlockerLabels: Readonly<Record<string, string>> = {
+  PROFILE_DIMENSIONS_UNKNOWN: 'Размерите на профилите са неизвестни.',
+  RULES_NOT_VALIDATED: 'Правилата за тези профили не са валидирани.',
+  CATALOGUE_PROMOTION_PENDING: 'Преминаването към избираем каталожен запис чака човешко решение.',
+}
+
 export function ProjectSourceEvidence({ profiles, onProfiles, onOpenCatalogue }: Props) {
   const [editing, setEditing] = useState<CatalogueProfile | null>(null)
   const [errors, setErrors] = useState<string[]>([])
@@ -41,21 +47,21 @@ export function ProjectSourceEvidence({ profiles, onProfiles, onOpenCatalogue }:
     setEditing(null)
   }
 
-  return <div className="project-source-evidence" aria-label="Проектни source evidence записи">
+  return <div className="project-source-evidence" aria-label="Проектни записи от реални източници">
     <article className="project-source-card project-source-card-vadim" aria-labelledby="project-source-vadim-title">
       <header className="project-source-head">
         <div>
-          <span className="project-source-kicker">SOURCE PROJECT · XML + LTE · READ ONLY</span>
+          <span className="project-source-kicker">ИЗТОЧНИКОВ ПРОЕКТ · XML + LTE · САМО ЗА ЧЕТЕНЕ</span>
           <h4 id="project-source-vadim-title">Надежда · {nadezhdaSourceEvidence.project}</h4>
-          <p>Заключен реален проектен източник. Профилните кодове и сеченията са evidence; ролята каса / крило / делител остава изрично човешко решение.</p>
+          <p>Заключен реален проектен източник. Профилните кодове и сеченията идват от реалния източник; ролята каса / крило / делител остава изрично човешко решение.</p>
         </div>
-        <span className="project-source-state">SOURCE IMMUTABLE</span>
+        <span className="project-source-state">ИЗТОЧНИКЪТ Е НЕПРОМЕНЯЕМ</span>
       </header>
 
       <div className="project-source-metrics" aria-label="Обобщение на Вадим-2">
         <span><b>{nadezhdaSourceEvidence.xmlPieceCount}</b><small>XML детайла</small></span>
         <span><b>{nadezhdaSourceEvidence.lteRecordCount}</b><small>LTE записа</small></span>
-        <span><b>{nadezhdaSourceEvidence.matchedXmlBarcodesInLte}/{nadezhdaSourceEvidence.xmlPieceCount}</b><small>barcode match</small></span>
+        <span><b>{nadezhdaSourceEvidence.matchedXmlBarcodesInLte}/{nadezhdaSourceEvidence.xmlPieceCount}</b><small>съвпадение на баркодове</small></span>
         <span><b>{nadezhdaSourceEvidence.machiningCount}</b><small>обработки</small></span>
       </div>
 
@@ -67,7 +73,7 @@ export function ProjectSourceEvidence({ profiles, onProfiles, onOpenCatalogue }:
           return <section key={item.id} className={`project-source-profile ${confirmed ? 'confirmed' : ''} ${reviewing ? 'reviewing' : ''}`}>
             <div className="project-source-profile-title">
               <b>{item.code}</b>
-              <span>{confirmed && imported ? `HUMAN CONFIRMED · ${roleLabels[imported.role].toUpperCase()}` : reviewing && editing ? `ПРЕГЛЕД · ${roleLabels[editing.role].toUpperCase()}` : 'РОЛЯ: НЕПОТВЪРДЕНА'}</span>
+              <span>{confirmed && imported ? `ПОТВЪРДЕНО ОТ ЧОВЕК · ${roleLabels[imported.role].toUpperCase()}` : reviewing && editing ? `ПРЕГЛЕД · ${roleLabels[editing.role].toUpperCase()}` : 'РОЛЯ: НЕПОТВЪРДЕНА'}</span>
             </div>
             <dl>
               <div><dt>Сечение</dt><dd>{item.maxY} × {item.maxZ} mm</dd></div>
@@ -75,7 +81,7 @@ export function ProjectSourceEvidence({ profiles, onProfiles, onOpenCatalogue }:
               <div><dt>Дължини</dt><dd>{item.minLength}–{item.maxLength} mm</dd></div>
               <div><dt>Обработки</dt><dd>{item.machiningCount}</dd></div>
             </dl>
-            <p className="project-source-match">✓ XML ↔ LTE barcode evidence</p>
+            <p className="project-source-match">✓ XML ↔ LTE · потвърдено съвпадение на баркодове</p>
             {imported ? <div className="project-source-reviewed">
               <span>Каталожен запис: <b>{roleLabels[imported.role]}</b> · {profileStatusLabels[imported.status]}</span>
               {confirmed && <small>Потвърдено от: {imported.humanRoleConfirmedBy}</small>}
@@ -89,23 +95,23 @@ export function ProjectSourceEvidence({ profiles, onProfiles, onOpenCatalogue }:
       </div>
 
       {editing?.sourceEvidenceId?.startsWith('nadezhda-vadim2-') && <section className="project-source-review-panel" aria-live="polite">
-        <div className="project-source-review-heading"><span>HUMAN REVIEW</span><b>{editing.code} · {roleLabels[editing.role]}</b><small>Source evidence остава неизменен. В каталога се добавя само отделен нормализиран запис след изрично човешко потвърждение.</small></div>
+        <div className="project-source-review-heading"><span>ЧОВЕШКИ ПРЕГЛЕД</span><b>{editing.code} · {roleLabels[editing.role]}</b><small>Данните от източника остават неизменни. В каталога се добавя само отделен нормализиран запис след изрично човешко потвърждение.</small></div>
         <ProfileEditor value={editing} errors={errors} onChange={setEditing} onSave={save} onCancel={() => setEditing(null)}/>
       </section>}
 
-      <footer className="project-source-safety">SOURCE ONLY · HUMAN REVIEW REQUIRED · RULES VALIDATED: NO · MACHINE READY: NO · PRODUCTION APPROVED: NO</footer>
+      <footer className="project-source-safety">САМО ИЗТОЧНИК · ИЗИСКВА СЕ ЧОВЕШКИ ПРЕГЛЕД · ПРАВИЛА: НЕВАЛИДИРАНИ · ГОТОВ ЗА МАШИНА: НЕ · ПРОИЗВОДСТВЕНО ОДОБРЕН: НЕ</footer>
     </article>
 
     <article className="project-source-card project-source-card-wp78" aria-labelledby="project-source-wp78-title">
       <header className="project-source-head">
         <div>
-          <span className="project-source-kicker">REAL DATA BATCH 01 · READ ONLY</span>
+          <span className="project-source-kicker">РЕАЛНИ ДАННИ · ПАРТИДА 01 · САМО ЗА ЧЕТЕНЕ</span>
           <h4 id="project-source-wp78-title">{wp78CatalogueVisibility.system}</h4>
-          <p>Source-backed роли от предоставения WP 78 лист. Размерите на профилните сечения не са дадени и записите остават non-selectable.</p>
+          <p>Роли от предоставения WP 78 лист, подкрепени от реалния източник. Размерите на профилните сечения не са дадени и записите остават недостъпни за избор.</p>
         </div>
-        <span className="project-source-state">NO SELECTABLE</span>
+        <span className="project-source-state">НЕ МОЖЕ ДА СЕ ИЗБИРА</span>
       </header>
-      <div className="project-source-wp78-summary"><span><b>{wp78CatalogueVisibility.entries.length}</b> профила</span><span><b>WINDOW</b> категория</span><span><b>UNKNOWN</b> размери</span></div>
+      <div className="project-source-wp78-summary"><span><b>{wp78CatalogueVisibility.entries.length}</b> профила</span><span><b>Прозорец</b> категория</span><span><b>Неизвестни</b> размери</span></div>
       <div className="project-source-wp78-grid">
         {wp78CatalogueVisibility.entries.map((item) => <section key={item.code} className="project-source-wp78-profile">
           <b>{item.code}</b>
@@ -114,8 +120,8 @@ export function ProjectSourceEvidence({ profiles, onProfiles, onOpenCatalogue }:
           <em>Размери: НЕИЗВЕСТНИ</em>
         </section>)}
       </div>
-      <div className="project-source-blockers"><b>Защо остава заключено</b><ul>{wp78CatalogueVisibility.blockers.map((blocker) => <li key={blocker}>{blocker}</li>)}</ul></div>
-      <footer className="project-source-safety">READ ONLY · PROFILE DIMENSIONS: UNKNOWN · RULES VALIDATED: NO · MACHINE READY: NO · PRODUCTION APPROVED: NO</footer>
+      <div className="project-source-blockers"><b>Защо остава заключено</b><ul>{wp78CatalogueVisibility.blockers.map((blocker) => <li key={blocker}>{wp78BlockerLabels[blocker] ?? blocker}</li>)}</ul></div>
+      <footer className="project-source-safety">САМО ЗА ЧЕТЕНЕ · РАЗМЕРИ НА ПРОФИЛИТЕ: НЕИЗВЕСТНИ · ПРАВИЛА: НЕВАЛИДИРАНИ · ГОТОВ ЗА МАШИНА: НЕ · ПРОИЗВОДСТВЕНО ОДОБРЕН: НЕ</footer>
     </article>
   </div>
 }

@@ -27,8 +27,8 @@ test('UI01.2A preserves explicit human review from project evidence', () => {
   assert.match(evidence, /createPendingCatalogueProfileReviewFromNadezhdaEvidence/)
   assert.match(evidence, /validateCatalogueProfile/)
   assert.match(evidence, /ProfileEditor/)
-  assert.match(evidence, /HUMAN REVIEW/)
-  assert.match(evidence, /Source evidence остава неизменен/)
+  assert.match(evidence, /ЧОВЕШКИ ПРЕГЛЕД/)
+  assert.match(evidence, /Данните от източника остават неизменни/)
 })
 
 test('UI01.2A wires Projects and Catalogue without persistence or production authority', () => {

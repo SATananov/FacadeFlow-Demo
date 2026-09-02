@@ -52,7 +52,7 @@ function baseCatalogueProfileFromNadezhdaEvidence(evidence: NadezhdaProfileEvide
     nameBg: `${evidence.code} · роля за човешко потвърждение`,
     dimensionA: evidence.maxY,
     dimensionB: evidence.maxZ,
-    description: `Реален source evidence от ${evidence.project}: XML ${evidence.xmlPieceCount} детайла · LTE ${evidence.lteRecordCount} записа · обработки ${evidence.machiningCount}. Ролята остава отделно човешко решение и не е производствено одобрение.`,
+    description: `Реални данни от източника ${evidence.project}: XML ${evidence.xmlPieceCount} детайла · LTE ${evidence.lteRecordCount} записа · обработки ${evidence.machiningCount}. Ролята остава отделно човешко решение и не е производствено одобрение.`,
     status: 'SOURCE_EVIDENCE',
     createdAt: now,
     updatedAt: now,
@@ -76,7 +76,7 @@ export function confirmCatalogueProfileHumanRole(profile: CatalogueProfile, conf
     humanRoleConfirmedAt: now,
     humanRoleConfirmationNote: note.trim() || undefined,
     updatedAt: now,
-    description: `${profile.description ?? ''} HUMAN CONFIRMED роля: ${profile.role}. Експертната проверка, правилата и производствената готовност остават отделно непотвърдени.`.trim(),
+    description: `${profile.description ?? ''} Роля, потвърдена от човек: ${profile.role}. Експертната проверка, правилата и производствената готовност остават отделно непотвърдени.`.trim(),
   }
 }
 

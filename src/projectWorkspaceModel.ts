@@ -56,3 +56,48 @@ export function projectJobTypeLabel(jobType: FacadeFlowJobType | null): string {
   if (!jobType) return 'Типът не е зададен'
   return PROJECT_JOB_TYPE_OPTIONS.find((option) => option.value === jobType)?.label ?? jobType
 }
+
+const PROJECT_BLOCKER_LABELS: Readonly<Record<string, string>> = {
+  'Project id is required.': 'Липсва идентификатор на проекта.',
+  'Project name is required.': 'Името на проекта е задължително.',
+  'Project reference is required.': 'Референцията на проекта е задължителна.',
+  'Project timestamp is required.': 'Липсва дата и час на проекта.',
+  'Human project review is required before completion.': 'Преди завършване е необходим потвърден човешки преглед.',
+  'Project must be in NEEDS_REVIEW before human review can be confirmed.': 'Човешки преглед може да се потвърди само когато проектът е със статус „За преглед“.',
+  'Human reviewer is required.': 'Трябва да бъде посочен човекът, извършил прегледа.',
+  'Source link id, sourceId and label are required.': 'За връзката към източник са необходими идентификатор и име.',
+  'Source link already exists.': 'Този източник вече е свързан с проекта.',
+  'Product id is required.': 'Липсва идентификатор на изделието.',
+  'Product is already linked to this project.': 'Това изделие вече е свързано с проекта.',
+  'Only a completed project can receive a reusable-template decision.': 'Решение за повторна употреба може да се вземе само за завършен проект.',
+  'Human-confirmed project review is required before reusable-template review.': 'Преди решение за повторна употреба е необходим човешки потвърден преглед на проекта.',
+  'Human reuse reviewer is required.': 'Трябва да бъде посочен човекът, взел решението за повторна употреба.',
+  'Project id and reference must be unique in the session library.': 'Референцията на проекта трябва да е уникална в текущата сесия.',
+  'Project reference must remain unique in the session library.': 'Референцията на проекта трябва да остане уникална в текущата сесия.',
+  'Project does not exist in the session library.': 'Проектът не съществува в текущата сесия.',
+}
+
+const ACTION_LABELS: Readonly<Record<string, string>> = {
+  START_WORK: 'Стартирането на проекта',
+  REQUEST_REVIEW: 'Изпращането за преглед',
+  RETURN_TO_ACTIVE: 'Връщането за редакция',
+  COMPLETE: 'Завършването на проекта',
+}
+
+const STATUS_LABELS: Readonly<Record<string, string>> = {
+  DRAFT: '„Чернова“',
+  ACTIVE: '„Активен“',
+  NEEDS_REVIEW: '„За преглед“',
+  COMPLETED: '„Завършен“',
+  ARCHIVED: '„Архивиран“',
+}
+
+export function projectBlockerLabel(blocker: string): string {
+  const known = PROJECT_BLOCKER_LABELS[blocker]
+  if (known) return known
+  const transition = blocker.match(/^Action ([A-Z_]+) requires project status ([A-Z_]+)\.$/)
+  if (!transition) return blocker
+  const action = ACTION_LABELS[transition[1]] ?? 'Това действие'
+  const status = STATUS_LABELS[transition[2]] ?? transition[2]
+  return `${action} е позволено само при статус ${status}.`
+}

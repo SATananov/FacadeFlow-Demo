@@ -33,7 +33,7 @@ void test('06C.2.3.1 leaves demo profiles selectable for explicit demo workflows
 void test('06C.2.3.1 preserves the human-reviewed source-evidence flow in Projects', () => {
   const evidence = read('src/components/ProjectSourceEvidence.tsx')
   assert.match(evidence, /project-source-review-panel/)
-  assert.match(evidence, /HUMAN REVIEW/)
+  assert.match(evidence, /ЧОВЕШКИ ПРЕГЛЕД/)
   assert.match(evidence, /createPendingCatalogueProfileReviewFromNadezhdaEvidence/)
   assert.match(catalogue, /catalogueProfileIsSelectable/)
 })

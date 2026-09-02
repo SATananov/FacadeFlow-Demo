@@ -45,13 +45,13 @@ test('06C.2.1 UI requires named human review before source evidence is added', (
   const catalogue = read('src/components/ProjectSourceEvidence.tsx')
   const editor = read('src/components/ProfileEditor.tsx')
   assert.match(catalogue, /createPendingCatalogueProfileReviewFromNadezhdaEvidence/)
-  assert.match(catalogue, /HUMAN CONFIRMED/)
+  assert.match(catalogue, /ПОТВЪРДЕНО ОТ ЧОВЕК/)
   assert.match(catalogue, /Потвърдено от:/)
-  assert.match(editor, /HUMAN REVIEW REQUIRED/)
+  assert.match(editor, /ИЗИСКВА СЕ ЧОВЕШКИ ПРЕГЛЕД/)
   assert.match(editor, /Потвърдено от човек \/ технолог \*/)
   assert.match(editor, /Потвърди и добави в каталога/)
   assert.match(editor, /readOnly=\{Boolean\(value\.sourceEvidenceId\)\}/)
-  assert.match(editor, /RULES VALIDATED: NO · MACHINE READY: NO/)
+  assert.match(editor, /ПРАВИЛА: НЕВАЛИДИРАНИ · ГОТОВ ЗА МАШИНА: НЕ/)
 })
 
 test('06C.2.1 AI builder counts only HUMAN CONFIRMED Nadezhda role assignments', () => {

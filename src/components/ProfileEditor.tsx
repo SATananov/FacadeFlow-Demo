@@ -27,12 +27,12 @@ export function ProfileEditor({ value, errors, onChange, onSave, onCancel }: Pro
   return <form className="catalogue-editor" onSubmit={(event) => { event.preventDefault(); submit() }} noValidate>
     <h3>{value.sourceEvidenceId ? 'Човешко потвърждение на реален профил' : value.createdAt === value.updatedAt ? 'Добавяне / редактиране на профил' : 'Редактиране на профил'}</h3>
     {value.sourceEvidenceId && <div className="catalogue-source-review" role="note">
-      <b>РЕАЛЕН SOURCE EVIDENCE</b><span>{value.sourceEvidenceLabel}</span>
-      <small>Провери ролята, системата и името преди запис. Кодът и сечението идват от заключения source evidence. Ролята, системата и името са човешко решение. HUMAN CONFIRMED не означава експертно или производствено одобрение.</small>
+      <b>РЕАЛНИ ДАННИ ОТ ИЗТОЧНИКА</b><span>{value.sourceEvidenceLabel}</span>
+      <small>Провери ролята, системата и името преди запис. Кодът и сечението идват от заключения реален източник. Ролята, системата и името са човешко решение. Потвърждението от човек не означава експертно или производствено одобрение.</small>
     </div>}
     {value.sourceEvidenceId && <div className={`catalogue-human-review-state ${pendingEvidenceReview ? 'pending' : 'confirmed'}`}>
-      <b>{pendingEvidenceReview ? 'HUMAN REVIEW REQUIRED' : '✓ HUMAN CONFIRMED ROLE'}</b>
-      <span>{pendingEvidenceReview ? 'Профилът още не участва в продуктовите dropdown-и.' : `${roleLabels[value.role]} · потвърдено от ${value.humanRoleConfirmedBy}`}</span>
+      <b>{pendingEvidenceReview ? 'ИЗИСКВА СЕ ЧОВЕШКИ ПРЕГЛЕД' : '✓ РОЛЯТА Е ПОТВЪРДЕНА ОТ ЧОВЕК'}</b>
+      <span>{pendingEvidenceReview ? 'Профилът още не участва в продуктовите списъци за избор.' : `${roleLabels[value.role]} · потвърдено от ${value.humanRoleConfirmedBy}`}</span>
       {!pendingEvidenceReview && value.humanRoleConfirmedAt && <small>{new Date(value.humanRoleConfirmedAt).toLocaleString('bg-BG')}</small>}
     </div>}
     <div className="catalogue-form-grid">
@@ -47,6 +47,6 @@ export function ProfileEditor({ value, errors, onChange, onSave, onCancel }: Pro
     </div>
     {errors.length > 0 && <div className="inline-errors" role="alert"><b>Профилът не може да бъде записан:</b><ul>{errors.map((error) => <li key={error}>{error}</li>)}</ul></div>}
     <div className="form-actions"><button className="primary" type="submit" disabled={pendingEvidenceReview && !value.humanRoleConfirmedBy?.trim()}>{pendingEvidenceReview ? 'Потвърди и добави в каталога' : 'Запази профила'}</button><button type="button" onClick={onCancel}>Отказ</button></div>
-    {pendingEvidenceReview && <p className="catalogue-human-review-warning">SOURCE EVIDENCE → HUMAN CONFIRMED ROLE → CATALOGUE. RULES VALIDATED: NO · MACHINE READY: NO</p>}
+    {pendingEvidenceReview && <p className="catalogue-human-review-warning">РЕАЛЕН ИЗТОЧНИК → РОЛЯ, ПОТВЪРДЕНА ОТ ЧОВЕК → КАТАЛОГ. ПРАВИЛА: НЕВАЛИДИРАНИ · ГОТОВ ЗА МАШИНА: НЕ</p>}
   </form>
 }

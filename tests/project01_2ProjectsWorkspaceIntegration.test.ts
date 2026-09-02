@@ -87,14 +87,14 @@ test('PROJECT01.2 keeps source evidence visually and logically separate from lif
   assert.match(projects, /projects-lifecycle-region/)
   assert.match(projects, /projects-source-region/)
   assert.match(projects, /ProjectSourceEvidence/)
-  assert.match(projects, /Source-backed проектният контекст остава отделна evidence зона/)
+  assert.match(projects, /Проектният контекст от реални източници остава в отделна зона/)
   assert.doesNotMatch(projects, /linkProjectSource\(/)
 })
 
 test('PROJECT01.2 retains zero-state compatibility and explicit no-persistence copy', () => {
-  assert.match(projects, /Все още няма lifecycle проекти/)
+  assert.match(projects, /Все още няма проекти с жизнен цикъл/)
   assert.match(projects, /Няма създадени данни и нищо не се записва извън текущата сесия/)
-  assert.match(projects, /Няма backend, записване, AI similarity, автоматично копиране или production unlock/)
+  assert.match(projects, /Няма сървър \/ база, постоянно записване, AI търсене по сходство, автоматично копиране или производствено отключване/)
 })
 
 test('PROJECT01.2 adds responsive project creation and lifecycle-card styling', () => {

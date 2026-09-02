@@ -1,7 +1,7 @@
 import type { CatalogueProfile, ProfileRole } from './profileCatalogueTypes'
 
 export const roleLabels: Record<ProfileRole, string> = { FRAME: 'Каса', SASH: 'Крило', MULLION: 'Делител' }
-export const profileStatusLabels = { DEMONSTRATION: 'Демонстрационен', SOURCE_EVIDENCE: 'Реален source evidence', EXPERT_CONFIRMED: 'Потвърден от експерт', ARCHIVED: 'Архивиран' } as const
+export const profileStatusLabels = { DEMONSTRATION: 'Демонстрационен', SOURCE_EVIDENCE: 'Реален източник', EXPERT_CONFIRMED: 'Потвърден от експерт', ARCHIVED: 'Архивиран' } as const
 
 export function catalogueProfileIsSelectable(profile: CatalogueProfile) {
   return profile.status !== 'ARCHIVED' && (profile.status !== 'SOURCE_EVIDENCE' || profile.humanRoleReviewStatus === 'HUMAN_CONFIRMED')
@@ -20,7 +20,7 @@ export function duplicateCatalogueProfile(source: CatalogueProfile, id: string, 
 }
 
 export function catalogueExport(profiles: CatalogueProfile[]) {
-  const payload = { schemaVersion: '1.0', simulationOnly: true, machineReady: false, requiresHumanApproval: true, warning: 'Симулационен каталог с демонстрационни и source-evidence записи. Не е одобрен за производство.', profiles, generatedAt: new Date().toISOString() }
+  const payload = { schemaVersion: '1.0', simulationOnly: true, machineReady: false, requiresHumanApproval: true, warning: 'Симулационен каталог с демонстрационни записи и записи от реални източници. Не е одобрен за производство.', profiles, generatedAt: new Date().toISOString() }
   const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' })
   const url = URL.createObjectURL(blob), anchor = document.createElement('a')
   anchor.href = url; anchor.download = 'facadeflow.profile-catalogue.simulation.json'; anchor.click(); URL.revokeObjectURL(url)
