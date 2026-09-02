@@ -6,6 +6,7 @@ export type FacadeFlowIconName =
   | 'import'
   | 'catalogue'
   | 'designer'
+  | 'projects'
   | 'building'
   | 'house'
   | 'small-project'
@@ -38,6 +39,7 @@ export function FacadeFlowIcon({ name, ...props }: Props) {
     {name === 'import' && <><path d="M4 15.5V19h16v-3.5"/><path d="M12 4v10"/><path d="m8.5 10.5 3.5 3.5 3.5-3.5"/><path d="M6 4h12"/></>}
     {name === 'catalogue' && <><path d="M5 4.5h11a3 3 0 0 1 3 3V20H8a3 3 0 0 1-3-3V4.5Z"/><path d="M8 4.5V20"/><path d="M11 8h5M11 11h5M11 14h3"/></>}
     {name === 'designer' && <><rect x="4" y="4" width="16" height="16" rx="1.5"/><path d="M8 4v16M16 4v16M4 12h16"/><path d="m10.5 16.5 1.5-1.5 1.5 1.5"/></>}
+    {name === 'projects' && <><path d="M3.5 6.5h6l1.5 2h9.5v10.5H3.5V6.5Z"/><path d="M3.5 9h17"/><path d="M7 12h4M7 15h7M16.5 12h.01M16.5 15h.01"/></>}
     {name === 'building' && <><path d="M5 21V4h10v17M15 8h4v13"/><path d="M8 7h2M8 10h2M8 13h2M8 16h2M12 7h1M12 10h1M12 13h1M12 16h1M17 11h1M17 14h1M17 17h1"/><path d="M3 21h18"/></>}
     {name === 'house' && <><path d="m3 11 9-7 9 7"/><path d="M5.5 10v10h13V10"/><path d="M9 20v-6h6v6"/><path d="M8 10h2M14 10h2"/></>}
     {name === 'small-project' && <><path d="M4 20V8l5-4 5 4v12"/><path d="M14 12h6v8M7 11h4M7 14h4M7 17h4M16.5 15h1M16.5 18h1"/><path d="M2.5 20h19"/></>}

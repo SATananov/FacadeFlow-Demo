@@ -18,6 +18,7 @@ import './visualSystem.css'
 import './aiWorkspace.css'
 import './workspaceShell.css'
 import './workspaceUnifiedPolish.css'
+import './projectsWorkspace.css'
 import { OperationsPanel } from './components/OperationsPanel'
 import { ProfilePanel } from './components/ProfilePanel'
 import { ProfileWorkspace } from './components/ProfileWorkspace'
@@ -32,6 +33,7 @@ import { ProfileCatalogue } from './components/ProfileCatalogue'
 import { CustomProductDesigner } from './components/CustomProductDesigner'
 import { DetailDraftingPlaceholder } from './components/DetailDraftingPlaceholder'
 import { FacadeFlowAIWorkspace } from './components/FacadeFlowAIWorkspace'
+import { ProjectsWorkspace } from './components/ProjectsWorkspace'
 import { FacadeFlowIcon } from './components/FacadeFlowIcons'
 import { SelectedCustomComponentContext } from './components/SelectedCustomComponentContext'
 import { operationsForComponent, type ComponentOperations } from './componentOperations'
@@ -90,6 +92,7 @@ function App() {
   const [showDetailDrafting, setShowDetailDrafting] = useState(false)
   const [detailDraftingOrigin, setDetailDraftingOrigin] = useState<'MAIN' | 'AI'>('MAIN')
   const [showAiWorkspace, setShowAiWorkspace] = useState(false)
+  const [showProjects, setShowProjects] = useState(false)
   const aiReturnScrollYRef = useRef(0)
   const [aiSession, setAiSession] = useState<FacadeFlowAiSession>(() => createFacadeFlowAiSession(crypto.randomUUID()))
   const [hybridSession, setHybridSession] = useState<HybridProductDesignerSession>(() => createHybridProductDesignerSession(crypto.randomUUID()))
@@ -294,6 +297,7 @@ function App() {
           <button type="button" className="ai-workspace-action" onClick={openAiWorkspaceFromMain}><span className="ff-nav-icon"><FacadeFlowIcon name="ai"/></span><span><b>AI</b><small>FacadeFlow</small></span></button>
           <button type="button" className="detail-drafting-action" onClick={openDetailDraftingFromMain}><span className="ff-nav-icon"><FacadeFlowIcon name="designer"/></span><span><b>Конструктор</b><small>Изделие</small></span></button>
           <button type="button" className="drawing-import-action" data-help-id="unified-import" onClick={() => { setDrawingImportOrigin('MAIN'); setShowDrawingImport(true) }}><span className="ff-nav-icon"><FacadeFlowIcon name="import"/></span><span><b>Импорт</b><small>Проект / чертеж</small></span></button>
+          <button type="button" className="projects-action" onClick={() => setShowProjects(true)}><span className="ff-nav-icon"><FacadeFlowIcon name="projects"/></span><span><b>Проекти</b><small>Библиотека</small></span></button>
           <button type="button" className="catalogue-action" onClick={() => { setProfileCatalogueOrigin('MAIN'); setShowProfileCatalogue(true) }}><span className="ff-nav-icon"><FacadeFlowIcon name="catalogue"/></span><span><b>Каталог</b><small>Профили</small></span></button>
           <button type="button" className="help-action" data-help-id="help-button" onClick={() => setShowHelp(true)}><span className="ff-nav-icon"><FacadeFlowIcon name="help"/></span><span><b>Помощ</b><small>Ръководство</small></span></button>
         </nav>
@@ -437,6 +441,7 @@ function App() {
           onClose={closeDrawingImport}
         />
       )}
+      {showProjects && <ProjectsWorkspace onClose={() => setShowProjects(false)}/>}
       {showProfileCatalogue && <ProfileCatalogue profiles={catalogueProfiles} selection={activeProfileSelection} onProfiles={updateCatalogue} onSelection={setActiveProfileSelection} onClose={closeProfileCatalogue}/>}
       {showAiWorkspace && <FacadeFlowAIWorkspace session={aiSession} onSession={setAiSession} activeProfileCount={catalogueProfiles.filter((item) => item.status !== 'ARCHIVED').length} profiles={catalogueProfiles} onClose={closeAiWorkspaceToPrevious} onOpenImportCenter={() => { setDrawingImportOrigin('AI'); setShowAiWorkspace(false); setShowDrawingImport(true) }} onOpenProductDesigner={openConfirmedAiProductInConstructor} onOpenCustomCad={() => { setCustomDesignerOrigin('AI'); setShowAiWorkspace(false); setShowCustomDesigner(true) }} onOpenProfileCatalogue={() => { setProfileCatalogueOrigin('AI'); setShowAiWorkspace(false); setShowProfileCatalogue(true) }} onOpenAi04Constructor={openReviewedAiProposalInEditableConstructor}/>}
       {showDetailDrafting && (
