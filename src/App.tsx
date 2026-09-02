@@ -61,6 +61,7 @@ import { createHybridSessionFromGuidedAi } from './aiConstructorHandoff'
 import type { FacadeFlowAiSession } from './aiWorkspaceTypes'
 import type { FacadeFlowAi03ParametricProposal } from './aiParametricConstructionProposal'
 import { buildFacadeFlowAi04ConstructorHandoff } from './ai04ConstructorHandoff'
+import { createEmptyProjectLibraryState, type ProjectLibraryState } from './projectLifecycle'
 
 function App() {
   const isLocalApplication = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
@@ -94,6 +95,7 @@ function App() {
   const [detailDraftingOrigin, setDetailDraftingOrigin] = useState<'MAIN' | 'AI'>('MAIN')
   const [showAiWorkspace, setShowAiWorkspace] = useState(false)
   const [showProjects, setShowProjects] = useState(false)
+  const [projectLibrary, setProjectLibrary] = useState<ProjectLibraryState>(() => createEmptyProjectLibraryState())
   const aiReturnScrollYRef = useRef(0)
   const [aiSession, setAiSession] = useState<FacadeFlowAiSession>(() => createFacadeFlowAiSession(crypto.randomUUID()))
   const [hybridSession, setHybridSession] = useState<HybridProductDesignerSession>(() => createHybridProductDesignerSession(crypto.randomUUID()))
@@ -442,7 +444,7 @@ function App() {
           onClose={closeDrawingImport}
         />
       )}
-      {showProjects && <ProjectsWorkspace profiles={catalogueProfiles} onProfiles={updateCatalogue} onOpenCatalogue={() => { setShowProjects(false); setProfileCatalogueOrigin('MAIN'); setShowProfileCatalogue(true) }} onClose={() => setShowProjects(false)}/>}
+      {showProjects && <ProjectsWorkspace profiles={catalogueProfiles} projectLibrary={projectLibrary} onProjectLibrary={setProjectLibrary} onProfiles={updateCatalogue} onOpenCatalogue={() => { setShowProjects(false); setProfileCatalogueOrigin('MAIN'); setShowProfileCatalogue(true) }} onClose={() => setShowProjects(false)}/>}
       {showProfileCatalogue && <ProfileCatalogue profiles={catalogueProfiles} selection={activeProfileSelection} onProfiles={updateCatalogue} onSelection={setActiveProfileSelection} onOpenProjects={() => { setShowProfileCatalogue(false); setProfileCatalogueOrigin('MAIN'); setShowProjects(true) }} onClose={closeProfileCatalogue}/>}
       {showAiWorkspace && <FacadeFlowAIWorkspace session={aiSession} onSession={setAiSession} activeProfileCount={catalogueProfiles.filter((item) => item.status !== 'ARCHIVED').length} profiles={catalogueProfiles} onClose={closeAiWorkspaceToPrevious} onOpenImportCenter={() => { setDrawingImportOrigin('AI'); setShowAiWorkspace(false); setShowDrawingImport(true) }} onOpenProductDesigner={openConfirmedAiProductInConstructor} onOpenCustomCad={() => { setCustomDesignerOrigin('AI'); setShowAiWorkspace(false); setShowCustomDesigner(true) }} onOpenProfileCatalogue={() => { setProfileCatalogueOrigin('AI'); setShowAiWorkspace(false); setShowProfileCatalogue(true) }} onOpenAi04Constructor={openReviewedAiProposalInEditableConstructor}/>}
       {showDetailDrafting && (
