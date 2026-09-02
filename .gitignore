@@ -24,7 +24,7 @@ dist-ssr
 *.sln
 *.sw?
 
-# Private local evidence — never commit or package
+# Private local evidence — never commit; exclude from SHAREABLE_CLEAN packages
 local-samples/
 *.dwg
 *.DWG

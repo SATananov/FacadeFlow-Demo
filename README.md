@@ -2,7 +2,7 @@
 
 ## Текущ архитектурен checkpoint
 
-FacadeFlow е локална, human-gated среда за симулация, технически преглед и подготовка на структурирани продуктови данни. Текущият checkpoint включва архитектурата до AI04, Phase 06C rule foundations, REAL DATA BATCH 01 / WP78 и затворената RP01 foundation. Историческите секции по-долу остават като подробен phase-specific запис.
+FacadeFlow е локална, human-gated среда за симулация, технически преглед и подготовка на структурирани продуктови данни. Текущият checkpoint включва архитектурата до AI04, Phase 06C rule foundations, REAL DATA BATCH 01 / WP78, затворената RP01 foundation и приетия UI01.1–UI01.2B navigation/projects layer. Историческите секции по-долу остават като подробен phase-specific запис. За текущия closure статус използвайте [Current Architecture Status](docs/CURRENT_ARCHITECTURE_STATUS.md).
 
 ### AI01 → AI04 — human-authority pipeline
 
@@ -26,19 +26,25 @@ RP01.21 затваря и консолидира RP01.1–RP01.20. Текущи�
 
 ### Clean verification gate
 
-За чиста локална проверка на текущите AI closure граници:
+Единственият canonical repository verification command е:
 
 ```bash
 npm ci
-npm run test:ai01_prompt
-npm run test:ai02_documents
-npm run test:ai03
-npm run test:ai03_5
-npm run test:ai04
-npm run lint
-npm run build
+npm run verify
 git diff --check
+git status --short
 ```
+
+`npm run verify` включва **всички** `tests/*.test.ts` чрез `npm run test:regression`, след което изпълнява lint и production build. Това предотвратява пропускане на WP78/RP01 или бъдещи regression test файлове само защото нямат отделен package script.
+
+За clean ZIP има два explicit режима:
+
+```powershell
+npm run checkpoint:shareable
+npm run checkpoint:internal
+```
+
+`checkpoint:shareable` изключва private evidence (`local-samples/`, DWG/LTE). `checkpoint:internal` може да го запази само за контролиран вътрешен audit.
 
 ## Профилен каталог и нестандартен прозорец
 
@@ -65,7 +71,7 @@ npm run dev
 
 Локална production версия: `npm run local`. Под Windows double-click върху `START_FACADEFLOW_LOCAL.cmd` отваря Nadezhda-branded dedicated Edge/Chrome app window с изолиран project-local profile. Затварянето му спира само matching server и затваря launcher terminal-а; `npm run local:serve` остава manual Ctrl+C режим. `CREATE_FACADEFLOW_DESKTOP_SHORTCUT.cmd` създава shortcut със supplied ICO. На нов компютър са необходими Node.js и еднократно ръчно `npm install`.
 
-Проверка: `npm run lint` и `npm run build`. Подробности и troubleshooting: [Локално стартиране под Windows](docs/LOCAL_WINDOWS_START_BG.md).
+Пълна проверка: `npm run verify`. Подробности и troubleshooting: [Локално стартиране под Windows](docs/LOCAL_WINDOWS_START_BG.md).
 
 ## Възможности
 
