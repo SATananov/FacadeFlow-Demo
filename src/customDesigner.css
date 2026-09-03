@@ -29,3 +29,9 @@
 
 /* AI04 provenance banner inside editable Custom Product Designer */
 .custom-ai04-handoff-banner{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:14px;align-items:start;margin:8px 12px;padding:12px 14px;border:1px solid #2e7b87;border-left:4px solid #2bc6d6;background:#0a2a33;color:#dceef1}.custom-ai04-handoff-banner>div{display:grid;gap:4px}.custom-ai04-handoff-banner span{color:#63dce7;font:800 9px/1.3 ui-monospace;letter-spacing:.1em}.custom-ai04-handoff-banner strong{color:#f2fbfc;font-size:13px}.custom-ai04-handoff-banner p{margin:0;color:#9cb9bf;font-size:10px;line-height:1.45}.custom-ai04-handoff-banner dl{display:grid;grid-template-columns:repeat(2,minmax(125px,1fr));gap:5px;margin:0}.custom-ai04-handoff-banner dl>div{padding:6px 8px;border:1px solid #31545d;background:#10343d}.custom-ai04-handoff-banner dt{color:#7aaab3;font-size:8px;text-transform:uppercase}.custom-ai04-handoff-banner dd{margin:2px 0 0;color:#fff;font-size:10px;font-weight:800}@media(max-width:850px){.custom-ai04-handoff-banner{grid-template-columns:1fr}.custom-ai04-handoff-banner dl{grid-template-columns:1fr 1fr}}
+
+/* PROFILE DATA 01.1 — structural profiles render as visible-width geometry, not center strokes. */
+.custom-structural-profile-layer{pointer-events:none}.custom-structural-profile-band{fill:rgba(82,102,110,.64);stroke:#263b44;stroke-width:1.25;vector-effect:non-scaling-stroke;pointer-events:none}.custom-frame-profile-band{fill:rgba(223,231,233,.92)}.custom-divider-profile-band{fill:rgba(82,102,110,.78)}
+
+/* PROFILE DATA 01.1 V2 — sash is also visible-width profile geometry. No placeholder width is drawn. */
+.custom-sash-profile-band{fill:rgba(111,135,143,.72)}.custom-sash-visible-width-pending{fill:#8a5a1d;font:800 8px ui-monospace;text-anchor:middle;pointer-events:none}.custom-sash-profile-layer{pointer-events:none}

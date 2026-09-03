@@ -48,7 +48,7 @@ import { defaultOrientation, defaultProfile, defaultProject, emptyOperation } fr
 import type { MachiningOperation, OperationDraft, Orientation, Profile } from './types'
 import { validateAll, validateOperation } from './validation'
 import type { CapturedDrawingProduct } from './drawingImportTypes'
-import { sampleCatalogueProfiles } from './profileCatalogueData'
+import { applicationCatalogueProfiles } from './profileCatalogueData'
 import type { ActiveProfileSelection, CatalogueProfile } from './profileCatalogueTypes'
 import { initialGeometry } from './customGeometryTree'
 import type { CustomProduct } from './customGeometryTypes'
@@ -88,7 +88,7 @@ function App() {
   const [importPreview, setImportPreview] = useState<{ product: ProductParameters; project: string; verified: boolean; evidence: ImportedDimensionEvidence[] } | null>(null)
   const [productFromVerifiedImport, setProductFromVerifiedImport] = useState(false)
   const [importedDimensionEvidence, setImportedDimensionEvidence] = useState<ImportedDimensionEvidence[]>([])
-  const [catalogueProfiles, setCatalogueProfiles] = useState<CatalogueProfile[]>(sampleCatalogueProfiles)
+  const [catalogueProfiles, setCatalogueProfiles] = useState<CatalogueProfile[]>(applicationCatalogueProfiles)
   const [activeProfileSelection, setActiveProfileSelection] = useState<ActiveProfileSelection>({ FRAME: 'profile-demo-frame-01', SASH: 'profile-demo-sash-01', MULLION: 'profile-demo-mullion-01' })
   const [showProfileCatalogue, setShowProfileCatalogue] = useState(false)
   const [profileCatalogueOrigin, setProfileCatalogueOrigin] = useState<'MAIN' | 'AI'>('MAIN')

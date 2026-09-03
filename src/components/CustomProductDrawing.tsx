@@ -1,6 +1,11 @@
 import { useRef, type PointerEvent } from 'react'
 import { projectGeometry } from '../customGeometryTree'
 import {
+  buildMullionVisibleBand,
+  buildRectangularFrameVisibleBands,
+  buildRectangularSashVisibleBands,
+} from '../profileData/visibleProfileGeometry'
+import {
   CUSTOM_DRAWING_VIEW,
   drawingPointToModel,
   getCustomDrawingTransform,
@@ -57,15 +62,20 @@ interface Props {
   onCanvasPoint?: (coordinates: ModelCoordinates) => void
   cursorCoordinates?: ModelCoordinates | null
   showCoordinates?: boolean
+  /** Human-confirmed sash visible widths by leaf id. No fallback is allowed. */
+  sashVisibleWidthByFieldId?: Readonly<Record<string, number>>
 }
 
-export function CustomProductDrawing({ product, selectedFieldId, onSelectField, onClearDrawingLineSelection, large = false, annotations = [], dimensionVisibility = defaultDimensionVisibility, onCursorCoordinates, snapPoint = null, snappingEnabled = false, zoom = 1, drawingLines = [], selectedDrawingLineId = null, lineSelectionEnabled = false, onSelectDrawingLine, lineEndpointEditingEnabled = false, lineEndpointDrag = null, onBeginLineEndpointDrag, onMoveLineEndpointDrag, onCommitLineEndpointDrag, onCancelLineEndpointDrag, lineBodyEditingEnabled = false, lineBodyDrag = null, onBeginLineBodyDrag, onMoveLineBodyDrag, onCommitLineBodyDrag, onCancelLineBodyDrag, lineStartPoint = null, linePreviewPoint = null, onCanvasPoint, cursorCoordinates = null, showCoordinates = true }: Props) {
+export function CustomProductDrawing({ product, selectedFieldId, onSelectField, onClearDrawingLineSelection, large = false, annotations = [], dimensionVisibility = defaultDimensionVisibility, onCursorCoordinates, snapPoint = null, snappingEnabled = false, zoom = 1, drawingLines = [], selectedDrawingLineId = null, lineSelectionEnabled = false, onSelectDrawingLine, lineEndpointEditingEnabled = false, lineEndpointDrag = null, onBeginLineEndpointDrag, onMoveLineEndpointDrag, onCommitLineEndpointDrag, onCancelLineEndpointDrag, lineBodyEditingEnabled = false, lineBodyDrag = null, onBeginLineBodyDrag, onMoveLineBodyDrag, onCommitLineBodyDrag, onCancelLineBodyDrag, lineStartPoint = null, linePreviewPoint = null, onCanvasPoint, cursorCoordinates = null, showCoordinates = true, sashVisibleWidthByFieldId = {} }: Props) {
   const svgRef = useRef<SVGSVGElement>(null)
   const { width: viewWidth, height: viewHeight } = CUSTOM_DRAWING_VIEW
   const transform = getCustomDrawingTransform(Math.max(product.width, 1), Math.max(product.height, 1))
-  const { scale, width, height, ox, oy } = transform
+  const { scale, ox, oy } = transform
   const projected = projectGeometry(product.geometry, { x: 0, y: 0, width: product.width, height: product.height }).map(({ node, rect }) => ({ node, rect: { x: ox + rect.x * scale, y: oy + rect.y * scale, width: rect.width * scale, height: rect.height * scale } }))
   const leaves = projected.filter(({ node }) => node.kind === 'LEAF'), splits = projected.filter(({ node }) => node.kind === 'SPLIT')
+  const frameVisibleBands = product.frameCreated
+    ? buildRectangularFrameVisibleBands(product.width, product.height)
+    : null
 
   const clientToModelCoordinates = (clientX: number, clientY: number) => {
     const svg = svgRef.current
@@ -152,13 +162,42 @@ export function CustomProductDrawing({ product, selectedFieldId, onSelectField, 
 
   return <svg ref={svgRef} className={`custom-product-drawing ${large ? 'large' : ''}`} viewBox={`0 0 ${viewWidth} ${viewHeight}`} role="img" aria-label={`Нестандартен прозорец ${product.width} на ${product.height} милиметъра`} onPointerMove={updateCursorCoordinates} onPointerDown={chooseCanvasPoint} onPointerLeave={() => onCursorCoordinates?.(null)}>
     <defs><marker id="custom-dim-arrow" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto-start-reverse"><path d="M8 0L0 4L8 8"/></marker></defs>
-    {product.frameCreated && <rect x={ox} y={oy} width={width} height={height} className="custom-frame"/>}
     {leaves.map(({ node, rect }) => node.kind === 'LEAF' && <g key={node.id} role="button" tabIndex={0} aria-label={`Поле ${node.id}, ${node.fieldType}`} onClick={() => { onClearDrawingLineSelection?.(); onSelectField(node.id) }} onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); onClearDrawingLineSelection?.(); onSelectField(node.id) } }}>
       <rect x={rect.x + 5} y={rect.y + 5} width={Math.max(0, rect.width - 10)} height={Math.max(0, rect.height - 10)} className={`custom-field ${node.fieldType.toLowerCase()} ${selectedFieldId === node.id ? 'selected' : ''}`}/>
-      {node.fieldType === 'OPENING_SASH' && (() => { const notation = openingNotationForLeaf(node); return <><rect x={rect.x + 12} y={rect.y + 12} width={Math.max(0, rect.width - 24)} height={Math.max(0, rect.height - 24)} className="custom-sash-outline"/>{notation && <OpeningSymbol x={rect.x + 13} y={rect.y + 13} width={Math.max(0, rect.width - 26)} height={Math.max(0, rect.height - 26)} notation={notation} openingDirection={node.openingDirection} directionConfirmed={Boolean(node.openingDirection)}/>}</> })()}
+      {node.fieldType === 'OPENING_SASH' && (() => {
+        const notation = openingNotationForLeaf(node)
+        const humanConfirmedSashVisibleWidthMm = sashVisibleWidthByFieldId[node.id]
+        const sashBands = Number.isFinite(humanConfirmedSashVisibleWidthMm) && humanConfirmedSashVisibleWidthMm > 0
+          ? buildRectangularSashVisibleBands(rect.width / scale, rect.height / scale, humanConfirmedSashVisibleWidthMm)
+          : null
+        return <>
+          {sashBands
+            ? <g className="custom-structural-profile-layer custom-sash-profile-layer" data-profile-code={sashBands.profileCode} data-visible-width-mm={sashBands.visibleWidthMm} pointerEvents="none">
+                {[sashBands.left, sashBands.right, sashBands.top, sashBands.bottom].map((band, index) => <rect key={`sash-band-${node.id}-${index}`} x={rect.x + band.x * scale} y={rect.y + band.y * scale} width={band.width * scale} height={band.height * scale} className="custom-structural-profile-band custom-sash-profile-band"/>)}
+              </g>
+            : <text x={rect.x + rect.width / 2} y={rect.y + 23} className="custom-sash-visible-width-pending" data-profile-code="482.05" data-visible-width-state="PENDING_HUMAN_CONFIRMATION">Крило · видима ширина чака потвърждение</text>}
+          {notation && <OpeningSymbol x={rect.x + 13} y={rect.y + 13} width={Math.max(0, rect.width - 26)} height={Math.max(0, rect.height - 26)} notation={notation} openingDirection={node.openingDirection} directionConfirmed={Boolean(node.openingDirection)}/>}
+        </>
+      })()}
       <text x={rect.x + rect.width / 2} y={rect.y + rect.height / 2 + 4} className="custom-field-id">{node.id}</text>
     </g>)}
-    {splits.map(({ node, rect }) => node.kind === 'SPLIT' && <g key={node.id}>{node.orientation === 'VERTICAL' ? <line x1={rect.x + node.position * scale} y1={rect.y} x2={rect.x + node.position * scale} y2={rect.y + rect.height} className="custom-divider"/> : <line x1={rect.x} y1={rect.y + node.position * scale} x2={rect.x + rect.width} y2={rect.y + node.position * scale} className="custom-divider"/>}<text x={node.orientation === 'VERTICAL' ? rect.x + node.position * scale + 7 : rect.x + 7} y={node.orientation === 'VERTICAL' ? rect.y + 17 : rect.y + node.position * scale - 7} className="custom-divider-label">{Math.round(node.position)} mm</text></g>)}
+    {frameVisibleBands && <g className="custom-structural-profile-layer" data-profile-code={frameVisibleBands.profileCode} pointerEvents="none">
+      {[frameVisibleBands.left, frameVisibleBands.right, frameVisibleBands.top, frameVisibleBands.bottom].map((band, index) => <rect key={`frame-band-${index}`} x={ox + band.x * scale} y={oy + band.y * scale} width={band.width * scale} height={band.height * scale} className="custom-structural-profile-band custom-frame-profile-band"/>)}
+    </g>}
+    {splits.map(({ node, rect }) => {
+      if (node.kind !== 'SPLIT') return null
+      const parentSpanMm = node.orientation === 'VERTICAL' ? rect.height / scale : rect.width / scale
+      const mullion = buildMullionVisibleBand(node.orientation, node.position, parentSpanMm)
+      const band = mullion.rect
+      const bandX = node.orientation === 'VERTICAL' ? rect.x + band.x * scale : rect.x
+      const bandY = node.orientation === 'VERTICAL' ? rect.y : rect.y + band.y * scale
+      const bandWidth = band.width * scale
+      const bandHeight = band.height * scale
+      return <g key={node.id} data-profile-code={mullion.profileCode}>
+        <rect x={bandX} y={bandY} width={bandWidth} height={bandHeight} className="custom-structural-profile-band custom-divider-profile-band"/>
+        <text x={node.orientation === 'VERTICAL' ? bandX + bandWidth + 7 : rect.x + 7} y={node.orientation === 'VERTICAL' ? rect.y + 17 : bandY - 7} className="custom-divider-label">{Math.round(node.position)} mm</text>
+      </g>
+    })}
     <g className="custom-drawing-line-layer" pointerEvents="none">
       {drawingLines.map((line) => {
         const drag = lineEndpointDrag?.lineId === line.id ? lineEndpointDrag : null
