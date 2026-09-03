@@ -6,6 +6,11 @@ import {
   buildRectangularSashVisibleBands,
 } from '../profileData/visibleProfileGeometry'
 import {
+  buildOverlapAwareFrameSegments,
+  buildOverlapAwareMullionSegments,
+  type StructuralLeafRegion,
+} from '../profileData/sashOverlapGeometry'
+import {
   CUSTOM_DRAWING_VIEW,
   drawingPointToModel,
   getCustomDrawingTransform,
@@ -64,17 +69,25 @@ interface Props {
   showCoordinates?: boolean
   /** Human-confirmed sash visible widths by leaf id. No fallback is allowed. */
   sashVisibleWidthByFieldId?: Readonly<Record<string, number>>
+  /** Explicit profile-system sash overlap. No global/default inference is allowed. */
+  sashOverlapMm?: number | null
 }
 
-export function CustomProductDrawing({ product, selectedFieldId, onSelectField, onClearDrawingLineSelection, large = false, annotations = [], dimensionVisibility = defaultDimensionVisibility, onCursorCoordinates, snapPoint = null, snappingEnabled = false, zoom = 1, drawingLines = [], selectedDrawingLineId = null, lineSelectionEnabled = false, onSelectDrawingLine, lineEndpointEditingEnabled = false, lineEndpointDrag = null, onBeginLineEndpointDrag, onMoveLineEndpointDrag, onCommitLineEndpointDrag, onCancelLineEndpointDrag, lineBodyEditingEnabled = false, lineBodyDrag = null, onBeginLineBodyDrag, onMoveLineBodyDrag, onCommitLineBodyDrag, onCancelLineBodyDrag, lineStartPoint = null, linePreviewPoint = null, onCanvasPoint, cursorCoordinates = null, showCoordinates = true, sashVisibleWidthByFieldId = {} }: Props) {
+export function CustomProductDrawing({ product, selectedFieldId, onSelectField, onClearDrawingLineSelection, large = false, annotations = [], dimensionVisibility = defaultDimensionVisibility, onCursorCoordinates, snapPoint = null, snappingEnabled = false, zoom = 1, drawingLines = [], selectedDrawingLineId = null, lineSelectionEnabled = false, onSelectDrawingLine, lineEndpointEditingEnabled = false, lineEndpointDrag = null, onBeginLineEndpointDrag, onMoveLineEndpointDrag, onCommitLineEndpointDrag, onCancelLineEndpointDrag, lineBodyEditingEnabled = false, lineBodyDrag = null, onBeginLineBodyDrag, onMoveLineBodyDrag, onCommitLineBodyDrag, onCancelLineBodyDrag, lineStartPoint = null, linePreviewPoint = null, onCanvasPoint, cursorCoordinates = null, showCoordinates = true, sashVisibleWidthByFieldId = {}, sashOverlapMm = null }: Props) {
   const svgRef = useRef<SVGSVGElement>(null)
   const { width: viewWidth, height: viewHeight } = CUSTOM_DRAWING_VIEW
   const transform = getCustomDrawingTransform(Math.max(product.width, 1), Math.max(product.height, 1))
   const { scale, ox, oy } = transform
-  const projected = projectGeometry(product.geometry, { x: 0, y: 0, width: product.width, height: product.height }).map(({ node, rect }) => ({ node, rect: { x: ox + rect.x * scale, y: oy + rect.y * scale, width: rect.width * scale, height: rect.height * scale } }))
+  const projectedModel = projectGeometry(product.geometry, { x: 0, y: 0, width: product.width, height: product.height })
+  const projected = projectedModel.map(({ node, rect }) => ({ node, rect: { x: ox + rect.x * scale, y: oy + rect.y * scale, width: rect.width * scale, height: rect.height * scale } }))
   const leaves = projected.filter(({ node }) => node.kind === 'LEAF'), splits = projected.filter(({ node }) => node.kind === 'SPLIT')
+  const structuralLeaves: StructuralLeafRegion[] = projectedModel.flatMap(({ node, rect }) => node.kind === 'LEAF' ? [{ id: node.id, fieldType: node.fieldType, rect }] : [])
+  const explicitSashOverlapMm = typeof sashOverlapMm === 'number' && Number.isFinite(sashOverlapMm) && sashOverlapMm > 0 ? sashOverlapMm : null
   const frameVisibleBands = product.frameCreated
     ? buildRectangularFrameVisibleBands(product.width, product.height)
+    : null
+  const overlapAwareFrameSegments = product.frameCreated && explicitSashOverlapMm
+    ? buildOverlapAwareFrameSegments(product.width, product.height, structuralLeaves, explicitSashOverlapMm)
     : null
 
   const clientToModelCoordinates = (clientX: number, clientY: number) => {
@@ -181,11 +194,16 @@ export function CustomProductDrawing({ product, selectedFieldId, onSelectField, 
       })()}
       <text x={rect.x + rect.width / 2} y={rect.y + rect.height / 2 + 4} className="custom-field-id">{node.id}</text>
     </g>)}
-    {frameVisibleBands && <g className="custom-structural-profile-layer" data-profile-code={frameVisibleBands.profileCode} pointerEvents="none">
-      {[frameVisibleBands.left, frameVisibleBands.right, frameVisibleBands.top, frameVisibleBands.bottom].map((band, index) => <rect key={`frame-band-${index}`} x={ox + band.x * scale} y={oy + band.y * scale} width={band.width * scale} height={band.height * scale} className="custom-structural-profile-band custom-frame-profile-band"/>)}
-    </g>}
+    {overlapAwareFrameSegments
+      ? <g className="custom-structural-profile-layer custom-overlap-aware-frame-layer" data-profile-code="482.30" data-sash-overlap-mm={explicitSashOverlapMm ?? undefined} pointerEvents="none">
+          {overlapAwareFrameSegments.map((segment) => <rect key={segment.id} x={ox + segment.rect.x * scale} y={oy + segment.rect.y * scale} width={segment.rect.width * scale} height={segment.rect.height * scale} className="custom-structural-profile-band custom-frame-profile-band" data-frame-side={segment.side} data-base-visible-width-mm={segment.baseVisibleWidthMm} data-effective-visible-width-mm={segment.effectiveVisibleWidthMm} data-overlap-applications={segment.overlapApplicationCount} data-adjacent-sash-ids={segment.adjacentSashIds.join(',')}/>)}
+        </g>
+      : frameVisibleBands && <g className="custom-structural-profile-layer" data-profile-code={frameVisibleBands.profileCode} pointerEvents="none">
+          {[frameVisibleBands.left, frameVisibleBands.right, frameVisibleBands.top, frameVisibleBands.bottom].map((band, index) => <rect key={`frame-band-${index}`} x={ox + band.x * scale} y={oy + band.y * scale} width={band.width * scale} height={band.height * scale} className="custom-structural-profile-band custom-frame-profile-band"/>)}
+        </g>}
     {splits.map(({ node, rect }) => {
       if (node.kind !== 'SPLIT') return null
+      const modelProjection = projectedModel.find((item) => item.node.id === node.id)
       const parentSpanMm = node.orientation === 'VERTICAL' ? rect.height / scale : rect.width / scale
       const mullion = buildMullionVisibleBand(node.orientation, node.position, parentSpanMm)
       const band = mullion.rect
@@ -193,8 +211,13 @@ export function CustomProductDrawing({ product, selectedFieldId, onSelectField, 
       const bandY = node.orientation === 'VERTICAL' ? rect.y : rect.y + band.y * scale
       const bandWidth = band.width * scale
       const bandHeight = band.height * scale
-      return <g key={node.id} data-profile-code={mullion.profileCode}>
-        <rect x={bandX} y={bandY} width={bandWidth} height={bandHeight} className="custom-structural-profile-band custom-divider-profile-band"/>
+      const overlapSegments = explicitSashOverlapMm && modelProjection
+        ? buildOverlapAwareMullionSegments(node.orientation, node.position, modelProjection.rect, structuralLeaves, explicitSashOverlapMm)
+        : null
+      return <g key={node.id} data-profile-code={mullion.profileCode} data-sash-overlap-mm={explicitSashOverlapMm ?? undefined}>
+        {overlapSegments
+          ? overlapSegments.map((segment) => <rect key={`${node.id}-${segment.id}`} x={ox + segment.rect.x * scale} y={oy + segment.rect.y * scale} width={segment.rect.width * scale} height={segment.rect.height * scale} className="custom-structural-profile-band custom-divider-profile-band" data-base-visible-width-mm={segment.baseVisibleWidthMm} data-effective-visible-width-mm={segment.effectiveVisibleWidthMm} data-overlap-applications={segment.overlapApplicationCount} data-side-a-has-sash={segment.sideAHasSash ? 'true' : 'false'} data-side-b-has-sash={segment.sideBHasSash ? 'true' : 'false'} data-adjacent-sash-ids={segment.adjacentSashIds.join(',')}/>)
+          : <rect x={bandX} y={bandY} width={bandWidth} height={bandHeight} className="custom-structural-profile-band custom-divider-profile-band"/>}
         <text x={node.orientation === 'VERTICAL' ? bandX + bandWidth + 7 : rect.x + 7} y={node.orientation === 'VERTICAL' ? rect.y + 17 : bandY - 7} className="custom-divider-label">{Math.round(node.position)} mm</text>
       </g>
     })}

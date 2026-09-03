@@ -1,4 +1,5 @@
 import type { CatalogueProfile, ProfileRole } from '../profileCatalogueTypes'
+import { PRELUDE_60_SASH_OVERLAP_PARAMETER } from './sashOverlapGeometry'
 
 export const PROFILE_CATALOG_REGISTRY_VERSION = 'PROFILE_DATA_01.1_V3' as const
 export const PRELUDE_60_SYSTEM_ID = 'PRELUDE_60' as const
@@ -17,6 +18,10 @@ export interface RegisteredProfileCatalogSystem {
   label: string
   kind: RegisteredCatalogKind
   systemDepthMm: number
+  sashOverlapMm: number | null
+  sashOverlapEditable: true
+  sashOverlapState: 'HUMAN_REVIEWED_WORKING_VALUE' | 'UNRESOLVED'
+  sashOverlapProductionConfirmationRequired: true
   sourceLabel: string
   automaticProfileSelectionAllowed: false
   automaticProductionUseAllowed: false
@@ -44,6 +49,10 @@ export const PRELUDE_60_CATALOG_SYSTEM: RegisteredProfileCatalogSystem = Object.
   label: PRELUDE_60_SYSTEM_LABEL,
   kind: 'REAL_CATALOG',
   systemDepthMm: 60,
+  sashOverlapMm: PRELUDE_60_SASH_OVERLAP_PARAMETER.sashOverlapMm,
+  sashOverlapEditable: PRELUDE_60_SASH_OVERLAP_PARAMETER.editable,
+  sashOverlapState: PRELUDE_60_SASH_OVERLAP_PARAMETER.state,
+  sashOverlapProductionConfirmationRequired: PRELUDE_60_SASH_OVERLAP_PARAMETER.exactProductionConfirmationRequired,
   sourceLabel: 'PVC Prelude_bg.pdf',
   automaticProfileSelectionAllowed: false,
   automaticProductionUseAllowed: false,
@@ -277,6 +286,10 @@ export const PRELUDE_60_APPLICATION_PROFILES: CatalogueProfile[] = [
 ]
 
 export const PRELUDE_60_CATALOG_SAFETY = Object.freeze({
+  systemSpecificSashOverlapRequired: true,
+  universalSashOverlapConstantAllowed: false,
+  overlapMayReduceFrameOrMullionOnlyWhenAdjacentSashExists: true,
+  sashVisibleWidthReductionFromSystemOverlapAllowed: false,
   automaticProfileSelectionAllowed: false,
   automaticCatalogExpansionAllowed: false,
   automaticAssemblyOverlapFormulaAllowed: false,
