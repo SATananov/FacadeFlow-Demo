@@ -26,6 +26,7 @@ export type NadezhdaDocumentPatternCandidateKind =
   | 'EXCLUDED_ITEM'
   | 'PRICE_TEXT'
   | 'VAT_MODE'
+  | 'SPECIFICATION_SECTION'
 
 export type NadezhdaDocumentPatternValue = string | number
 export type NadezhdaDocumentCommercialSection = 'INCLUDED' | 'EXCLUDED' | null
@@ -183,6 +184,19 @@ export function extractNadezhdaDocumentPatterns(input: NadezhdaDocumentPatternIn
     }
 
     const stripped = stripBullet(line)
+
+    if (/^спецификация(?:\s+на\s+дограма)?\s*:?$/i.test(stripped)) {
+      context = {
+        ...context,
+        offerVariantLabel: null,
+        productGroupLabel: null,
+        material: null,
+        moduleExternalReference: null,
+        commercialSection: null,
+      }
+      push('SPECIFICATION_SECTION', 'PROJECT_GEOMETRY', lineNumber, rawText)
+      continue
+    }
 
     if (/^В\s+(?:посочената\s+)?цена\s+не\s+са\s+включени\s*:?$/i.test(stripped)) {
       context = { ...context, commercialSection: 'EXCLUDED', moduleExternalReference: null }

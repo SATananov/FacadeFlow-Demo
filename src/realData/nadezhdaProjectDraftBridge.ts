@@ -278,6 +278,13 @@ export function bridgeNadezhdaExtractionToProjectDraft(
   }
 
   for (const candidate of extraction.candidates) {
+    if (candidate.kind === 'SPECIFICATION_SECTION') {
+      currentVariant = null
+      currentGroup = null
+      currentModule = null
+      continue
+    }
+
     if (candidate.kind === 'OFFER_VARIANT') {
       currentVariant = createVariant(candidate as CandidateOfKind<'OFFER_VARIANT'>)
       variants.push(currentVariant)

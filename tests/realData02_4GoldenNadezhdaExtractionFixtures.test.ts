@@ -116,21 +116,23 @@ test('REAL DATA 02.4 mixed-product fixture keeps PVC, thermal aluminium and alum
   assert.equal(groups[2]?.moduleIds.length, 1)
 })
 
-test('REAL DATA 02.4 alternative-variant fixture records common-geometry scoping as an explicit known gap', () => {
+test('REAL DATA 02.4 alternative-variant fixture preserves common geometry at project level after explicit specification heading', () => {
   const fixture = NADEZHDA_GOLDEN_PATTERN_FIXTURES.find((item) => item.patternFamily === 'ALTERNATIVE_VARIANTS_SHARED_GEOMETRY')!
-  assert.ok(fixture.knownGaps.includes('COMMON_GEOMETRY_AFTER_VARIANTS_REQUIRES_EXPLICIT_SCOPE'))
-  const { bridge } = runFixture(fixture)
-  assert.equal(bridge.draft.offerVariants[0]?.productGroups[0]?.moduleIds.length, 0)
-  assert.equal(bridge.draft.offerVariants[1]?.productGroups[0]?.moduleIds.length, fixture.expectation.moduleCount)
+  assert.equal(fixture.knownGaps.includes('COMMON_GEOMETRY_AFTER_VARIANTS_REQUIRES_EXPLICIT_SCOPE'), false)
+  const { extraction, bridge } = runFixture(fixture)
+  assert.equal(extraction.candidates.some((candidate) => candidate.kind === 'SPECIFICATION_SECTION'), true)
+  assert.equal(bridge.draft.modules.length, fixture.expectation.moduleCount)
+  assert.deepEqual(bridge.draft.offerVariants.map((variant) => variant.productGroups.reduce((sum, group) => sum + group.moduleIds.length, 0)), [0, 0])
 })
 
-test('REAL DATA 02.4 four-variant fixture does not duplicate shared geometry across variants', () => {
+test('REAL DATA 02.4 four-variant fixture keeps explicit specification geometry separate from every offer variant', () => {
   const fixture = NADEZHDA_GOLDEN_PATTERN_FIXTURES.find((item) => item.patternFamily === 'MULTIPLE_OFFER_VARIANTS')!
-  const { bridge } = runFixture(fixture)
+  const { extraction, bridge } = runFixture(fixture)
+  assert.equal(extraction.candidates.some((candidate) => candidate.kind === 'SPECIFICATION_SECTION'), true)
   assert.equal(bridge.draft.modules.length, fixture.expectation.moduleCount)
   assert.deepEqual(
     bridge.draft.offerVariants.map((variant) => variant.productGroups.reduce((sum, group) => sum + group.moduleIds.length, 0)),
-    [0, 0, 0, fixture.expectation.moduleCount],
+    [0, 0, 0, 0],
   )
 })
 

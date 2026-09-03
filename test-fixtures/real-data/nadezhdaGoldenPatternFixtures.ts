@@ -158,6 +158,7 @@ export const NADEZHDA_GOLDEN_PATTERN_FIXTURES: readonly NadezhdaGoldenPatternFix
       'Обков: SYNTH-HW-C',
       'Стъклопакет: SYNTH-GLASS-44',
       'Армировка: 2,0 мм',
+      'Спецификация:',
       'Модул: 1',
       'Брой: 6',
       'L =2000 mm',
@@ -178,7 +179,7 @@ export const NADEZHDA_GOLDEN_PATTERN_FIXTURES: readonly NadezhdaGoldenPatternFix
       sameGeometryGroupCount: 1,
       materials: ['ALUMINIUM', 'PVC'],
     },
-    knownGaps: ['COMMON_GEOMETRY_AFTER_VARIANTS_REQUIRES_EXPLICIT_SCOPE'],
+    knownGaps: [],
     provenance: trackedSafeProvenance,
   },
   {
@@ -240,6 +241,7 @@ export const NADEZHDA_GOLDEN_PATTERN_FIXTURES: readonly NadezhdaGoldenPatternFix
       'Цвят: SYNTH-COLOR',
       'Стъклопакет: SYNTH-44',
       'Обков: SYNTH-HW-E',
+      'Спецификация',
       'Модул: 1',
       'Брой: 2',
       'L =2000 mm',
@@ -260,7 +262,7 @@ export const NADEZHDA_GOLDEN_PATTERN_FIXTURES: readonly NadezhdaGoldenPatternFix
       sameGeometryGroupCount: 1,
       materials: ['PVC', 'PVC', 'ALUMINIUM', 'ALUMINIUM'],
     },
-    knownGaps: ['COMMON_GEOMETRY_AFTER_VARIANTS_REQUIRES_EXPLICIT_SCOPE'],
+    knownGaps: [],
     provenance: trackedSafeProvenance,
   },
   {
