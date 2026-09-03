@@ -59,7 +59,7 @@ export function inspectSkyGlazingXml(text: string, source: SkyGlazingSourceEvide
   const root = parseXml(text)
   if (root.name !== 'Order') throw new Error('Очаква се XML коренов елемент Order.')
   const generator = value(child(root, 'Generator')), warnings = [...source.warnings]
-  if (generator !== 'SkyGlazing') warnings.push('Generator не е SkyGlazing; структурата е показана само като непотвърден read-only източник.')
+  if (generator !== 'SkyGlazing') warnings.push('Полето Generator не е SkyGlazing; структурата е показана само като непотвърден източник за преглед.')
   const bars = children(root, 'Bar'), pieces: SkyGlazingXmlPiece[] = []
   bars.forEach((bar) => {
     const dxfProfileName = value(child(bar, 'DXF_Name')), maxY = value(child(bar, 'MaxY')), maxZ = value(child(bar, 'MaxZ'))
@@ -80,7 +80,7 @@ export function inspectSkyGlazingXml(text: string, source: SkyGlazingSourceEvide
   })
   const barcodeCounts = new Map<string, number>()
   pieces.forEach(({ normalizedBarcode }) => { if (normalizedBarcode) barcodeCounts.set(normalizedBarcode, (barcodeCounts.get(normalizedBarcode) ?? 0) + 1) })
-  if ([...barcodeCounts.values()].some((count) => count > 1)) warnings.push('Открити са повтарящи се XML баркодове; съпоставянето им остава UNRESOLVED.')
+  if ([...barcodeCounts.values()].some((count) => count > 1)) warnings.push('Открити са повтарящи се XML баркодове; съпоставянето им остава неразрешено.')
   const inspectedSource = { ...source, warnings: [...new Set(warnings)] }
   return {
     source: inspectedSource, generator, version: value(child(root, 'Version')), unit: value(child(root, 'Unit')),

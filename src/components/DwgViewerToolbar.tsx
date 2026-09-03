@@ -8,6 +8,6 @@ export function DwgViewerToolbar(props: Props) {
     <button type="button" aria-pressed={props.showText} onClick={props.onText}>{props.showText ? 'Скрий текст' : 'Покажи текст'}</button>
     <label className="dwg-approximate-toggle"><input type="checkbox" checked={props.approximateText} onChange={props.onApproximateText}/>Подреди текстовете визуално</label>
     {props.approximateText && <span className="dwg-approximate-badge">Приблизителен изглед</span>}
-    <label>Пространство<select aria-describedby="dwg-layout-status" value={props.selectedLayout} onChange={(event) => props.onLayout(event.target.value)}>{props.layouts.map((layout) => <option key={layout.id} value={layout.id} disabled={!layout.renderable}>{layout.name}{layout.renderable ? '' : ' — не се поддържа от текущия decoder'}</option>)}</select></label>
+    <label>Пространство<select aria-describedby="dwg-layout-status" value={props.selectedLayout} onChange={(event) => props.onLayout(event.target.value)}>{props.layouts.map((layout) => <option key={layout.id} value={layout.id} disabled={!layout.renderable}>{layout.id === 'MODEL' ? 'Модел' : layout.name}{layout.renderable ? '' : ' — не се поддържа от текущия декодер'}</option>)}</select></label>
   </div>
 }

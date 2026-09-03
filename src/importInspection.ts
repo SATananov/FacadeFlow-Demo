@@ -1,5 +1,6 @@
 import { calculateSha256 } from './drawingImportHash'
 import { formatsForRoute } from './importFormatRoutes'
+import { importRouteLabels } from './importUiLabels'
 import { detectImportFormat } from './importSignatureInspection'
 import type { ImportRoute, InspectedImportSource } from './importFormatTypes'
 
@@ -9,7 +10,7 @@ export async function inspectImportFile(file: File, selectedRoute: ImportRoute, 
   if (!file.size) warnings.push('Файлът е празен.')
   if (file.size > maximumBytes) warnings.push(`Файлът надвишава ограничението от ${Math.round(maximumBytes / 1024 / 1024)} MB.`)
   if (detected.format === 'UNKNOWN') warnings.push('Форматът не може да бъде потвърден безопасно по съдържанието.')
-  else if (!formatsForRoute[selectedRoute].includes(detected.format)) { supportStatus = 'FORMAT_MISMATCH'; warnings.push(`Съдържанието е ${detected.format}, но избраният маршрут е ${selectedRoute}.`) }
+  else if (!formatsForRoute[selectedRoute].includes(detected.format)) { supportStatus = 'FORMAT_MISMATCH'; warnings.push(`Съдържанието е ${detected.format}, но избраният маршрут е „${importRouteLabels[selectedRoute]}“.`) }
   else {
     const expectedExtensions: Record<typeof detected.format, string[]> = { PNG: ['png'], JPEG: ['jpg', 'jpeg'], PDF: ['pdf'], SKYGLAZING_XML: ['xml'], LTE: ['lte'], DWG: ['dwg'], DXF: ['dxf'], CSV: ['csv'], XLSX: ['xlsx'], FACADEFLOW_SIMULATION_JSON: ['json'] }
     if (!expectedExtensions[detected.format].includes(extension)) warnings.push(`Разширението .${extension || '(липсва)'} не съответства на потвърдения формат ${detected.format}.`)

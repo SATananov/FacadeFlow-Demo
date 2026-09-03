@@ -26,7 +26,7 @@ export function inspectSkyGlazingLte(text: string, source: SkyGlazingSourceEvide
   const barcodeCounts = new Map<string, number>()
   records.forEach(({ normalizedBarcode }) => { if (normalizedBarcode) barcodeCounts.set(normalizedBarcode, (barcodeCounts.get(normalizedBarcode) ?? 0) + 1) })
   if (records.some(({ normalizedBarcode }) => !/^\d{12}$/.test(normalizedBarcode))) warnings.push('Има LTE редове без наблюдаван 12-цифрен краен баркод.')
-  if ([...barcodeCounts.values()].some((count) => count > 1)) warnings.push('Открити са повтарящи се LTE баркодове; съпоставянето им остава UNRESOLVED.')
+  if ([...barcodeCounts.values()].some((count) => count > 1)) warnings.push('Открити са повтарящи се LTE баркодове; съпоставянето им остава неразрешено.')
   const inspectedSource = { ...source, warnings: [...new Set(warnings)] }
   const widths = new Set(lines.map(({ length }) => length))
   return { source: inspectedSource, recordCount: records.length, fixedRecordWidth: widths.size === 1 ? [...widths][0]! : null, uniqueBarcodeCount: barcodeCounts.size, profileGroupCount: new Set(records.map(({ profileToken }) => profileToken).filter(Boolean)).size, records }

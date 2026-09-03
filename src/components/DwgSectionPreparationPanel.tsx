@@ -24,6 +24,6 @@ export function DwgSectionPreparationPanel({ sectionNumber, state, onPrevious, o
       <button type="button" disabled={state.activeStep === 0} onClick={onPrevious}>Назад</button>
       <button type="button" className="primary-action" disabled={complete && stepDone} onClick={onCompleteStep}>{state.activeStep === DWG_PREPARATION_STEPS.length - 1 ? 'Потвърди прегледа' : 'Проверено · продължи'}</button>
     </div>
-    {complete && <div className="dwg-preparation-complete" role="status"><span><b>Прегледът е завършен.</b> Може да подготвите отделна simulation-only чернова.</span><button type="button" onClick={onStartDraft}>Подготви чернова</button></div>}
+    {complete && <div className="dwg-preparation-complete" role="status"><span><b>Прегледът е завършен.</b> Може да подготвите отделна симулационна чернова.</span><button type="button" onClick={onStartDraft}>Подготви чернова</button></div>}
   </section>
 }

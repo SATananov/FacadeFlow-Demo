@@ -10,7 +10,7 @@ interface DecodeMessage { id: string; bytes: ArrayBuffer; options: DwgDecodeOpti
 self.onmessage = async (event: MessageEvent<DecodeMessage>) => {
   const { id, bytes, options } = event.data
   try {
-    self.postMessage({ id, kind: 'progress', progress: 0.1, message: 'Зареждане на локалния DWG decoder…' })
+    self.postMessage({ id, kind: 'progress', progress: 0.1, message: 'Зареждане на локалния DWG декодер…' })
     const decoder = LibreDwg.createByWasmInstance(await createModule({ locateFile: () => wasmUrl }))
     self.postMessage({ id, kind: 'progress', progress: 0.35, message: 'Локално декодиране на DWG…' })
     const pointer = decoder.dwg_read_data(bytes, Dwg_File_Type.DWG)

@@ -25,7 +25,7 @@ export class LibreDwgWorkerDecoder implements DwgDecoder {
         finish()
         if (event.data.kind === 'result') resolve(event.data.result); else reject(new DwgDecoderError(event.data.message, event.data.message.startsWith('LIMIT_') ? 'LIMIT_EXCEEDED' : 'DECODE_FAILED'))
       }
-      worker.onerror = () => { finish(); reject(new DwgDecoderError('Изолираният DWG worker приключи неочаквано.', 'DECODE_FAILED')) }
+      worker.onerror = () => { finish(); reject(new DwgDecoderError('Изолираният DWG работен процес приключи неочаквано.', 'DECODE_FAILED')) }
       worker.postMessage({ id, bytes, options }, [bytes])
     })
   }

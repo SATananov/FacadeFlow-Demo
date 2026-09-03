@@ -17,7 +17,7 @@ function DraftPreview({ draft }: { draft: DwgSectionDraft }) {
 export function DwgSectionDraftPanel({ draft, onChange, onClose }: Props) {
   const validation = validateDwgSectionDraft(draft), setNumber = (field: 'widthMm' | 'heightMm' | 'fieldCount' | 'verticalDividers' | 'horizontalDividers' | 'openingSashes', value: string) => onChange(updateDwgSectionDraft(draft, { [field]: numberOrNull(value) } as never))
   return <section className="dwg-draft" aria-labelledby="dwg-draft-title">
-    <header><div><span>PHASE 05D · SESSION-ONLY</span><h4 id="dwg-draft-title">Чернова от проверената секция</h4></div><button type="button" onClick={onClose}>Затвори черновата</button></header>
+    <header><div><span>ЧЕРНОВА · САМО В ТЕКУЩАТА СЕСИЯ</span><h4 id="dwg-draft-title">Чернова от проверената секция</h4></div><button type="button" onClick={onClose}>Затвори черновата</button></header>
     <div className="dwg-draft-grid">
       <form onSubmit={(event) => { event.preventDefault(); onChange(confirmDwgSectionDraft(draft)) }}>
         <label>Наименование<input value={draft.name} onChange={(event) => onChange(updateDwgSectionDraft(draft, { name: event.target.value }))}/></label>
@@ -33,6 +33,6 @@ export function DwgSectionDraftPanel({ draft, onChange, onClose }: Props) {
       </form>
       <div className="dwg-draft-preview"><b>Концептуален 2D изглед</b><DraftPreview draft={draft}/><small>Изграден само от ръчно въведените стойности.</small></div>
     </div>
-    <div className={draft.humanConfirmed ? 'dwg-draft-result confirmed' : 'dwg-draft-result'} role="status"><b>{draft.humanConfirmed ? 'Черновата е потвърдена от човек.' : 'Черновата не е потвърдена.'}</b><span>Не е производствено изделие · няма export · machineReady: false</span></div>
+    <div className={draft.humanConfirmed ? 'dwg-draft-result confirmed' : 'dwg-draft-result'} role="status"><b>{draft.humanConfirmed ? 'Черновата е потвърдена от човек.' : 'Черновата не е потвърдена.'}</b><span>Не е производствено изделие · няма експортиране · машинна готовност: НЕ</span></div>
   </section>
 }
