@@ -29,6 +29,6 @@ test('right rail summarizes remaining work instead of stacking every field error
   assert.equal(source.includes('errors.map'), false)
 })
 
-test('visual polish preserves DEMO and production safety wording', () => {
-  for (const marker of ['Праг: НЕРАЗРЕШЕН', 'DEMO-only тест', 'Готово за машина</dt><dd>Не', 'Статусът остава NEEDS_REVIEW']) assert.equal(source.includes(marker), true)
+test('visual polish preserves working-configuration and production safety wording', () => {
+  for (const marker of ['Праг: НЕРАЗРЕШЕН', 'Работна 2D композиция', 'Готово за машина</dt><dd>Не', 'Статусът остава NEEDS_REVIEW']) assert.equal(source.includes(marker), true)
 })

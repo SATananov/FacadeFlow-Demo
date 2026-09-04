@@ -1,4 +1,5 @@
-import type { CatalogueProfile, ProfileRole } from './profileCatalogueTypes'
+import type { CatalogueProfile, ProfileProductCategory, ProfileRole } from './profileCatalogueTypes'
+import { isComposerTemplateCompatible } from './structuredComposerTemplateSelection'
 
 export type HybridCreationRoute = 'STANDARD' | 'SKETCH_ASSISTED' | 'NON_STANDARD'
 export type HybridProductCategory = 'WINDOW' | 'DOOR' | 'SLIDING' | 'SHOPFRONT' | 'FACADE_MODULE'
@@ -10,7 +11,7 @@ export type ThresholdRequirementStatus = 'NOT_APPLICABLE' | 'UNRESOLVED'
 export type StructuredConfigurationStep = 1 | 2 | 3 | 4 | 5
 
 export interface StructuredProfileConfiguration {
-  productCategory: 'WINDOW' | 'DOOR'; productName: string; overallWidth: string; overallHeight: string; profileSystem: string
+  productCategory: 'WINDOW' | 'DOOR'; productName: string; composerTemplateId: string | null; overallWidth: string; overallHeight: string; profileSystem: string
   frameProfileId: string; sashProfileId: string; mullionProfileId: string; thresholdStatus: ThresholdRequirementStatus
   validationErrors: string[]; humanReviewChecked: boolean; status: StructuredConfigurationStatus
   wizardStep: StructuredConfigurationStep
@@ -68,17 +69,14 @@ const activeProfiles = (profiles: CatalogueProfile[]) => profiles.filter((profil
 const isPositiveFiniteText = (value: string) => value.trim() !== '' && Number.isFinite(Number(value)) && Number(value) > 0
 
 export function deriveActiveProfileSystems(profiles: CatalogueProfile[]): string[] { return [...new Set(activeProfiles(profiles).map(({ system }) => system.trim()).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'bg')) }
-export function compatibleProfiles(profiles: CatalogueProfile[], system: string, role: ProfileRole): CatalogueProfile[] { return activeProfiles(profiles).filter((profile) => profile.system === system && profile.role === role) }
+export function profileSupportsProductCategory(profile: CatalogueProfile, productCategory: ProfileProductCategory): boolean { return !profile.compatibleProductCategories || profile.compatibleProductCategories.includes(productCategory) }
+export function compatibleProfiles(profiles: CatalogueProfile[], system: string, role: ProfileRole, productCategory?: ProfileProductCategory): CatalogueProfile[] { return activeProfiles(profiles).filter((profile) => profile.system === system && profile.role === role && (!productCategory || profileSupportsProductCategory(profile, productCategory))) }
 export function createStructuredConfiguration(productCategory: 'WINDOW' | 'DOOR'): StructuredProfileConfiguration {
-  return { productCategory, productName: '', overallWidth: '', overallHeight: '', profileSystem: '', frameProfileId: '', sashProfileId: '', mullionProfileId: '', thresholdStatus: productCategory === 'DOOR' ? 'UNRESOLVED' : 'NOT_APPLICABLE', validationErrors: [], humanReviewChecked: false, status: 'EMPTY', wizardStep: 1, sessionOnly: true, simulationOnly: true, machineReady: false, geometryCreated: false, exportAvailable: false }
+  return { productCategory, productName: '', composerTemplateId: null, overallWidth: '', overallHeight: '', profileSystem: '', frameProfileId: '', sashProfileId: '', mullionProfileId: '', thresholdStatus: productCategory === 'DOOR' ? 'UNRESOLVED' : 'NOT_APPLICABLE', validationErrors: [], humanReviewChecked: false, status: 'EMPTY', wizardStep: 1, sessionOnly: true, simulationOnly: true, machineReady: false, geometryCreated: false, exportAvailable: false }
 }
-export function maximumAccessibleConfigurationStep(configuration: StructuredProfileConfiguration, profiles: CatalogueProfile[]): StructuredConfigurationStep {
+export function maximumAccessibleConfigurationStep(configuration: StructuredProfileConfiguration, _profiles: CatalogueProfile[]): StructuredConfigurationStep {
   if (!configuration.productName.trim() || !isPositiveFiniteText(configuration.overallWidth) || !isPositiveFiniteText(configuration.overallHeight)) return 2
-  if (!configuration.profileSystem || !deriveActiveProfileSystems(profiles).includes(configuration.profileSystem)) return 3
-  const frameValid = compatibleProfiles(profiles, configuration.profileSystem, 'FRAME').some((profile) => profile.id === configuration.frameProfileId)
-  const sashValid = !configuration.sashProfileId || compatibleProfiles(profiles, configuration.profileSystem, 'SASH').some((profile) => profile.id === configuration.sashProfileId)
-  const mullionValid = !configuration.mullionProfileId || compatibleProfiles(profiles, configuration.profileSystem, 'MULLION').some((profile) => profile.id === configuration.mullionProfileId)
-  return frameValid && sashValid && mullionValid ? 5 : 4
+  return 5
 }
 export function moveStructuredConfigurationStep(configuration: StructuredProfileConfiguration, step: StructuredConfigurationStep, profiles: CatalogueProfile[]): StructuredProfileConfiguration {
   return step <= maximumAccessibleConfigurationStep(configuration, profiles) ? { ...configuration, wizardStep: step } : configuration
@@ -92,27 +90,29 @@ export function validateStructuredConfiguration(configuration: StructuredProfile
   else if (!deriveActiveProfileSystems(profiles).includes(configuration.profileSystem)) errors.push('Избраната профилна система няма активни профили.')
   const validateRole = (id: string, role: ProfileRole, required: boolean, label: string) => {
     if (!id) { if (required) errors.push(`Изберете активен профил за ${label}.`); return }
-    if (!compatibleProfiles(profiles, configuration.profileSystem, role).some((profile) => profile.id === id)) errors.push(`Избраният профил за ${label} вече не е съвместим или активен.`)
+    if (!compatibleProfiles(profiles, configuration.profileSystem, role, configuration.productCategory).some((profile) => profile.id === id)) errors.push(`Избраният профил за ${label} вече не е съвместим или активен.`)
   }
   validateRole(configuration.frameProfileId, 'FRAME', true, 'каса'); validateRole(configuration.sashProfileId, 'SASH', false, 'крило'); validateRole(configuration.mullionProfileId, 'MULLION', false, 'делител')
+  if (!isComposerTemplateCompatible(configuration.productCategory, configuration.composerTemplateId)) errors.push('Избраната начална композиция не е съвместима с категорията на изделието.')
   if (configuration.productCategory === 'DOOR') errors.push('Прагът е неразрешен: няма потвърдена роля и профил в текущия каталог.')
   return errors
 }
 function semanticStatus(configuration: StructuredProfileConfiguration): StructuredConfigurationStatus { return configuration.productName.trim() || configuration.overallWidth || configuration.overallHeight || configuration.profileSystem || configuration.frameProfileId || configuration.sashProfileId || configuration.mullionProfileId ? 'NEEDS_REVIEW' : 'EMPTY' }
-export function updateStructuredConfiguration(configuration: StructuredProfileConfiguration, patch: Partial<Pick<StructuredProfileConfiguration, 'productName' | 'overallWidth' | 'overallHeight' | 'profileSystem' | 'frameProfileId' | 'sashProfileId' | 'mullionProfileId' | 'humanReviewChecked'>>, profiles: CatalogueProfile[]): StructuredProfileConfiguration {
+export function updateStructuredConfiguration(configuration: StructuredProfileConfiguration, patch: Partial<Pick<StructuredProfileConfiguration, 'productName' | 'composerTemplateId' | 'overallWidth' | 'overallHeight' | 'profileSystem' | 'frameProfileId' | 'sashProfileId' | 'mullionProfileId' | 'humanReviewChecked'>>, profiles: CatalogueProfile[]): StructuredProfileConfiguration {
   let next = { ...configuration, ...patch, humanReviewChecked: patch.humanReviewChecked ?? false, status: 'NEEDS_REVIEW' as StructuredConfigurationStatus }
   if (patch.profileSystem !== undefined && patch.profileSystem !== configuration.profileSystem) {
-    const valid = (id: string, role: ProfileRole) => compatibleProfiles(profiles, patch.profileSystem ?? '', role).some((profile) => profile.id === id)
+    const valid = (id: string, role: ProfileRole) => compatibleProfiles(profiles, patch.profileSystem ?? '', role, configuration.productCategory).some((profile) => profile.id === id)
     next = { ...next, frameProfileId: valid(configuration.frameProfileId, 'FRAME') ? configuration.frameProfileId : '', sashProfileId: valid(configuration.sashProfileId, 'SASH') ? configuration.sashProfileId : '', mullionProfileId: valid(configuration.mullionProfileId, 'MULLION') ? configuration.mullionProfileId : '' }
   }
   next.status = semanticStatus(next); next.validationErrors = validateStructuredConfiguration(next, profiles); return next
 }
 export function reconcileStructuredConfiguration(configuration: StructuredProfileConfiguration, profiles: CatalogueProfile[]): StructuredProfileConfiguration {
   const systemValid = !configuration.profileSystem || deriveActiveProfileSystems(profiles).includes(configuration.profileSystem)
-  const valid = (id: string, role: ProfileRole) => !id || compatibleProfiles(profiles, configuration.profileSystem, role).some((profile) => profile.id === id)
-  const changed = !systemValid || !valid(configuration.frameProfileId, 'FRAME') || !valid(configuration.sashProfileId, 'SASH') || !valid(configuration.mullionProfileId, 'MULLION')
+  const composerTemplateValid = isComposerTemplateCompatible(configuration.productCategory, configuration.composerTemplateId)
+  const valid = (id: string, role: ProfileRole) => !id || compatibleProfiles(profiles, configuration.profileSystem, role, configuration.productCategory).some((profile) => profile.id === id)
+  const changed = !systemValid || !composerTemplateValid || !valid(configuration.frameProfileId, 'FRAME') || !valid(configuration.sashProfileId, 'SASH') || !valid(configuration.mullionProfileId, 'MULLION')
   if (!changed) return { ...configuration, validationErrors: validateStructuredConfiguration(configuration, profiles) }
-  const next = { ...configuration, profileSystem: systemValid ? configuration.profileSystem : '', frameProfileId: systemValid && valid(configuration.frameProfileId, 'FRAME') ? configuration.frameProfileId : '', sashProfileId: systemValid && valid(configuration.sashProfileId, 'SASH') ? configuration.sashProfileId : '', mullionProfileId: systemValid && valid(configuration.mullionProfileId, 'MULLION') ? configuration.mullionProfileId : '', humanReviewChecked: false, status: 'NEEDS_REVIEW' as const }
+  const next = { ...configuration, composerTemplateId: composerTemplateValid ? configuration.composerTemplateId : null, profileSystem: systemValid ? configuration.profileSystem : '', frameProfileId: systemValid && valid(configuration.frameProfileId, 'FRAME') ? configuration.frameProfileId : '', sashProfileId: systemValid && valid(configuration.sashProfileId, 'SASH') ? configuration.sashProfileId : '', mullionProfileId: systemValid && valid(configuration.mullionProfileId, 'MULLION') ? configuration.mullionProfileId : '', humanReviewChecked: false, status: 'NEEDS_REVIEW' as const }
   const wizardStep = Math.min(next.wizardStep, maximumAccessibleConfigurationStep(next, profiles)) as StructuredConfigurationStep
   return { ...next, wizardStep, validationErrors: validateStructuredConfiguration(next, profiles) }
 }
@@ -131,3 +131,9 @@ export function selectHybridCreationRoute(session: HybridProductDesignerSession,
 export function selectHybridStandardCategory(session: HybridProductDesignerSession, category: HybridProductCategory, profiles: CatalogueProfile[] = []): HybridProductDesignerSession { if (session.creationRoute !== 'STANDARD' || !HYBRID_SELECTABLE_CATEGORIES.includes(category)) return session; const productCategory = category as 'WINDOW' | 'DOOR'; const configuration = session.configuration ? changeStructuredCategory(session.configuration, productCategory, profiles) : createStructuredConfiguration(productCategory); return { ...session, productCategory: category, workflowStep: 'STANDARD_DRAFT', configuration, geometryEntityCount: 0 } }
 export function returnToHybridDesignerStart(session: HybridProductDesignerSession): HybridProductDesignerSession { return createHybridProductDesignerSession(session.id) }
 export const canOpenVisualComposer = (configuration: StructuredProfileConfiguration): boolean => configuration.productCategory === 'WINDOW' && configuration.thresholdStatus === 'NOT_APPLICABLE' && configuration.status === 'HUMAN_CONFIRMED'
+export const canOpenWorkingComposer = (configuration: StructuredProfileConfiguration): boolean => Boolean(
+  configuration.productName.trim()
+  && isPositiveFiniteText(configuration.overallWidth)
+  && isPositiveFiniteText(configuration.overallHeight)
+  && isComposerTemplateCompatible(configuration.productCategory, configuration.composerTemplateId),
+)

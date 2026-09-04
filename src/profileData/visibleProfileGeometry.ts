@@ -57,14 +57,14 @@ export const PRELUDE_60_VISIBLE_PROFILE_GEOMETRY = Object.freeze({
     profileCode: '482.05',
     role: 'SASH',
     systemDepthMm: 60,
-    profileHeightMm: null,
-    visibleWidthMm: null,
-    measurementState: 'PENDING_HUMAN_CONFIRMATION',
+    profileHeightMm: 78,
+    visibleWidthMm: 56,
+    measurementState: 'HUMAN_CONFIRMED',
     representation: 'FILLED_VISIBLE_BAND',
     structuralProfileIsDrawingStroke: false,
     visibleBandRequired: true,
     placeholderVisibleWidthAllowed: false,
-    note: 'Крило: размерите за видима ширина в сглобка каса + крило очакват човешко потвърждение.',
+    note: 'Крило: човешки потвърдени базови размери 78 mm височина и 56 mm видима ширина. Ефективната ширина в конкретна сглобка остава отделна величина.',
   }),
 } satisfies Record<string, NadezhdaVisibleProfileGeometry>)
 
@@ -243,9 +243,10 @@ export interface RectangularSashVisibleBands extends RectangularFrameVisibleBand
 }
 
 /**
- * Builds the structural visible-width geometry for a sash only when a human-confirmed
- * visible width is supplied explicitly by the caller. PROFILE DATA 01.1 V2 deliberately
- * has no numeric fallback for 482.05 and never uses a placeholder width.
+ * Builds the structural visible-width geometry for a sash only when an explicit
+ * assembly-width value is supplied by the caller. The base 482.05 profile geometry
+ * is now human-confirmed as 78/56 mm, but this function deliberately does not use
+ * 56 mm as an automatic assembled/effective width and never invents a fallback.
  */
 export function buildRectangularSashVisibleBands(
   outerWidthMm: number,
@@ -297,9 +298,11 @@ export interface SashVisibleGeometryPolicy {
   profileCode: '482.05'
   role: 'SASH'
   visibleBandRequired: true
-  currentVisibleWidthMm: null
-  currentState: 'PENDING_HUMAN_CONFIRMATION'
-  rendererWithoutConfirmedWidth: 'BLOCK_STRUCTURAL_SASH_BAND'
+  baseProfileHeightMm: 78
+  baseProfileVisibleWidthMm: 56
+  baseGeometryState: 'HUMAN_CONFIRMED'
+  assemblyEffectiveVisibleWidthState: 'UNRESOLVED'
+  rendererWithoutAssemblyWidth: 'BLOCK_STRUCTURAL_SASH_BAND'
   legacySingleStrokeAllowed: false
   placeholderVisibleWidthAllowed: false
 }
@@ -308,9 +311,11 @@ export const PRELUDE_60_SASH_VISIBLE_GEOMETRY_POLICY: SashVisibleGeometryPolicy 
   profileCode: '482.05',
   role: 'SASH',
   visibleBandRequired: true,
-  currentVisibleWidthMm: null,
-  currentState: 'PENDING_HUMAN_CONFIRMATION',
-  rendererWithoutConfirmedWidth: 'BLOCK_STRUCTURAL_SASH_BAND',
+  baseProfileHeightMm: 78,
+  baseProfileVisibleWidthMm: 56,
+  baseGeometryState: 'HUMAN_CONFIRMED',
+  assemblyEffectiveVisibleWidthState: 'UNRESOLVED',
+  rendererWithoutAssemblyWidth: 'BLOCK_STRUCTURAL_SASH_BAND',
   legacySingleStrokeAllowed: false,
   placeholderVisibleWidthAllowed: false,
 })
@@ -325,7 +330,10 @@ export interface FrameSashAssemblyPolicy {
   assemblyType: 'FRAME_SASH'
   frameProfileCode: '482.30'
   sashProfileCode: '482.05'
-  sashVisibleWidthState: 'PENDING_HUMAN_CONFIRMATION'
+  sashBaseProfileHeightMm: 78
+  sashBaseVisibleWidthMm: 56
+  sashBaseGeometryState: 'HUMAN_CONFIRMED'
+  sashEffectiveAssemblyWidthState: 'UNRESOLVED'
   sashMustRenderAsVisibleBandAfterConfirmation: true
   legacySashSingleStrokeAllowed: false
   placeholderSashVisibleWidthAllowed: false
@@ -338,7 +346,10 @@ export const PRELUDE_60_FRAME_SASH_ASSEMBLY_POLICY: FrameSashAssemblyPolicy = Ob
   assemblyType: 'FRAME_SASH',
   frameProfileCode: '482.30',
   sashProfileCode: '482.05',
-  sashVisibleWidthState: 'PENDING_HUMAN_CONFIRMATION',
+  sashBaseProfileHeightMm: 78,
+  sashBaseVisibleWidthMm: 56,
+  sashBaseGeometryState: 'HUMAN_CONFIRMED',
+  sashEffectiveAssemblyWidthState: 'UNRESOLVED',
   sashMustRenderAsVisibleBandAfterConfirmation: true,
   legacySashSingleStrokeAllowed: false,
   placeholderSashVisibleWidthAllowed: false,

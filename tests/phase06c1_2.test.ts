@@ -81,7 +81,7 @@ test('06C.1.2 manual profile evidence remains visible but is not forced into cat
   assert.equal(hybrid.configuration?.frameProfileId, '')
   assert.equal(hybrid.configuration?.sashProfileId, '')
   assert.equal(hybrid.configuration?.mullionProfileId, '')
-  assert.equal(hybrid.configuration?.wizardStep, 3)
+  assert.equal(hybrid.configuration?.wizardStep, 5)
 })
 
 test('06C.1.2 App replaces the hybrid session and skips the constructor start screen for confirmed handoff', () => {

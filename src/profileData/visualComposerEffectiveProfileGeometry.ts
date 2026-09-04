@@ -10,6 +10,8 @@ export const PROFILE_DATA_01_2A_V3_VERSION = 'PROFILE_DATA_01.2A_V3' as const
 
 export const VISUAL_COMPOSER_EFFECTIVE_GEOMETRY_SAFETY = Object.freeze({
   sashGeometryPromoted: false,
+  canonicalDividerPositionRatioRequired: true,
+  explicitSashProfileRequired: true,
   globalFallbackOverlapAllowed: false,
   automaticProfileSelectionAllowed: false,
   automaticProductionUseAllowed: false,
@@ -23,6 +25,7 @@ export interface VisualComposerEffectiveProfileGeometryReady {
   outerHeightMm: number
   sashOverlapMm: number
   frameProfileCode: string
+  sashProfileCode: string
   mullionProfileCode: string | null
   frameSegments: OverlapAwareProfileSegment[]
   mullionSegments: OverlapAwareProfileSegment[]
@@ -65,12 +68,7 @@ const unresolved = (reason: string): VisualComposerEffectiveProfileGeometryUnres
 })
 
 const positiveFinite = (value: number) => Number.isFinite(value) && value > 0
-const percentage = (placement: string) => {
-  const match = placement.trim().match(/^(-?\d+(?:\.\d+)?)%$/)
-  if (!match) return null
-  const value = Number(match[1]) / 100
-  return Number.isFinite(value) && value > 0 && value < 1 ? value : null
-}
+const validPositionRatio = (value: number | undefined): value is number => typeof value === 'number' && Number.isFinite(value) && value > 0 && value < 1
 
 export function buildVisualComposerEffectiveProfileGeometry(input: {
   state: Pick<VisualComposition, 'fields' | 'components' | 'templateId'>
@@ -78,12 +76,14 @@ export function buildVisualComposerEffectiveProfileGeometry(input: {
   outerHeightMm: number
   sashOverlapMm: number
   frameProfileCode: string | null
+  sashProfileCode: string | null
   mullionProfileCode: string | null
 }): VisualComposerEffectiveProfileGeometry {
   if (!input.state.templateId) return unresolved('Няма приложен шаблон.')
   if (!positiveFinite(input.outerWidthMm) || !positiveFinite(input.outerHeightMm)) return unresolved('Невалидни общи размери.')
   if (!positiveFinite(input.sashOverlapMm)) return unresolved('Невалидна работна стойност за застъпване.')
   if (!input.frameProfileCode) return unresolved('Липсва избран профил за каса.')
+  if (!input.sashProfileCode) return unresolved('Липсва избран профил за крило; застъпването не може да се приложи.')
 
   const leaves: StructuralLeafRegion[] = input.state.fields.map((field) => ({
     id: field.id,
@@ -115,8 +115,8 @@ export function buildVisualComposerEffectiveProfileGeometry(input: {
 
     const parentRect = { x: 0, y: 0, width: input.outerWidthMm, height: input.outerHeightMm }
     const mullionSegments = templateDividers.flatMap((component) => {
-      const ratio = percentage(component.placement)
-      if (ratio === null) throw new Error(`Делител ${component.id} няма доказана процентна позиция.`)
+      const ratio = component.positionRatio
+      if (!validPositionRatio(ratio)) throw new Error(`Делител ${component.id} няма канонична числова позиция.`)
       const orientation = component.type === 'VERTICAL_DIVIDER' ? 'VERTICAL'
         : component.type === 'HORIZONTAL_DIVIDER' ? 'HORIZONTAL'
           : null
@@ -140,6 +140,7 @@ export function buildVisualComposerEffectiveProfileGeometry(input: {
       outerHeightMm: input.outerHeightMm,
       sashOverlapMm: input.sashOverlapMm,
       frameProfileCode: input.frameProfileCode,
+      sashProfileCode: input.sashProfileCode,
       mullionProfileCode: templateDividers.length ? input.mullionProfileCode : null,
       frameSegments,
       mullionSegments,

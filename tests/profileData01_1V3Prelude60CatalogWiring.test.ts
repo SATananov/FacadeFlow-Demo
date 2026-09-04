@@ -8,6 +8,7 @@ import {
   PRELUDE_60_CATALOG_ENTRIES,
   PRELUDE_60_CATALOG_SAFETY,
   PRELUDE_60_CATALOG_SYSTEM,
+  PRELUDE_60_GLAZING_BEAD_REVIEW,
   PRELUDE_60_SYSTEM_LABEL,
   PROFILE_CATALOG_REGISTRY_VERSION,
   REGISTERED_PROFILE_CATALOG_SYSTEMS,
@@ -58,10 +59,11 @@ test('482.05 is registered as a SASH', () => {
   assert.equal(entry('482.05').currentAppRole, 'SASH')
 })
 
-test('482.05 catalogue values remain source-only for assembly geometry', () => {
-  assert.equal(entry('482.05').catalogHeightMm, 56)
-  assert.equal(entry('482.05').catalogVisibleWidthMm, 34)
-  assert.equal(entry('482.05').measurementUseState, 'SOURCE_ONLY_PENDING_ASSEMBLY_CONFIRMATION')
+test('482.05 base profile geometry is human-confirmed as 78/56', () => {
+  assert.equal(entry('482.05').catalogHeightMm, 78)
+  assert.equal(entry('482.05').catalogVisibleWidthMm, 56)
+  assert.equal(entry('482.05').measurementUseState, 'HUMAN_CONFIRMED_BASE_GEOMETRY')
+  assert.equal(entry('482.05').measurementEvidenceKind, 'HUMAN_TECHNICAL_CONFIRMATION')
 })
 
 test('other PRELUDE source profiles are not silently activated in the current selector', () => {
@@ -88,11 +90,23 @@ test('PRELUDE 482.21 application profile is expert-confirmed', () => {
   assert.equal(profile.dimensionB, 40)
 })
 
-test('PRELUDE 482.05 is source evidence rather than promoted effective geometry', () => {
+test('PRELUDE 482.05 application profile exposes confirmed base geometry without promoting assembly width', () => {
   const profile = PRELUDE_60_APPLICATION_PROFILES.find(({ code }) => code === '482.05')!
-  assert.equal(profile.status, 'SOURCE_EVIDENCE')
+  assert.equal(profile.status, 'EXPERT_CONFIRMED')
+  assert.equal(profile.dimensionA, 78)
+  assert.equal(profile.dimensionB, 56)
   assert.equal(profile.humanRoleReviewStatus, 'HUMAN_CONFIRMED')
-  assert.match(profile.description ?? '', /Ефективната видима геометрия.*не се приема автоматично/)
+  assert.match(profile.description ?? '', /Ефективната ширина.*конкретна сглобка.*отделни/)
+})
+
+test('glazing-bead review keeps 20/22 as deferred evidence rather than a universal constant', () => {
+  assert.equal(PRELUDE_60_GLAZING_BEAD_REVIEW.state, 'DEFERRED_NOT_MODELED')
+  assert.equal(PRELUDE_60_GLAZING_BEAD_REVIEW.observedExampleMm, 20)
+  assert.equal(PRELUDE_60_GLAZING_BEAD_REVIEW.commonReferenceMm, 22)
+  assert.equal(PRELUDE_60_GLAZING_BEAD_REVIEW.universalConstantAllowed, false)
+  assert.equal(PRELUDE_60_GLAZING_BEAD_REVIEW.deriveFromProfileDimensionDifferenceAllowed, false)
+  assert.equal(PRELUDE_60_GLAZING_BEAD_REVIEW.participatesInGeometryCalculations, false)
+  assert.equal(PRELUDE_60_GLAZING_BEAD_REVIEW.separateFromSashOverlap, true)
 })
 
 test('legacy sampleCatalogueProfiles stays DEMO-only', () => {
@@ -129,6 +143,9 @@ test('PRELUDE catalogue never auto-selects a profile', () => {
 test('V3 does not calculate overlap or effective visible width', () => {
   assert.equal(PRELUDE_60_CATALOG_SAFETY.automaticAssemblyOverlapFormulaAllowed, false)
   assert.equal(PRELUDE_60_CATALOG_SAFETY.effectiveVisibleWidthFromOverlapAllowed, false)
+  assert.equal(PRELUDE_60_CATALOG_SAFETY.glazingBeadUniversalConstantAllowed, false)
+  assert.equal(PRELUDE_60_CATALOG_SAFETY.deriveGlazingBeadFromProfileDimensionDifferenceAllowed, false)
+  assert.equal(PRELUDE_60_CATALOG_SAFETY.glazingBeadGeometryCalculationAllowed, false)
 })
 
 test('V3 remains machine-locked and production-locked', () => {

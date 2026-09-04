@@ -1,4 +1,5 @@
 export type ProfileRole = 'FRAME' | 'SASH' | 'MULLION'
+export type ProfileProductCategory = 'WINDOW' | 'DOOR'
 export type CatalogueProfileStatus = 'DEMONSTRATION' | 'SOURCE_EVIDENCE' | 'EXPERT_CONFIRMED' | 'ARCHIVED'
 export type CatalogueHumanRoleReviewStatus = 'PENDING' | 'HUMAN_CONFIRMED'
 
@@ -23,6 +24,7 @@ export interface CatalogueProfile {
   humanRoleConfirmedBy?: string
   humanRoleConfirmedAt?: string
   humanRoleConfirmationNote?: string
+  compatibleProductCategories?: readonly ProfileProductCategory[]
 }
 
 export interface ProfileCatalogueFilters {

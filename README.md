@@ -2,7 +2,7 @@
 
 ## Текущ архитектурен checkpoint
 
-FacadeFlow е локална, human-gated среда за симулация, технически преглед и подготовка на структурирани продуктови данни. Текущият checkpoint включва архитектурата до AI04, Phase 06C rule foundations, REAL DATA BATCH 01 / WP78, затворената RP01 foundation и приетия UI01.1–UI01.2B navigation/projects layer. Историческите секции по-долу остават като подробен phase-specific запис. За текущия closure статус използвайте [Current Architecture Status](docs/CURRENT_ARCHITECTURE_STATUS.md).
+FacadeFlow е локална, human-gated среда за симулация, технически преглед и подготовка на структурирани продуктови данни. Source checkpoint `071355d` е независимо одитиран. Текущият незатворен hardening stack е **PROFILE DATA 01.2A V8 + V8.1/V8.1.1 + V8.2 + V8.3**. V8.3 въвежда един ясен „работна конфигурация“ workflow за прозорци и врати: след име и положителни размери потребителят може да започне композицията с наличните данни, а неизвестните система/профили остават празни и се попълват по-късно. Това не отслабва Human Confirm, unresolved-threshold или production/machine safety gates. Stack-ът не е затворен преди `npm run verify`, human visual audit, clean Git checks и commit. Историческите секции по-долу остават phase-specific запис; текущият status е в [Current Architecture Status](docs/CURRENT_ARCHITECTURE_STATUS.md).
 
 ### AI01 → AI04 — human-authority pipeline
 
@@ -45,6 +45,14 @@ npm run checkpoint:internal
 ```
 
 `checkpoint:shareable` изключва private evidence (`local-samples/`, DWG/LTE). `checkpoint:internal` може да го запази само за контролиран вътрешен audit.
+
+## PRELUDE 60 / Visual Composer current hardening
+
+PRELUDE 60 bridge използва 482.30 като FRAME (64/42 mm), 482.21 като MULLION (84/40 mm) и 482.05 като WINDOW SASH с човешки потвърдена базова геометрия 78/56 mm. Това не промотира effective assembly width за крилото. Стъклодържателят остава отделен, вариращ и засега немоделиран параметър: има прегледан пример 20 mm, а 22 mm е често срещана стойност, но не е универсална константа и не се извежда от разликите 22/44 mm. Работният 7 mm overlap е отделен параметър и се прилага само при explicit selected sash; няма global fallback. Template divider geometry използва numeric `positionRatio`, така че Triple 1/3 и 2/3 не зависят от закръглените display labels 33.33% / 66.67%. Каталожните door-sash 482.26 / 482.27 остават unmapped и не се активират автоматично.
+
+## Работна конфигурация на прозорец / врата
+
+Visual Composer вече е работна среда, а не отделен user-facing DEMO режим. Име + положителни общи размери са достатъчни, за да се започне работа. Профилна система, каса, крило и делител могат да останат „Не е избрано“ и да се попълнят по-късно от десния панел. Unknown стойности не се измислят. Предварително избраната 2/3/4-полева композиция се зарежда автоматично; generic entry остава празен. При врата прагът остава `UNRESOLVED` и production/machine readiness остава `false`. Стъклопакет/стъклодържател 20/22 mm не се моделират или изчисляват автоматично в този слой.
 
 ## Профилен каталог и нестандартен прозорец
 

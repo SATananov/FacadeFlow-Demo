@@ -64,12 +64,14 @@ test('липсващ DEMO sash блокира достъпа и не създа�
   assert.equal(createDoorComposerDemoConfiguration(sourceDoor(), profiles), null)
 })
 
-test('wizard показва отделния DEMO gate и никога не заменя source configuration', () => {
+test('wizard отваря една работна конфигурация без отделен DEMO gate или derived source replacement', () => {
   const source = readFileSync('src/components/StructuredConfigurationWizard.tsx', 'utf8')
-  for (const text of ['doorDemoAcknowledged', 'createDoorComposerDemoConfiguration', 'Използвай отделен DEMO режим само за концептуален тест', 'Текущата конфигурация и избраните каталожни профили няма да бъдат променяни', 'Отвори DEMO концептуалния конструктор на врата', 'sourceProfileSystem={configuration.profileSystem}']) assert.equal(source.includes(text), true)
+  for (const text of ['canOpenWorkingComposer', 'Отвори работния конструктор', 'configuration={configuration}', 'profiles={profiles}', 'onConfigurationChange={update}']) assert.equal(source.includes(text), true)
+  for (const removed of ['doorDemoAcknowledged', 'createDoorComposerDemoConfiguration', 'getDoorComposerDemoAccess', 'Отвори DEMO концептуалния конструктор на врата']) assert.equal(source.includes(removed), false)
 })
 
-test('door composer маркира ясно DEMO-only режима и source system', () => {
+test('door composer показва текущата конфигурация и държи прага неразрешен вътре в работния поток', () => {
   const source = readFileSync('src/components/DoorVisualComposer.tsx', 'utf8')
-  for (const text of ['demoOnly', 'sourceProfileSystem', 'DEMO тест · Източник:', 'Визуализатор: DEMO SYSTEM', 'Текущата конфигурация не се променя', 'DEMO-only тест']) assert.equal(source.includes(text), true)
+  for (const text of ['Работна конфигурация', 'WorkingConfigurationDataPanel', 'thresholdAcknowledged', 'Праг: НЕРАЗРЕШЕН', 'Статусът остава NEEDS_REVIEW']) assert.equal(source.includes(text), true)
+  for (const removed of ['demoOnly', 'sourceProfileSystem', 'DEMO-only тест']) assert.equal(source.includes(removed), false)
 })

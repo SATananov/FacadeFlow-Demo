@@ -6,6 +6,30 @@
 
 Конструкторът изчислява само правоъгълни полета и nominal spans. Няма сглобки, отнемания, ъгли, просвети, glazing/gasket deductions, machining allowances или optimization. `VERIFIED` е човешки преглед на симулация; `machineReady` остава `false`. Export-ите са само simulation JSON — без машина, backend или network.
 
+## PROFILE DATA 01.1–01.2A V8 — PRELUDE 60 effective geometry boundary
+
+PRELUDE 60 вече има ограничен source-backed application bridge, но това **не** е производствена геометрия. 482.30 (каса) е човешки потвърдена като 64 mm височина / 42 mm видима ширина, 482.21 (делител) като 84/40 mm, а 482.05 (WINDOW крило) като 78/56 mm базова профилна геометрия. Потвърдените 78/56 mm не се приемат автоматично за effective assembly width на крилото в конкретна сглобка.
+
+
+Разликите в потвърдените базови размери са 22 mm при касата (64-42), 22 mm при крилото (78-56) и 44 mm при делителя (84-40), но тези аритметични разлики **не** са универсална формула за стъклодържател. Прегледан пример показва стъклодържател 20 mm, а технологът посочва 22 mm като масово срещана стойност. Затова glazing-bead размерът е `DEFERRED_NOT_MODELED`: не се избира, не се изчислява, не се извежда от 22/44 mm и не участва в геометрията на V8.2. Той е отделен и от 7 mm sash overlap.
+
+Работната стойност 7 mm за PRELUDE застъпване на крилото е системен, човешки прегледан параметър, но остава editable и изисква exact production confirmation. Няма global fallback. Застъпване не се прилага без изрично избран съвместим SASH профил и не се извежда от Размер A/B.
+
+Visual Composer използва канонични числови `positionRatio` стойности за геометрията на template делителите. Процентният `placement` текст е само presentation label и не е geometry source. Това предотвратява закръгляване като 33.33% да разкъсва adjacency при триполеви изделия.
+
+Текущият application bridge маркира PRELUDE 482.05 като WINDOW sash. Той не трябва да се предлага или приема като DOOR sash. Каталожните 482.26 и 482.27 остават `CATALOG_ONLY_UNMAPPED` и не се активират, докато технолог не потвърди ролята и нужната геометрия. В V8.3 WINDOW и DOOR влизат в една работна конфигурация с текущите налични данни; липсващите стойности остават празни. При DOOR `thresholdStatus = UNRESOLVED` остава видим и блокира производственото/пълното техническо потвърждение, без да блокира работата по композицията.
+
+Всички тези слоеве запазват `machineReady: false` и `productionApproved: false`; не създават cutting deductions, machining dimensions, machine export или production authorization.
+
+
+## PROFILE DATA 01.2A V8.3 — working configuration boundary
+
+Работният конструктор е достъпен след име на изделието и положителни общи размери, дори ако профилната система или някои профили още не са известни. Това е permission за редактиране на непълна конфигурация, а не техническо одобрение. Празните полета не се попълват с fallback, примерни или inferred стойности.
+
+WINDOW и DOOR използват текущата structured конфигурация директно. Старият отделен user-facing Door DEMO gate не е authority boundary. Строгият `validateStructuredConfiguration` / Human Confirm остава отделен и не се отслабва. При врата прагът остава `UNRESOLVED`, а acknowledgement-ът в Composer потвърждава само, че човекът разбира това ограничение.
+
+Стъклопакетът и стъклодържателят остават deferred. Нито 20 mm, нито 22 mm се въвеждат или изчисляват автоматично. Това остава отделно от 7 mm PRELUDE sash overlap.
+
 ## Phase 04C
 
 3D е концептуална проекция само от structured product data. `conceptualDepthMm` не произлиза от Размер A/B. Няма точни сечения, hardware модел, производствена геометрия или 3D production export. Three.js ресурсите са в локалния bundle; няма CDN/cloud viewer. Scene metadata е `conceptualOnly: true`, `productionGeometryApproved: false`, `machineReady: false`.

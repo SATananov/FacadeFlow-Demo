@@ -188,7 +188,7 @@ export function CustomProductDrawing({ product, selectedFieldId, onSelectField, 
             ? <g className="custom-structural-profile-layer custom-sash-profile-layer" data-profile-code={sashBands.profileCode} data-visible-width-mm={sashBands.visibleWidthMm} pointerEvents="none">
                 {[sashBands.left, sashBands.right, sashBands.top, sashBands.bottom].map((band, index) => <rect key={`sash-band-${node.id}-${index}`} x={rect.x + band.x * scale} y={rect.y + band.y * scale} width={band.width * scale} height={band.height * scale} className="custom-structural-profile-band custom-sash-profile-band"/>)}
               </g>
-            : <text x={rect.x + rect.width / 2} y={rect.y + 23} className="custom-sash-visible-width-pending" data-profile-code="482.05" data-visible-width-state="PENDING_HUMAN_CONFIRMATION">Крило · видима ширина чака потвърждение</text>}
+            : <text x={rect.x + rect.width / 2} y={rect.y + 23} className="custom-sash-visible-width-pending" data-profile-code="482.05" data-visible-width-state="ASSEMBLY_EFFECTIVE_WIDTH_UNRESOLVED">Крило · ефективната ширина в сглобка не е зададена</text>}
           {notation && <OpeningSymbol x={rect.x + 13} y={rect.y + 13} width={Math.max(0, rect.width - 26)} height={Math.max(0, rect.height - 26)} notation={notation} openingDirection={node.openingDirection} directionConfirmed={Boolean(node.openingDirection)}/>}
         </>
       })()}

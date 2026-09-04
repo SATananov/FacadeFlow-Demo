@@ -19,7 +19,7 @@ const safety = {
 
 function composition(
   fieldTypes: Array<'FIXED' | 'OPENABLE'>,
-  dividerPlacements: string[],
+  dividerPositions: number[],
   horizontal = false,
 ): VisualComposition {
   const count = fieldTypes.length
@@ -42,12 +42,13 @@ function composition(
         attachedHingeIds: [],
         humanReviewState: 'UNREVIEWED' as const,
       })
-  const components = dividerPlacements.map((placement, index) => ({
+  const components = dividerPositions.map((positionRatio, index) => ({
     id: `divider-${index + 1}`,
     type: horizontal ? 'HORIZONTAL_DIVIDER' as const : 'VERTICAL_DIVIDER' as const,
     parentFieldId: null,
     role: 'DIVIDER' as const,
-    placement,
+    placement: `${Math.round(positionRatio * 10000) / 100}%`,
+    positionRatio,
     source: 'DEMO' as const,
     simulationOnly: true as const,
     machineReady: false as const,
@@ -75,11 +76,12 @@ const build = (state: VisualComposition) => buildVisualComposerEffectiveProfileG
   outerHeightMm: 1200,
   sashOverlapMm: 7,
   frameProfileCode: '482.30',
+  sashProfileCode: '482.05',
   mullionProfileCode: '482.21',
 })
 
 test('double sash uses PROFILE DATA 01.2 to produce 42→35 frame and 40→26 mullion geometry', () => {
-  const result = build(composition(['OPENABLE', 'OPENABLE'], ['50%']))
+  const result = build(composition(['OPENABLE', 'OPENABLE'], [.5]))
   assert.equal(result.state, 'READY')
   if (result.state !== 'READY') throw new Error(result.reason)
   assert.deepEqual(effectiveWidths(result.frameSegments), [35])
@@ -88,7 +90,7 @@ test('double sash uses PROFILE DATA 01.2 to produce 42→35 frame and 40→26 mu
 })
 
 test('mixed sash/fixed keeps untouched base bands and produces one-sided 40→33 mullion', () => {
-  const result = build(composition(['OPENABLE', 'FIXED'], ['50%']))
+  const result = build(composition(['OPENABLE', 'FIXED'], [.5]))
   assert.equal(result.state, 'READY')
   if (result.state !== 'READY') throw new Error(result.reason)
   assert.deepEqual(effectiveWidths(result.frameSegments), [35, 42])
@@ -96,7 +98,7 @@ test('mixed sash/fixed keeps untouched base bands and produces one-sided 40→33
 })
 
 test('fixed/fixed applies no overlap to frame or mullion', () => {
-  const result = build(composition(['FIXED', 'FIXED'], ['50%']))
+  const result = build(composition(['FIXED', 'FIXED'], [.5]))
   assert.equal(result.state, 'READY')
   if (result.state !== 'READY') throw new Error(result.reason)
   assert.deepEqual(effectiveWidths(result.frameSegments), [42])
@@ -104,7 +106,7 @@ test('fixed/fixed applies no overlap to frame or mullion', () => {
 })
 
 test('horizontal fixed/sash divider uses the same side-aware 01.2 geometry', () => {
-  const result = build(composition(['FIXED', 'OPENABLE'], ['50%'], true))
+  const result = build(composition(['FIXED', 'OPENABLE'], [.5], true))
   assert.equal(result.state, 'READY')
   if (result.state !== 'READY') throw new Error(result.reason)
   assert.deepEqual(effectiveWidths(result.frameSegments), [35, 42])
