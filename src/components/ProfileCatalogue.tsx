@@ -2,6 +2,8 @@ import { useMemo, useState } from 'react'
 import { catalogueExport, catalogueProfileIsDemonstration, catalogueProfileIsReal, catalogueProfileIsSelectable, duplicateCatalogueProfile, profileStatusLabels, roleLabels } from '../profileCatalogueState'
 import type { ActiveProfileSelection, CatalogueProfile, ProfileCatalogueFilters, ProfileRole } from '../profileCatalogueTypes'
 import { catalogueHasRequiredRoles, validateCatalogueProfile } from '../profileCatalogueValidation'
+import { EXTERNAL_PROFILE_CATALOGUE_SOURCES, EXTERNAL_PROFILE_CATALOGUE_SOURCE_GROUPS } from '../profileData/catalogueSourceLibrary'
+import type { ExternalCatalogueDocumentLanguage, ExternalCatalogueSourceKind } from '../profileData/catalogueSourceLibrary'
 import { ContextHelp } from './ContextHelp'
 import { ProfileEditor } from './ProfileEditor'
 import { FacadeFlowWorkspaceHeader } from './FacadeFlowWorkspaceHeader'
@@ -13,6 +15,19 @@ interface Props {
   onSelection: (selection: ActiveProfileSelection) => void
   onOpenProjects: () => void
   onClose: () => void
+}
+
+
+const catalogueSourceKindLabelBg: Record<ExternalCatalogueSourceKind, string> = {
+  TECHNICAL_PDF: 'Технически PDF',
+  PRODUCT_PAGE: 'Продуктова страница',
+}
+
+const catalogueLanguageLabelBg: Record<ExternalCatalogueDocumentLanguage, string> = {
+  BG: 'Български',
+  EN: 'Английски',
+  UK: 'Украински',
+  MULTI: 'Многоезичен',
 }
 
 const blankProfile = (): CatalogueProfile => {
@@ -60,6 +75,40 @@ export function ProfileCatalogue({ profiles, selection, onProfiles, onSelection,
       <section className="catalogue-source-routing" aria-label="Насочване към проектните източници">
         <div><span>ПРОЕКТЕН / ИЗТОЧНИКОВ КОНТЕКСТ</span><b>Суровите проектни данни са в „Проекти“</b><small>Тук остават само нормализирани каталожни записи. Данните от източника не означават каталожно или производствено одобрение.</small></div>
         <button type="button" onClick={onOpenProjects}>Отвори Проекти</button>
+      </section>
+      <section className="catalogue-reference-library" aria-labelledby="catalogue-reference-library-title">
+        <div className="catalogue-reference-library-head">
+          <div>
+            <span>PROFILE DATA 02.2.1 · ВЪНШНИ КАТАЛОЖНИ ИЗТОЧНИЦИ</span>
+            <b id="catalogue-reference-library-title">Каталожни документи</b>
+            <small>PDF източници за преглед и бъдещо моделиране на сечения. Не променят автоматично текущата геометрия и не създават избираеми профили.</small>
+          </div>
+          <strong>{EXTERNAL_PROFILE_CATALOGUE_SOURCES.length} · REFERENCE ONLY</strong>
+        </div>
+        <div className="catalogue-reference-groups">
+          {EXTERNAL_PROFILE_CATALOGUE_SOURCE_GROUPS.map((group) => <details key={group.brand} className="catalogue-reference-brand" open={group.brand === 'KMG'}>
+            <summary>
+              <span><b>{group.brand}</b><small>{group.sources.map((source) => source.system).join(' · ')}</small></span>
+              <em>{group.sources.length} {group.sources.length === 1 ? 'система' : 'системи'}</em>
+            </summary>
+            <div className="catalogue-reference-grid">
+              {group.sources.map((source) => <article key={source.id} className="catalogue-reference-card">
+                <div className="catalogue-reference-card-top"><span>{source.system}</span><em>{source.referenceState}</em></div>
+                <h3>{source.title}</h3>
+                <p>{source.summaryBg}</p>
+                <dl>
+                  <div><dt>Конструктивна дълбочина</dt><dd>{source.systemDepthMm} mm</dd></div>
+                  <div><dt>Тип източник</dt><dd>{catalogueSourceKindLabelBg[source.sourceKind]}</dd></div>
+                  <div><dt>Източник</dt><dd>{source.sourceHost}</dd></div>
+                  <div><dt>Език</dt><dd>{catalogueLanguageLabelBg[source.documentLanguage]}</dd></div>
+                  {source.focusProfileCodes.length > 0 && <div className="wide"><dt>Фокус кодове</dt><dd>{source.focusProfileCodes.join(' · ')}</dd></div>}
+                </dl>
+                <a href={source.sourceUrl} target="_blank" rel="noreferrer">{source.sourceKind === 'TECHNICAL_PDF' ? 'Отвори PDF каталога' : 'Отвори официалния източник'} ↗</a>
+              </article>)}
+            </div>
+          </details>)}
+        </div>
+        <footer>ВЪНШЕН ИЗТОЧНИК · БЕЗ АВТОМАТИЧЕН IMPORT НА РАЗМЕРИ · MACHINE READY: НЕ · PRODUCTION APPROVED: НЕ</footer>
       </section>
       {!catalogueHasRequiredRoles(profiles) && <div className="inline-errors" role="alert">Необходим е поне един активен профил за каса, крило и делител.</div>}
       <section className="catalogue-kind-summary" aria-label="Разделение на реален и демонстрационен каталог"><div className="real"><span>РЕАЛЕН КАТАЛОГ</span><b>{visibleReal.length}</b><small>Само записи от реален източник с човешки потвърдена роля или експертни записи могат да бъдат активни.</small></div><div className="demo"><span>ДЕМО КАТАЛОГ</span><b>{visibleDemo.length}</b><small>Временни данни само за ДЕМО и тестове. Не заместват реалните профили.</small></div></section>

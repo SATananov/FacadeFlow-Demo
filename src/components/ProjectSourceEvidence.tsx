@@ -4,6 +4,7 @@ import { profileStatusLabels, roleLabels } from '../profileCatalogueState'
 import type { CatalogueProfile, ProfileRole } from '../profileCatalogueTypes'
 import { validateCatalogueProfile } from '../profileCatalogueValidation'
 import { wp78CatalogueVisibility } from '../realData/wp78CatalogueVisibility'
+import { NADEZHDA_HUMAN_PROFILE_MEASUREMENTS } from '../realData/nadezhdaHumanProfileMeasurements'
 import { ProfileEditor } from './ProfileEditor'
 
 interface Props {
@@ -48,6 +49,33 @@ export function ProjectSourceEvidence({ profiles, onProfiles, onOpenCatalogue }:
   }
 
   return <div className="project-source-evidence" aria-label="Проектни записи от реални източници">
+    <article className="project-source-card project-source-card-human" aria-labelledby="project-source-human-title">
+      <header className="project-source-head">
+        <div>
+          <span className="project-source-kicker">НАДЕЖДА · РЕАЛНИ ПРОИЗВОДСТВЕНИ ДАННИ · ОТДЕЛНО ОТ КАТАЛОГА</span>
+          <h4 id="project-source-human-title">PRELUDE 60 · Надежда</h4>
+          <p>Технически потвърдени профилни измервания от Надежда. За касата и крилото видимата ширина е пълният размер минус една зона 22 mm; при делителя зоната 22 mm е от двете страни. Данните остават отделен производствен източник и не се сливат автоматично с KMG каталога.</p>
+        </div>
+        <span className="project-source-state">ИЗТОЧНИК: НАДЕЖДА</span>
+      </header>
+      <div className="project-source-human-grid">
+        {NADEZHDA_HUMAN_PROFILE_MEASUREMENTS.map((item) => <section key={item.id} className="project-source-human-profile confirmed">
+          <div><b>{item.code}</b><span>{item.roleLabelBg}</span></div>
+          <strong>{item.fullDimensionMm} → {item.visibleWidthMm} mm</strong>
+          <small>ТЕХНИЧЕСКИ ПОТВЪРДЕНО · НАДЕЖДА</small>
+          <div className="project-source-human-geometry">
+            <span><i>Пълен размер</i><b>{item.fullDimensionMm} mm</b></span>
+            <span><i>Видима ширина</i><b>{item.visibleWidthMm} mm</b></span>
+            <span><i>{item.deductionMeaningBg}</i><b>{item.deductionZoneCount === 2 ? `${item.deductionZoneMm} + ${item.deductionZoneMm}` : item.deductionZoneMm} mm</b></span>
+          </div>
+          <code>{item.measurementFormulaBg}</code>
+          <p>{item.noteBg}</p>
+        </section>)}
+      </div>
+      <div className="project-source-human-rule"><b>Потвърдено правило за видима ширина</b><span>Каса: 64 − 22 = 42 mm · Крило: 78 − 22 = 56 mm · Делител: 84 − 22 − 22 = 40 mm. Правилото е knowledge evidence и не отключва автоматично производствена геометрия.</span></div>
+      <footer className="project-source-safety">ИЗТОЧНИК: НАДЕЖДА · ТЕХНИЧЕСКИ КОНТАКТ: БАТ ТРИФОН · БЕЗ АВТОМАТИЧЕН CATALOGUE MERGE · ПРАВИЛА: НЕВАЛИДИРАНИ · ГОТОВ ЗА МАШИНА: НЕ · ПРОИЗВОДСТВЕНО ОДОБРЕН: НЕ</footer>
+    </article>
+
     <article className="project-source-card project-source-card-vadim" aria-labelledby="project-source-vadim-title">
       <header className="project-source-head">
         <div>
