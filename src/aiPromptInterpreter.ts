@@ -174,6 +174,15 @@ function positionIndex(token: string, count: number) {
   if (/ляв|left/.test(value)) return 0
   if (/д[ея]с|right/.test(value)) return Math.max(0, count - 1)
   if (/сред|center|middle/.test(value)) return count >= 3 ? Math.floor((count - 1) / 2) : null
+  const ordinal: Array<[RegExp, number]> = [
+    [/(?:първ|first)/, 0],
+    [/(?:втор|second)/, 1],
+    [/(?:трет|third)/, 2],
+    [/(?:четвърт|fourth)/, 3],
+    [/(?:пет|fifth)/, 4],
+    [/(?:шест|sixth)/, 5],
+  ]
+  for (const [pattern, index] of ordinal) if (pattern.test(value)) return index < count ? index : null
   return null
 }
 
@@ -204,6 +213,14 @@ function applyCompoundFieldRoles(text: string, fields: FacadeFlowIntentField[]) 
     setFieldRoleFromText(fields, 0, edge[1])
     setFieldRoleFromText(fields, fields.length - 1, edge[1])
   }
+
+  const ordinalPair = /(първ(?:ото|ия)?|втор(?:ото|ия)?|трет(?:ото|ия)?|четвърт(?:ото|ия)?|пет(?:ото|ия)?|шест(?:ото|ия)?|first|second|third|fourth|fifth|sixth)\s+(?:поле\s+)?и\s+(първ(?:ото|ия)?|втор(?:ото|ия)?|трет(?:ото|ия)?|четвърт(?:ото|ия)?|пет(?:ото|ия)?|шест(?:ото|ия)?|first|second|third|fourth|fifth|sixth)\s+(?:поле\s+)?(фикс(?:ирани|ирано|иран|но)?|fixed|отваряеми|отваряемо|openable|operable|плъзгащи|sliding)/gi
+  for (const match of text.matchAll(ordinalPair)) {
+    const firstIndex = positionIndex(match[1], fields.length)
+    const secondIndex = positionIndex(match[2], fields.length)
+    if (firstIndex !== null) setFieldRoleFromText(fields, firstIndex, match[3])
+    if (secondIndex !== null) setFieldRoleFromText(fields, secondIndex, match[3])
+  }
 }
 
 function createFields(text: string, count: number | null, evidenceId: string): FacadeFlowIntentField[] {
@@ -215,7 +232,7 @@ function createFields(text: string, count: number | null, evidenceId: string): F
     evidenceIds: [evidenceId],
     unresolved: ['Роля / отваряемост на полето'],
   }))
-  const matcher = /(ляв(?:ото|ото поле)?|д[ея]сн(?:ото|ото поле)?|средн(?:ото|ото поле)?|\bleft\b|\bright\b|\bcenter\b|\bmiddle\b)[^,;.]{0,35}?(фикс(?:ирано|иран|но)?|\bfixed\b|отваряемо|отваряем|\bturn\b|tilt\s*[-+&/]?\s*turn|осово\s*[- ]?(?:обръщателно|откидно)|падащо|\btilt\b|плъзгащо|\bsliding\b)/gi
+  const matcher = /(ляв(?:ото|ото поле)?|д[ея]сн(?:ото|ото поле)?|средн(?:ото|ото поле)?|първ(?:ото|ото поле)?|втор(?:ото|ото поле)?|трет(?:ото|ото поле)?|четвърт(?:ото|ото поле)?|пет(?:ото|ото поле)?|шест(?:ото|ото поле)?|\bleft\b|\bright\b|\bcenter\b|\bmiddle\b|\bfirst\b|\bsecond\b|\bthird\b|\bfourth\b|\bfifth\b|\bsixth\b)[^,;.]{0,35}?(фикс(?:ирано|иран|но)?|\bfixed\b|отваряемо|отваряем|\bturn\b|tilt\s*[-+&/]?\s*turn|осово\s*[- ]?(?:обръщателно|откидно)|падащо|\btilt\b|плъзгащо|\bsliding\b)/gi
   for (const match of text.matchAll(matcher)) {
     const index = positionIndex(match[1], count)
     if (index === null || index < 0 || index >= fields.length) continue
