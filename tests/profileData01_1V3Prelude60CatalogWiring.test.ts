@@ -142,7 +142,8 @@ test('PRELUDE catalogue never auto-selects a profile', () => {
 
 test('V3 does not calculate overlap or effective visible width', () => {
   assert.equal(PRELUDE_60_CATALOG_SAFETY.automaticAssemblyOverlapFormulaAllowed, false)
-  assert.equal(PRELUDE_60_CATALOG_SAFETY.effectiveVisibleWidthFromOverlapAllowed, false)
+  assert.equal(PRELUDE_60_CATALOG_SAFETY.catalogVisibleWidthMayBeOverwrittenByOverlap, false)
+  assert.equal(PRELUDE_60_CATALOG_SAFETY.workingEffectiveFrameOrMullionWidthFromExplicitOverlapAllowed, true)
   assert.equal(PRELUDE_60_CATALOG_SAFETY.glazingBeadUniversalConstantAllowed, false)
   assert.equal(PRELUDE_60_CATALOG_SAFETY.deriveGlazingBeadFromProfileDimensionDifferenceAllowed, false)
   assert.equal(PRELUDE_60_CATALOG_SAFETY.glazingBeadGeometryCalculationAllowed, false)

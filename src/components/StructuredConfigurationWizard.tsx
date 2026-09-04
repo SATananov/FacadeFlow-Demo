@@ -2,10 +2,11 @@ import { useEffect, useState } from 'react'
 import { canOpenWorkingComposer, compatibleProfiles, confirmStructuredConfiguration, deriveActiveProfileSystems, getProductNameSuggestions, getProductSizeSuggestions, maximumAccessibleConfigurationStep, moveStructuredConfigurationStep, reconcileStructuredConfiguration, selectHybridStandardCategory, updateStructuredConfiguration, type HybridProductDesignerSession, type StructuredConfigurationStep, type StructuredProfileConfiguration } from '../hybridProductDesigner'
 import type { CatalogueProfile, ProfileRole } from '../profileCatalogueTypes'
 import { createEmptyComposition } from '../visualComposerState'
+import { emptyDoorComposition } from '../doorComposerState'
 import { VisualTemplateComposer } from './VisualTemplateComposer'
 import { DoorVisualComposer } from './DoorVisualComposer'
 import { composerTemplateIdForProductPreset, composerTemplateLabel } from '../structuredComposerTemplateSelection'
-import { resolveWindowComposerEntry } from '../composerEntryConsistency'
+import { resolveDoorComposerEntry, resolveWindowComposerEntry } from '../composerEntryConsistency'
 
 interface Props { session: HybridProductDesignerSession; profiles: CatalogueProfile[]; onSession: (updater: (current: HybridProductDesignerSession) => HybridProductDesignerSession) => void; onCloseFacadeFlow: () => void; onOpenProfileCatalogue: () => void }
 const labels = ['Тип изделие', 'Размери', 'Профилна система', 'Профили', 'Проверка'] as const
@@ -13,7 +14,7 @@ const systemLabel = (system: string) => system === 'DEMO SYSTEM' ? 'Пример
 const profileOptionLabel = (profile: CatalogueProfile) => profile.status === 'DEMONSTRATION' ? `${profile.code} — служебен примерен профил` : `${profile.code} — ${profile.nameBg}`
 
 export function StructuredConfigurationWizard({ session, profiles, onSession, onCloseFacadeFlow, onOpenProfileCatalogue }: Props) {
-  const [composerOpen, setComposerOpen] = useState(false), [doorComposerOpen, setDoorComposerOpen] = useState(false), [composition, setComposition] = useState(createEmptyComposition), [compositionSeedTemplateId, setCompositionSeedTemplateId] = useState<string | null>(null)
+  const [composerOpen, setComposerOpen] = useState(false), [doorComposerOpen, setDoorComposerOpen] = useState(false), [composition, setComposition] = useState(createEmptyComposition), [compositionSeedTemplateId, setCompositionSeedTemplateId] = useState<string | null>(null), [doorComposition, setDoorComposition] = useState(emptyDoorComposition), [doorCompositionSeedTemplateId, setDoorCompositionSeedTemplateId] = useState<string | null>(null)
   useEffect(() => { if (!composerOpen && !doorComposerOpen) return; const frame = requestAnimationFrame(() => { const center = document.querySelector<HTMLElement>('.detail-drafting .visual-composer-stage'); if (center) { center.tabIndex=0; center.setAttribute('aria-label', 'Централна работна зона — превъртаемо съдържание'); center.scrollTop = 0 } }); return () => cancelAnimationFrame(frame) }, [composerOpen, doorComposerOpen])
   if (!session.configuration) return null
   const configuration = reconcileStructuredConfiguration(session.configuration, profiles)
@@ -26,9 +27,15 @@ export function StructuredConfigurationWizard({ session, profiles, onSession, on
     setCompositionSeedTemplateId(entry.seededTemplateId)
     setComposerOpen(true)
   }
-  const openWorkingComposer = () => configuration.productCategory === 'WINDOW' ? openWindowComposer() : setDoorComposerOpen(true)
+  const openDoorComposer = () => {
+    const entry = resolveDoorComposerEntry(doorComposition, configuration.composerTemplateId, doorCompositionSeedTemplateId)
+    setDoorComposition(entry.composition)
+    setDoorCompositionSeedTemplateId(entry.seededTemplateId)
+    setDoorComposerOpen(true)
+  }
+  const openWorkingComposer = () => configuration.productCategory === 'WINDOW' ? openWindowComposer() : openDoorComposer()
   if (composerOpen) return <VisualTemplateComposer configuration={configuration} profiles={profiles} initial={composition} onChange={setComposition} onConfigurationChange={update} lockedTemplateId={configuration.composerTemplateId} onBack={() => setComposerOpen(false)}/>
-  if (doorComposerOpen) return <DoorVisualComposer configuration={configuration} profiles={profiles} onConfigurationChange={update} initialTemplateId={configuration.composerTemplateId} onBack={() => setDoorComposerOpen(false)} onCloseFacadeFlow={onCloseFacadeFlow}/>
+  if (doorComposerOpen) return <DoorVisualComposer configuration={configuration} profiles={profiles} onConfigurationChange={update} initial={doorComposition} onChange={setDoorComposition} initialTemplateId={configuration.composerTemplateId} onBack={() => setDoorComposerOpen(false)} onCloseFacadeFlow={onCloseFacadeFlow}/>
   return <main className="hybrid-screen hybrid-configuration"><div className="hybrid-screen-heading"><h3>Конфигурация на изделието</h3><p>Започнете с данните, които имате. Липсващите технически стойности могат да останат непопълнени и да се добавят по-късно.</p></div><StepIndicator configuration={configuration} profiles={profiles} onMove={move}/><section className="hybrid-wizard-panel">
     {configuration.wizardStep === 1 && <ProductTypeStep configuration={configuration} profiles={profiles} onSession={onSession} onNext={() => move(2)}/>}
     {configuration.wizardStep === 2 && <DimensionsStep configuration={configuration} onUpdate={update} onBack={() => move(1)} onNext={() => move(3)}/>}

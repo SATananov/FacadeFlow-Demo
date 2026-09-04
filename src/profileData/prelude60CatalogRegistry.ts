@@ -1,9 +1,10 @@
 import type { CatalogueProfile, ProfileRole } from '../profileCatalogueTypes'
 import { PRELUDE_60_SASH_OVERLAP_PARAMETER } from './sashOverlapGeometry'
+import { PRELUDE_60_CONFIRMED_BASE_GEOMETRY, PRELUDE_60_PROFILE_CODES, PRELUDE_60_SYSTEM_DEPTH_MM, PRELUDE_60_SYSTEM_ID, PRELUDE_60_SYSTEM_LABEL } from './prelude60BaseProfiles'
+
+export { PRELUDE_60_PROFILE_CODES, PRELUDE_60_SYSTEM_ID, PRELUDE_60_SYSTEM_LABEL } from './prelude60BaseProfiles'
 
 export const PROFILE_CATALOG_REGISTRY_VERSION = 'PROFILE_DATA_01.1_V3' as const
-export const PRELUDE_60_SYSTEM_ID = 'PRELUDE_60' as const
-export const PRELUDE_60_SYSTEM_LABEL = 'PRELUDE 60' as const
 
 export type RegisteredCatalogKind = 'REAL_CATALOG'
 export type Prelude60CatalogRole = ProfileRole | 'DOOR_SASH' | 'OVERHUNG'
@@ -50,7 +51,7 @@ export const PRELUDE_60_CATALOG_SYSTEM: RegisteredProfileCatalogSystem = Object.
   manufacturer: 'KMG',
   label: PRELUDE_60_SYSTEM_LABEL,
   kind: 'REAL_CATALOG',
-  systemDepthMm: 60,
+  systemDepthMm: PRELUDE_60_SYSTEM_DEPTH_MM,
   sashOverlapMm: PRELUDE_60_SASH_OVERLAP_PARAMETER.sashOverlapMm,
   sashOverlapEditable: PRELUDE_60_SASH_OVERLAP_PARAMETER.editable,
   sashOverlapState: PRELUDE_60_SASH_OVERLAP_PARAMETER.state,
@@ -91,12 +92,12 @@ export const PRELUDE_60_GLAZING_BEAD_REVIEW = Object.freeze({
  */
 export const PRELUDE_60_CATALOG_ENTRIES: readonly Prelude60CatalogEntry[] = Object.freeze([
   {
-    profileCode: '482.30',
+    profileCode: PRELUDE_60_PROFILE_CODES.frame,
     catalogRole: 'FRAME',
     currentAppRole: 'FRAME',
     nameBg: 'Каса 482.30',
-    catalogHeightMm: 64,
-    catalogVisibleWidthMm: 42,
+    catalogHeightMm: PRELUDE_60_CONFIRMED_BASE_GEOMETRY[PRELUDE_60_PROFILE_CODES.frame].profileHeightMm,
+    catalogVisibleWidthMm: PRELUDE_60_CONFIRMED_BASE_GEOMETRY[PRELUDE_60_PROFILE_CODES.frame].visibleWidthMm,
     measurementUseState: 'HUMAN_CONFIRMED_BASE_GEOMETRY',
     selectableInCurrentApp: true,
     sourceLabel: 'PVC Prelude_bg.pdf',
@@ -117,12 +118,12 @@ export const PRELUDE_60_CATALOG_ENTRIES: readonly Prelude60CatalogEntry[] = Obje
     productionApproved: false,
   },
   {
-    profileCode: '482.05',
+    profileCode: PRELUDE_60_PROFILE_CODES.sash,
     catalogRole: 'SASH',
     currentAppRole: 'SASH',
     nameBg: 'Крило 482.05',
-    catalogHeightMm: 78,
-    catalogVisibleWidthMm: 56,
+    catalogHeightMm: PRELUDE_60_CONFIRMED_BASE_GEOMETRY[PRELUDE_60_PROFILE_CODES.sash].profileHeightMm,
+    catalogVisibleWidthMm: PRELUDE_60_CONFIRMED_BASE_GEOMETRY[PRELUDE_60_PROFILE_CODES.sash].visibleWidthMm,
     measurementUseState: 'HUMAN_CONFIRMED_BASE_GEOMETRY',
     selectableInCurrentApp: true,
     sourceLabel: 'PVC Prelude_bg.pdf',
@@ -171,12 +172,12 @@ export const PRELUDE_60_CATALOG_ENTRIES: readonly Prelude60CatalogEntry[] = Obje
     productionApproved: false,
   },
   {
-    profileCode: '482.21',
+    profileCode: PRELUDE_60_PROFILE_CODES.mullion,
     catalogRole: 'MULLION',
     currentAppRole: 'MULLION',
     nameBg: 'Делител 482.21',
-    catalogHeightMm: 84,
-    catalogVisibleWidthMm: 40,
+    catalogHeightMm: PRELUDE_60_CONFIRMED_BASE_GEOMETRY[PRELUDE_60_PROFILE_CODES.mullion].profileHeightMm,
+    catalogVisibleWidthMm: PRELUDE_60_CONFIRMED_BASE_GEOMETRY[PRELUDE_60_PROFILE_CODES.mullion].visibleWidthMm,
     measurementUseState: 'HUMAN_CONFIRMED_BASE_GEOMETRY',
     selectableInCurrentApp: true,
     sourceLabel: 'PVC Prelude_bg.pdf',
@@ -240,9 +241,9 @@ export const PRELUDE_60_CATALOG_ENTRIES: readonly Prelude60CatalogEntry[] = Obje
 export const REGISTERED_PROFILE_CATALOG_SYSTEMS: readonly RegisteredProfileCatalogSystem[] =
   Object.freeze([PRELUDE_60_CATALOG_SYSTEM])
 
-const frame = PRELUDE_60_CATALOG_ENTRIES.find(({ profileCode }) => profileCode === '482.30')!
-const sash = PRELUDE_60_CATALOG_ENTRIES.find(({ profileCode }) => profileCode === '482.05')!
-const mullion = PRELUDE_60_CATALOG_ENTRIES.find(({ profileCode }) => profileCode === '482.21')!
+const frame = PRELUDE_60_CATALOG_ENTRIES.find(({ profileCode }) => profileCode === PRELUDE_60_PROFILE_CODES.frame)!
+const sash = PRELUDE_60_CATALOG_ENTRIES.find(({ profileCode }) => profileCode === PRELUDE_60_PROFILE_CODES.sash)!
+const mullion = PRELUDE_60_CATALOG_ENTRIES.find(({ profileCode }) => profileCode === PRELUDE_60_PROFILE_CODES.mullion)!
 
 /**
  * Current application bridge.
@@ -322,7 +323,8 @@ export const PRELUDE_60_CATALOG_SAFETY = Object.freeze({
   automaticProfileSelectionAllowed: false,
   automaticCatalogExpansionAllowed: false,
   automaticAssemblyOverlapFormulaAllowed: false,
-  effectiveVisibleWidthFromOverlapAllowed: false,
+  catalogVisibleWidthMayBeOverwrittenByOverlap: false,
+  workingEffectiveFrameOrMullionWidthFromExplicitOverlapAllowed: true,
   machineReady: false,
   productionApproved: false,
 })

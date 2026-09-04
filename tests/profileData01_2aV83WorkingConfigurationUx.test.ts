@@ -73,6 +73,21 @@ test('door working composer uses the current source configuration and acknowledg
   for (const removed of ['demoOnly', 'sourceProfileSystem', 'DEMO-only тест']) assert.equal(door.includes(removed), false)
 })
 
+test('door working composition is parent-owned so Back → Reopen keeps local edits', () => {
+  const wizard = readFileSync('src/components/StructuredConfigurationWizard.tsx', 'utf8')
+  const door = readFileSync('src/components/DoorVisualComposer.tsx', 'utf8')
+  for (const marker of [
+    '[doorComposition, setDoorComposition]',
+    '[doorCompositionSeedTemplateId, setDoorCompositionSeedTemplateId]',
+    'resolveDoorComposerEntry(doorComposition',
+    'initial={doorComposition}',
+    'onChange={setDoorComposition}',
+  ]) assert.equal(wizard.includes(marker), true)
+  assert.equal(door.includes('initial: DoorComposition'), true)
+  assert.equal(door.includes('onChange: (composition: DoorComposition) => void'), true)
+  assert.equal(door.includes('useEffect(()=>{onChange(state)}'), true)
+})
+
 test('working configuration never unlocks production or fills glazing-bead values as technical truth', () => {
   const files = [
     'src/hybridProductDesigner.ts',

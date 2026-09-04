@@ -1,3 +1,5 @@
+import { PRELUDE_60_CONFIRMED_BASE_GEOMETRY, PRELUDE_60_PROFILE_CODES, PRELUDE_60_SYSTEM_DEPTH_MM, PRELUDE_60_SYSTEM_ID, PRELUDE_60_SYSTEM_LABEL } from './prelude60BaseProfiles'
+
 export const PROFILE_DATA_01_1_VERSION = 'PROFILE_DATA_01.1_V2' as const
 
 export type ProfileComponentRole = 'FRAME' | 'MULLION' | 'SASH'
@@ -5,8 +7,8 @@ export type ProfileMeasurementState = 'HUMAN_CONFIRMED' | 'PENDING_HUMAN_CONFIRM
 export type ProfileGeometryRepresentation = 'FILLED_VISIBLE_BAND'
 
 export interface NadezhdaVisibleProfileGeometry {
-  systemId: 'PRELUDE_60'
-  systemLabel: 'PRELUDE 60 mm'
+  systemId: string
+  systemLabel: string
   profileCode: string
   role: ProfileComponentRole
   systemDepthMm: number
@@ -20,52 +22,46 @@ export interface NadezhdaVisibleProfileGeometry {
   note: string
 }
 
+type ConfirmedVisibleProfileGeometry = NadezhdaVisibleProfileGeometry & {
+  profileHeightMm: number
+  visibleWidthMm: number
+  measurementState: 'HUMAN_CONFIRMED'
+}
+
+function confirmedVisibleProfileGeometry(
+  profileCode: keyof typeof PRELUDE_60_CONFIRMED_BASE_GEOMETRY,
+  roleLabel: string,
+): ConfirmedVisibleProfileGeometry {
+  const source = PRELUDE_60_CONFIRMED_BASE_GEOMETRY[profileCode]
+  return Object.freeze({
+    systemId: PRELUDE_60_SYSTEM_ID,
+    systemLabel: `${PRELUDE_60_SYSTEM_LABEL} mm`,
+    profileCode,
+    role: source.role,
+    systemDepthMm: PRELUDE_60_SYSTEM_DEPTH_MM,
+    profileHeightMm: source.profileHeightMm,
+    visibleWidthMm: source.visibleWidthMm,
+    measurementState: 'HUMAN_CONFIRMED',
+    representation: 'FILLED_VISIBLE_BAND',
+    structuralProfileIsDrawingStroke: false,
+    visibleBandRequired: true,
+    placeholderVisibleWidthAllowed: false,
+    note: `${roleLabel}: човешки потвърдени височина ${source.profileHeightMm} mm и видима ширина ${source.visibleWidthMm} mm.`,
+  })
+}
+
+const frameGeometry = confirmedVisibleProfileGeometry(PRELUDE_60_PROFILE_CODES.frame, 'Каса')
+const mullionGeometry = confirmedVisibleProfileGeometry(PRELUDE_60_PROFILE_CODES.mullion, 'Делител')
+const sashBaseGeometry = confirmedVisibleProfileGeometry(PRELUDE_60_PROFILE_CODES.sash, 'Крило')
+const sashGeometry = Object.freeze({
+  ...sashBaseGeometry,
+  note: `Крило: човешки потвърдени базови размери ${sashBaseGeometry.profileHeightMm} mm височина и ${sashBaseGeometry.visibleWidthMm} mm видима ширина. Ефективната ширина в конкретна сглобка остава отделна величина.`,
+}) satisfies ConfirmedVisibleProfileGeometry
+
 export const PRELUDE_60_VISIBLE_PROFILE_GEOMETRY = Object.freeze({
-  '482.30': Object.freeze({
-    systemId: 'PRELUDE_60',
-    systemLabel: 'PRELUDE 60 mm',
-    profileCode: '482.30',
-    role: 'FRAME',
-    systemDepthMm: 60,
-    profileHeightMm: 64,
-    visibleWidthMm: 42,
-    measurementState: 'HUMAN_CONFIRMED',
-    representation: 'FILLED_VISIBLE_BAND',
-    structuralProfileIsDrawingStroke: false,
-    visibleBandRequired: true,
-    placeholderVisibleWidthAllowed: false,
-    note: 'Каса: човешки потвърдени височина 64 mm и видима ширина 42 mm.',
-  }),
-  '482.21': Object.freeze({
-    systemId: 'PRELUDE_60',
-    systemLabel: 'PRELUDE 60 mm',
-    profileCode: '482.21',
-    role: 'MULLION',
-    systemDepthMm: 60,
-    profileHeightMm: 84,
-    visibleWidthMm: 40,
-    measurementState: 'HUMAN_CONFIRMED',
-    representation: 'FILLED_VISIBLE_BAND',
-    structuralProfileIsDrawingStroke: false,
-    visibleBandRequired: true,
-    placeholderVisibleWidthAllowed: false,
-    note: 'Делител: човешки потвърдени височина 84 mm и видима ширина 40 mm.',
-  }),
-  '482.05': Object.freeze({
-    systemId: 'PRELUDE_60',
-    systemLabel: 'PRELUDE 60 mm',
-    profileCode: '482.05',
-    role: 'SASH',
-    systemDepthMm: 60,
-    profileHeightMm: 78,
-    visibleWidthMm: 56,
-    measurementState: 'HUMAN_CONFIRMED',
-    representation: 'FILLED_VISIBLE_BAND',
-    structuralProfileIsDrawingStroke: false,
-    visibleBandRequired: true,
-    placeholderVisibleWidthAllowed: false,
-    note: 'Крило: човешки потвърдени базови размери 78 mm височина и 56 mm видима ширина. Ефективната ширина в конкретна сглобка остава отделна величина.',
-  }),
+  [PRELUDE_60_PROFILE_CODES.frame]: frameGeometry,
+  [PRELUDE_60_PROFILE_CODES.mullion]: mullionGeometry,
+  [PRELUDE_60_PROFILE_CODES.sash]: sashGeometry,
 } satisfies Record<string, NadezhdaVisibleProfileGeometry>)
 
 export interface ProfileGeometrySafety {
@@ -161,7 +157,7 @@ function assertFinitePositive(value: number, name: string): void {
 export function buildRectangularFrameVisibleBands(
   outerWidthMm: number,
   outerHeightMm: number,
-  frameProfileCode = '482.30',
+  frameProfileCode = PRELUDE_60_PROFILE_CODES.frame,
 ): RectangularFrameVisibleBands {
   assertFinitePositive(outerWidthMm, 'outerWidthMm')
   assertFinitePositive(outerHeightMm, 'outerHeightMm')
@@ -210,7 +206,7 @@ export function buildMullionVisibleBand(
   orientation: 'VERTICAL' | 'HORIZONTAL',
   centerPositionMm: number,
   spanMm: number,
-  mullionProfileCode = '482.21',
+  mullionProfileCode = PRELUDE_60_PROFILE_CODES.mullion,
 ): MullionVisibleBand {
   assertFinitePositive(spanMm, 'spanMm')
   if (!Number.isFinite(centerPositionMm) || centerPositionMm < 0) {
@@ -252,7 +248,7 @@ export function buildRectangularSashVisibleBands(
   outerWidthMm: number,
   outerHeightMm: number,
   humanConfirmedVisibleWidthMm: number,
-  sashProfileCode = '482.05',
+  sashProfileCode = PRELUDE_60_PROFILE_CODES.sash,
 ): RectangularSashVisibleBands {
   assertFinitePositive(outerWidthMm, 'outerWidthMm')
   assertFinitePositive(outerHeightMm, 'outerHeightMm')
@@ -295,11 +291,11 @@ export function buildRectangularSashVisibleBands(
 }
 
 export interface SashVisibleGeometryPolicy {
-  profileCode: '482.05'
+  profileCode: string
   role: 'SASH'
   visibleBandRequired: true
-  baseProfileHeightMm: 78
-  baseProfileVisibleWidthMm: 56
+  baseProfileHeightMm: number
+  baseProfileVisibleWidthMm: number
   baseGeometryState: 'HUMAN_CONFIRMED'
   assemblyEffectiveVisibleWidthState: 'UNRESOLVED'
   rendererWithoutAssemblyWidth: 'BLOCK_STRUCTURAL_SASH_BAND'
@@ -308,11 +304,11 @@ export interface SashVisibleGeometryPolicy {
 }
 
 export const PRELUDE_60_SASH_VISIBLE_GEOMETRY_POLICY: SashVisibleGeometryPolicy = Object.freeze({
-  profileCode: '482.05',
+  profileCode: sashGeometry.profileCode,
   role: 'SASH',
   visibleBandRequired: true,
-  baseProfileHeightMm: 78,
-  baseProfileVisibleWidthMm: 56,
+  baseProfileHeightMm: sashGeometry.profileHeightMm,
+  baseProfileVisibleWidthMm: sashGeometry.visibleWidthMm,
   baseGeometryState: 'HUMAN_CONFIRMED',
   assemblyEffectiveVisibleWidthState: 'UNRESOLVED',
   rendererWithoutAssemblyWidth: 'BLOCK_STRUCTURAL_SASH_BAND',
@@ -328,10 +324,10 @@ export function visibleWidthMmToCanvasPx(visibleWidthMm: number, pxPerMm: number
 
 export interface FrameSashAssemblyPolicy {
   assemblyType: 'FRAME_SASH'
-  frameProfileCode: '482.30'
-  sashProfileCode: '482.05'
-  sashBaseProfileHeightMm: 78
-  sashBaseVisibleWidthMm: 56
+  frameProfileCode: string
+  sashProfileCode: string
+  sashBaseProfileHeightMm: number
+  sashBaseVisibleWidthMm: number
   sashBaseGeometryState: 'HUMAN_CONFIRMED'
   sashEffectiveAssemblyWidthState: 'UNRESOLVED'
   sashMustRenderAsVisibleBandAfterConfirmation: true
@@ -344,10 +340,10 @@ export interface FrameSashAssemblyPolicy {
 
 export const PRELUDE_60_FRAME_SASH_ASSEMBLY_POLICY: FrameSashAssemblyPolicy = Object.freeze({
   assemblyType: 'FRAME_SASH',
-  frameProfileCode: '482.30',
-  sashProfileCode: '482.05',
-  sashBaseProfileHeightMm: 78,
-  sashBaseVisibleWidthMm: 56,
+  frameProfileCode: frameGeometry.profileCode,
+  sashProfileCode: sashGeometry.profileCode,
+  sashBaseProfileHeightMm: sashGeometry.profileHeightMm,
+  sashBaseVisibleWidthMm: sashGeometry.visibleWidthMm,
   sashBaseGeometryState: 'HUMAN_CONFIRMED',
   sashEffectiveAssemblyWidthState: 'UNRESOLVED',
   sashMustRenderAsVisibleBandAfterConfirmation: true,

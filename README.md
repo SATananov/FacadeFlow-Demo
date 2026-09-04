@@ -2,7 +2,7 @@
 
 ## Текущ архитектурен checkpoint
 
-FacadeFlow е локална, human-gated среда за симулация, технически преглед и подготовка на структурирани продуктови данни. Source checkpoint `071355d` е независимо одитиран. Текущият незатворен hardening stack е **PROFILE DATA 01.2A V8 + V8.1/V8.1.1 + V8.2 + V8.3**. V8.3 въвежда един ясен „работна конфигурация“ workflow за прозорци и врати: след име и положителни размери потребителят може да започне композицията с наличните данни, а неизвестните система/профили остават празни и се попълват по-късно. Това не отслабва Human Confirm, unresolved-threshold или production/machine safety gates. Stack-ът не е затворен преди `npm run verify`, human visual audit, clean Git checks и commit. Историческите секции по-долу остават phase-specific запис; текущият status е в [Current Architecture Status](docs/CURRENT_ARCHITECTURE_STATUS.md).
+FacadeFlow е локална, human-gated среда за симулация, технически преглед и подготовка на структурирани продуктови данни. Текущият hardening stack е **PROFILE DATA 01.2A V8 + V8.1 + V8.2 + V8.3**. Обозначението „V8.1.1“ е исторически follow-up, който е включен в V8.1 и няма самостоятелен closure artifact. V8.3 въвежда един ясен „работна конфигурация“ workflow за прозорци и врати: след име и положителни размери потребителят може да започне композицията с наличните данни, а неизвестните система/профили остават празни и се попълват по-късно. Това не отслабва Human Confirm, unresolved-threshold или production/machine safety gates. Stack-ът не е затворен преди `npm run verify`, human visual audit, clean Git checks и commit. Историческите секции по-долу остават phase-specific запис; текущият status е в [Current Architecture Status](docs/CURRENT_ARCHITECTURE_STATUS.md).
 
 ### AI01 → AI04 — human-authority pipeline
 
@@ -35,7 +35,7 @@ git diff --check
 git status --short
 ```
 
-`npm run verify` включва **всички** `tests/*.test.ts` чрез `npm run test:regression`, след което изпълнява lint и production build. Това предотвратява пропускане на WP78/RP01 или бъдещи regression test файлове само защото нямат отделен package script.
+`npm run verify` включва автоматично всички **shareable** `tests/*.test.ts` чрез `npm run test:regression`, като умишлено изключва `*.internal.test.ts`, след което изпълнява lint и production build. Private RP01 evidence regression е отделен чрез `npm run test:internal-evidence` и се включва в `npm run verify:internal` само когато locked `local-samples/phase05a` evidence е наличен. Така SHAREABLE_CLEAN checkpoint остава самостоятелно възпроизводим, без да публикува private production evidence.
 
 За clean ZIP има два explicit режима:
 
@@ -44,7 +44,7 @@ npm run checkpoint:shareable
 npm run checkpoint:internal
 ```
 
-`checkpoint:shareable` изключва private evidence (`local-samples/`, DWG/LTE). `checkpoint:internal` може да го запази само за контролиран вътрешен audit.
+`checkpoint:shareable` изпълнява shareable `npm run verify` и изключва private evidence (`local-samples/`, DWG/LTE). `checkpoint:internal` изпълнява `npm run verify:internal` и може да запази private evidence само за контролиран вътрешен audit.
 
 ## PRELUDE 60 / Visual Composer current hardening
 

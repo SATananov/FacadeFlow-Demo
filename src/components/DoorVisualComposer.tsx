@@ -12,20 +12,20 @@ import { beginHardwareDrag, hardwareDragChanged, positionRatioFromSvgY, previewH
 import { buildDoorConceptualScene } from '../conceptual3dDoorScene'
 import { Conceptual3DPreview, type Conceptual3DViewSummary } from './Conceptual3DPreview'
 import { containsVisualBounds, fitVisualBounds } from '../composerViewport'
-import { createDoorComposerEntryComposition } from '../composerEntryConsistency'
 import '../visualComposerUx.css'
 import '../doorComposerFieldFocus.css'
 import { WorkingConfigurationDataPanel } from './WorkingConfigurationDataPanel'
 
-interface Props { configuration: StructuredProfileConfiguration; profiles: CatalogueProfile[]; onConfigurationChange: (patch: Partial<Pick<StructuredProfileConfiguration, 'profileSystem' | 'frameProfileId' | 'sashProfileId' | 'mullionProfileId'>>) => void; initialTemplateId?: string | null; onBack: () => void; onCloseFacadeFlow: () => void }
+interface Props { configuration: StructuredProfileConfiguration; profiles: CatalogueProfile[]; onConfigurationChange: (patch: Partial<Pick<StructuredProfileConfiguration, 'profileSystem' | 'frameProfileId' | 'sashProfileId' | 'mullionProfileId'>>) => void; initial: DoorComposition; onChange: (composition: DoorComposition) => void; initialTemplateId?: string | null; onBack: () => void; onCloseFacadeFlow: () => void }
 const colors: Array<{value:DoorColor;label:string}>=[{value:'',label:'Не е избран'},{value:'WHITE',label:'Бяло'},{value:'ANTHRACITE',label:'Антрацит'},{value:'BLACK',label:'Черно'},{value:'BROWN',label:'Кафяво'},{value:'SILVER',label:'Сребристо'},{value:'CUSTOM',label:'Друг цвят'}]
 const doorCanvasFieldLabel=(fields:DoorComposition['fields'],id:string)=>{const label=doorFieldDisplayName(fields,id);return fields.length>2?label.replace(/ от \d+$/,''):label}
 const hingeSideLabel=(value:DoorComposition['fields'][number]['hingeSide'])=>value==='LEFT'?'Ляво':value==='RIGHT'?'Дясно':'Не е избрана'
 const swingLabel=(value:DoorComposition['fields'][number]['swing'])=>value==='INWARD'?'Навътре':value==='OUTWARD'?'Навън':'Не е избрана'
 
-export function DoorVisualComposer({configuration,profiles,onConfigurationChange,initialTemplateId=null,onBack,onCloseFacadeFlow}:Props){
+export function DoorVisualComposer({configuration,profiles,onConfigurationChange,initial,onChange,initialTemplateId=null,onBack,onCloseFacadeFlow}:Props){
   const stageRef=useRef<HTMLElement>(null)
-  const [state,setState]=useState(()=>createDoorComposerEntryComposition(initialTemplateId)),[past,setPast]=useState<DoorComposition[]>([]),[future,setFuture]=useState<DoorComposition[]>([]),[open,setOpen]=useState('templates'),[drag,setDrag]=useState<HardwareDragSession|null>(null),[review,setReview]=useState(false),[thresholdAcknowledged,setThresholdAcknowledged]=useState(false),[workspaceMessage,setWorkspaceMessageState]=useState(''),[viewMode,setViewMode]=useState<'2D'|'3D'>('2D'),[threeDView,setThreeDView]=useState<Conceptual3DViewSummary>({label:'Изометрия',zoom:82})
+  const [state,setState]=useState(()=>initial),[past,setPast]=useState<DoorComposition[]>([]),[future,setFuture]=useState<DoorComposition[]>([]),[open,setOpen]=useState('templates'),[drag,setDrag]=useState<HardwareDragSession|null>(null),[review,setReview]=useState(false),[thresholdAcknowledged,setThresholdAcknowledged]=useState(false),[workspaceMessage,setWorkspaceMessageState]=useState(''),[viewMode,setViewMode]=useState<'2D'|'3D'>('2D'),[threeDView,setThreeDView]=useState<Conceptual3DViewSummary>({label:'Изометрия',zoom:82})
+  useEffect(()=>{onChange(state)},[state,onChange])
   const setWorkspaceMessage=(message:string)=>{if(message!=='Изгледът е побран'){setWorkspaceMessageState(message);return}const svg=stageRef.current?.querySelector('svg'),box=svg?.getBoundingClientRect(),fitted=box?fitVisualBounds({x:0,y:0,width:800,height:520},box.width,box.height):null;setWorkspaceMessageState(fitted&&box&&containsVisualBounds(box.width,box.height,fitted.rect)?message:'Изгледът още не е измерен или не е побран.')}
   useEffect(()=>{const stage=stageRef.current;if(!stage||typeof ResizeObserver==='undefined')return;const observer=new ResizeObserver(()=>setWorkspaceMessage(''));observer.observe(stage);return()=>observer.disconnect()},[configuration.overallWidth,configuration.overallHeight])
   const commit=(next:DoorComposition)=>{if(JSON.stringify(next)===JSON.stringify(state))return;setPast(v=>[...v,state]);setFuture([]);setState(next);setReview(false)}

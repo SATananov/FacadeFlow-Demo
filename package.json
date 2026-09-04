@@ -89,7 +89,9 @@
     "test:ui01_1": "vite build --ssr tests/ui01_1ProjectsNavigation.test.ts --outDir .facadeflow-runtime/ui01_1-tests --emptyOutDir && node --test .facadeflow-runtime/ui01_1-tests/ui01_1ProjectsNavigation.test.js",
     "test:ui01_2": "vite build --ssr tests/ui01_2WorkspaceVisualAlignment.test.ts --outDir .facadeflow-runtime/ui01_2-tests --emptyOutDir && node --test .facadeflow-runtime/ui01_2-tests/ui01_2WorkspaceVisualAlignment.test.js",
     "test:ui01_2a": "vite build --ssr tests/ui01_2aProjectsCatalogueSeparation.test.ts --outDir .facadeflow-runtime/ui01_2a-tests --emptyOutDir && node --test .facadeflow-runtime/ui01_2a-tests/ui01_2aProjectsCatalogueSeparation.test.js",
-    "test:ui01_2b": "vite build --ssr tests/ui01_2bProjectSourceEvidenceVisualFix.test.ts --outDir .facadeflow-runtime/ui01_2b-tests --emptyOutDir && node --test .facadeflow-runtime/ui01_2b-tests/ui01_2bProjectSourceEvidenceVisualFix.test.js"
+    "test:ui01_2b": "vite build --ssr tests/ui01_2bProjectSourceEvidenceVisualFix.test.ts --outDir .facadeflow-runtime/ui01_2b-tests --emptyOutDir && node --test .facadeflow-runtime/ui01_2b-tests/ui01_2bProjectSourceEvidenceVisualFix.test.js",
+    "test:internal-evidence": "node scripts/run-internal-evidence.mjs",
+    "verify:internal": "npm run test:regression && npm run test:internal-evidence && npm run lint && npm run build"
   },
   "dependencies": {
     "@mlightcad/libredwg-web": "0.7.10",

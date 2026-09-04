@@ -1,8 +1,9 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import { readFileSync } from 'node:fs'
-import { createDoorComposerEntryComposition, resolveWindowComposerEntry } from '../src/composerEntryConsistency'
+import { createDoorComposerEntryComposition, resolveDoorComposerEntry, resolveWindowComposerEntry } from '../src/composerEntryConsistency'
 import { createStructuredConfiguration, getProductNameSuggestions, reconcileStructuredConfiguration, updateStructuredConfiguration } from '../src/hybridProductDesigner'
+import { setDoorOpening } from '../src/doorComposerState'
 import { sampleCatalogueProfiles } from '../src/profileCatalogueData'
 import { composerTemplateIdForProductPreset, composerTemplateLabel, isComposerTemplateCompatible } from '../src/structuredComposerTemplateSelection'
 import { applyComposerTemplate, createEmptyComposition } from '../src/visualComposerState'
@@ -76,6 +77,26 @@ test('explicit DOOR preset auto-seeds the matching DEMO composition while generi
   assert.equal(generic.fields.length, 0)
 })
 
+test('generic DOOR entry preserves local edits across back/reopen instead of resetting state', () => {
+  const entry = resolveDoorComposerEntry(createDoorComposerEntryComposition(null), null, null)
+  const selected = resolveDoorComposerEntry(entry.composition, 'DEMO-DOOR-DOUBLE-SOLID', null)
+  const edited = setDoorOpening(selected.composition, 'leaf-1', 'LEFT', 'INWARD')
+  const reopened = resolveDoorComposerEntry(edited, 'DEMO-DOOR-DOUBLE-SOLID', selected.seededTemplateId)
+  assert.equal(reopened.composition.fields.find((field) => field.id === 'leaf-1')?.hingeSide, 'LEFT')
+  assert.equal(reopened.composition.fields.find((field) => field.id === 'leaf-1')?.swing, 'INWARD')
+  assert.equal(reopened.composition, edited)
+})
+
+test('removing or changing an explicit DOOR preset reseeds only when configuration topology changes', () => {
+  const double = resolveDoorComposerEntry(createDoorComposerEntryComposition(null), 'DEMO-DOOR-DOUBLE-SOLID', null)
+  const triple = resolveDoorComposerEntry(double.composition, 'DEMO-DOOR-TRIPLE-SOLID', double.seededTemplateId)
+  assert.equal(triple.composition.fields.length, 3)
+  assert.equal(triple.seededTemplateId, 'DEMO-DOOR-TRIPLE-SOLID')
+  const generic = resolveDoorComposerEntry(triple.composition, null, triple.seededTemplateId)
+  assert.equal(generic.composition.fields.length, 0)
+  assert.equal(generic.seededTemplateId, null)
+})
+
 test('wrong-category composer template is rejected during structured configuration reconciliation', () => {
   const invalid = { ...createStructuredConfiguration('WINDOW'), composerTemplateId: 'DEMO-DOOR-DOUBLE-SOLID' }
   const reconciled = reconcileStructuredConfiguration(invalid, sampleCatalogueProfiles)
@@ -92,6 +113,8 @@ test('wizard explicitly distinguishes preselected topology from generic blank co
     'визуалният конструктор ще се отвори празен',
     'lockedTemplateId={configuration.composerTemplateId}',
     'initialTemplateId={configuration.composerTemplateId}',
+    'initial={doorComposition}',
+    'onChange={setDoorComposition}',
   ]) assert.equal(source.includes(text), true)
 })
 

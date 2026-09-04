@@ -11,10 +11,11 @@ It is a **non-feature maintenance phase**. It must not change UI behavior, AI in
 ## Changes
 
 1. Add one canonical full-regression runner:
-   - discovers every `tests/*.test.ts` file;
+   - discovers every shareable `tests/*.test.ts` file and excludes explicit `*.internal.test.ts`;
    - generates a temporary Vite SSR entry under `.facadeflow-runtime/`;
    - executes the combined Node test harness;
-   - automatically includes future `.test.ts` files without adding a package script per file.
+   - automatically includes future shareable `.test.ts` files without adding a package script per file;
+   - keeps locked/private RP01 evidence in a separate `test:internal-evidence` suite that requires `local-samples/phase05a`.
 
 2. Add one canonical repository verification command:
 
@@ -22,7 +23,7 @@ It is a **non-feature maintenance phase**. It must not change UI behavior, AI in
    npm run verify
    ```
 
-   which runs full regression, lint, and production build.
+   which runs the full shareable regression, lint, and production build. Controlled internal checkpoints use `npm run verify:internal` to add the locked evidence suite.
 
 3. Add explicit checkpoint package classes:
    - `SHAREABLE_CLEAN`: private local evidence is excluded;
@@ -59,7 +60,7 @@ git diff --check
 
 Expected:
 
-- all `tests/*.test.ts` files are included automatically;
+- all shareable `tests/*.test.ts` files are included automatically, while `*.internal.test.ts` remains explicitly separated;
 - regression is green;
 - lint has zero errors;
 - build passes;

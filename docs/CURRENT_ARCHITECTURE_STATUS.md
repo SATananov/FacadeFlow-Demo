@@ -2,8 +2,8 @@
 
 **Source-of-truth status document**
 
-Source checkpoint independently audited: `071355d`.
-Current working hardening stack: **PROFILE DATA 01.2A V8 — N-field Effective Geometry Integrity Hardening**, **V8.1/V8.1.1 — Composer Entry / Template State Consistency**, **V8.2 — PRELUDE 482.05 Base Geometry Correction**, plus **V8.3 — Working Configuration UX**.
+Base SHAREABLE_CLEAN source checkpoint independently audited: `e227a0c`.
+Current working hardening stack: **PROFILE DATA 01.2A V8 — N-field Effective Geometry Integrity Hardening**, **V8.1 — Composer Entry / Template State Consistency** (historical V8.1.1 follow-up is folded into V8.1; there is no separate V8.1.1 closure artifact), **V8.2 — PRELUDE 482.05 Base Geometry Correction**, plus **V8.3 — Working Configuration UX**.
 V8.2 reached canonical technical verify PASS locally. Human review then identified that the separate user-facing Door DEMO entry was confusing for the intended workflow: users must be able to start with only known data and add missing technical details later. V8.3 changes this access/UX model while preserving all validation and production locks. **The combined stack remains open until V8.3 passes canonical `npm run verify`, the updated human visual audit, clean Git checks and commit.**
 
 Older phase acceptance files remain historical evidence. An acceptance filename never overrides the executable code, regression results, safety gates or this current status.
@@ -78,9 +78,11 @@ npm run verify
 
 It runs:
 
-1. every `tests/*.test.ts` file through `npm run test:regression`;
+1. every shareable `tests/*.test.ts` file through `npm run test:regression`, excluding explicitly private `*.internal.test.ts`;
 2. `npm run lint`;
 3. `npm run build`.
+
+Locked/private RP01 evidence tests are intentionally separate under `*.internal.test.ts`. `npm run test:internal-evidence` requires `local-samples/phase05a`, and `npm run verify:internal` runs shareable regression + internal evidence + lint + build for controlled InternalAudit checkpoints.
 
 For a closure/checkpoint also run:
 
@@ -100,7 +102,7 @@ npm run checkpoint:shareable
 npm run checkpoint:internal
 ```
 
-`SHAREABLE_CLEAN` excludes private evidence including `local-samples/`, `*.dwg` and `*.lte`, plus Git metadata, dependencies, build/runtime output, coverage, environment files, logs and temporary files.
+`SHAREABLE_CLEAN` runs the shareable verification contract and excludes private evidence including `local-samples/`, `*.dwg` and `*.lte`, plus Git metadata, dependencies, build/runtime output, coverage, environment files, logs and temporary files. `INTERNAL_AUDIT` runs `verify:internal`, so locked evidence regression is required before that checkpoint can be created.
 
 The checkpoint ZIP is expected to contain the manifest produced by `scripts/New-FacadeFlowCheckpoint.ps1`; do not infer commit provenance only from the ZIP filename.
 
@@ -108,4 +110,4 @@ The checkpoint ZIP is expected to contain the manifest produced by `scripts/New-
 
 Do **not** start a new major feature phase yet.
 
-First close the combined **PROFILE DATA 01.2A V8 + V8.1/V8.1.1 + V8.2 + V8.3** working tree with full canonical verify and the updated human visual audit. The audit must confirm PRELUDE N-field geometry, Composer-entry/template-state consistency, the corrected 482.05 base geometry 78/56, partial-data working access for both WINDOW and DOOR, direct source-configuration editing, unresolved door threshold handling, and the continued separation of deferred glazing-bead semantics from the 7 mm overlap. If that passes, run staged clean checks, commit/push the combined hardening slice and create a canonical shareable checkpoint. Only then select the next feature/data phase.
+First close the combined **PROFILE DATA 01.2A V8 + V8.1 + V8.2 + V8.3** working tree with full canonical verify and the updated human visual audit. The audit must confirm PRELUDE N-field geometry, Composer-entry/template-state consistency, the corrected 482.05 base geometry 78/56, partial-data working access for both WINDOW and DOOR, direct source-configuration editing, unresolved door threshold handling, and the continued separation of deferred glazing-bead semantics from the 7 mm overlap. If that passes, run staged clean checks, commit/push the combined hardening slice and create a canonical shareable checkpoint. Only then select the next feature/data phase.

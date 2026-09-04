@@ -7,6 +7,73 @@ param(
   [switch]$SkipVerify
 )
 
+
+function New-PortableZip {
+  param(
+    [Parameter(Mandatory = $true)][string]$SourceDirectory,
+    [Parameter(Mandatory = $true)][string]$DestinationZip
+  )
+
+  Add-Type -AssemblyName System.IO.Compression.FileSystem
+  if (Test-Path $DestinationZip) {
+    Remove-Item $DestinationZip -Force
+  }
+
+  $zipStream = [System.IO.File]::Open($DestinationZip, [System.IO.FileMode]::CreateNew)
+  try {
+    $archive = [System.IO.Compression.ZipArchive]::new(
+      $zipStream,
+      [System.IO.Compression.ZipArchiveMode]::Create,
+      $false
+    )
+    try {
+      Get-ChildItem -Path $SourceDirectory -Recurse -File | ForEach-Object {
+        $relative = $_.FullName.Substring($SourceDirectory.Length).TrimStart([char[]]"\\/")
+        $entryName = $relative.Replace("\", "/")
+        $entry = $archive.CreateEntry($entryName, [System.IO.Compression.CompressionLevel]::Optimal)
+        $entryStream = $entry.Open()
+        try {
+          $fileStream = [System.IO.File]::OpenRead($_.FullName)
+          try {
+            $fileStream.CopyTo($entryStream)
+          }
+          finally {
+            $fileStream.Dispose()
+          }
+        }
+        finally {
+          $entryStream.Dispose()
+        }
+      }
+    }
+    finally {
+      $archive.Dispose()
+    }
+  }
+  finally {
+    $zipStream.Dispose()
+  }
+}
+
+function Assert-PortableZip {
+  param([Parameter(Mandatory = $true)][string]$ZipPath)
+
+  Add-Type -AssemblyName System.IO.Compression.FileSystem
+  $archive = [System.IO.Compression.ZipFile]::OpenRead($ZipPath)
+  try {
+    $badEntries = @($archive.Entries | Where-Object { $_.FullName.Contains("\") })
+    if ($badEntries.Count -gt 0) {
+      throw "Portable ZIP guard failed: archive contains Windows path separators."
+    }
+    if (-not ($archive.Entries | Where-Object { $_.FullName -like "src/*" } | Select-Object -First 1)) {
+      throw "Portable ZIP guard failed: src/ hierarchy was not preserved."
+    }
+  }
+  finally {
+    $archive.Dispose()
+  }
+}
+
 $ErrorActionPreference = "Stop"
 
 $RepoRoot = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
@@ -30,10 +97,11 @@ try {
     throw "git diff --check failed."
   }
 
+  $verificationScript = if ($Mode -eq "InternalAudit") { "verify:internal" } else { "verify" }
   if (-not $SkipVerify) {
-    npm run verify
+    npm run $verificationScript
     if ($LASTEXITCODE -ne 0) {
-      throw "npm run verify failed. Checkpoint was not created."
+      throw "npm run $verificationScript failed. Checkpoint was not created."
     }
   }
 
@@ -125,7 +193,7 @@ Commit short: $shortCommit
 Commit full: $fullCommit
 Origin sync: $sync
 Working tree: clean
-Verification: $(if ($SkipVerify) { "SKIPPED BY EXPLICIT FLAG" } else { "npm run verify PASS" })
+Verification: $(if ($SkipVerify) { "SKIPPED BY EXPLICIT FLAG" } else { "npm run $verificationScript PASS" })
 Private local evidence: $(if ($Mode -eq "InternalAudit") { "retained when present" } else { "excluded" })
 
 Excluded from ZIP:
@@ -141,7 +209,8 @@ $(if ($Mode -eq "ShareableClean") { "- local-samples`r`n- *.dwg / *.lte" } else 
 
   Set-Content -Path (Join-Path $temp "CHECKPOINT_MANIFEST.txt") -Value $manifest -Encoding UTF8
 
-  Compress-Archive -Path (Join-Path $temp "*") -DestinationPath $zip -CompressionLevel Optimal -Force
+  New-PortableZip -SourceDirectory $temp -DestinationZip $zip
+  Assert-PortableZip -ZipPath $zip
 
   Write-Host ""
   Write-Host "=== FACADEFLOW CHECKPOINT READY ===" -ForegroundColor Green

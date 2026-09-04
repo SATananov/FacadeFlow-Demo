@@ -6,28 +6,33 @@ import { fileURLToPath } from 'node:url'
 const scriptDir = dirname(fileURLToPath(import.meta.url))
 const repoRoot = resolve(scriptDir, '..')
 const testsDir = join(repoRoot, 'tests')
-const runtimeRoot = join(repoRoot, '.facadeflow-runtime', 'regression')
+const privateEvidenceDir = join(repoRoot, 'local-samples', 'phase05a')
+const runtimeRoot = join(repoRoot, '.facadeflow-runtime', 'internal-evidence')
 const viteBin = join(repoRoot, 'node_modules', 'vite', 'bin', 'vite.js')
 
 const testFiles = readdirSync(testsDir)
-  .filter((name) => name.endsWith('.test.ts') && !name.endsWith('.internal.test.ts'))
+  .filter((name) => name.endsWith('.internal.test.ts'))
   .sort((a, b) => a.localeCompare(b))
 
 if (testFiles.length === 0) {
-  console.error('No shareable tests/*.test.ts files found.')
+  console.error('No tests/*.internal.test.ts private-evidence tests found.')
+  process.exit(1)
+}
+
+if (!existsSync(privateEvidenceDir)) {
+  console.error('Internal evidence suite requires local-samples/phase05a. Use an InternalAudit checkout/checkpoint with the locked private evidence present.')
   process.exit(1)
 }
 
 if (!existsSync(viteBin)) {
-  console.error('Vite is not installed. Run npm ci before npm run test:regression.')
+  console.error('Vite is not installed. Run npm ci before npm run test:internal-evidence.')
   process.exit(1)
 }
 
 rmSync(runtimeRoot, { recursive: true, force: true })
 
-console.log(`FacadeFlow shareable regression: ${testFiles.length} test files`)
-console.log('Private evidence tests (*.internal.test.ts) are intentionally excluded from shareable verification.')
-console.log('Each shareable test file is bundled and executed in isolation.')
+console.log(`FacadeFlow internal evidence regression: ${testFiles.length} test files`)
+console.log('This suite is intentionally not part of SHAREABLE_CLEAN verification.')
 
 for (const [index, name] of testFiles.entries()) {
   const sourceFile = join(testsDir, name)
@@ -61,4 +66,4 @@ for (const [index, name] of testFiles.entries()) {
   if (test.status !== 0) process.exit(test.status ?? 1)
 }
 
-console.log(`\nFacadeFlow shareable regression PASS: ${testFiles.length}/${testFiles.length} files.`)
+console.log(`\nFacadeFlow internal evidence regression PASS: ${testFiles.length}/${testFiles.length} files.`)
