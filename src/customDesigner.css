@@ -35,3 +35,8 @@
 
 /* PROFILE DATA 01.1 V2 — sash is also visible-width profile geometry. No placeholder width is drawn. */
 .custom-sash-profile-band{fill:rgba(111,135,143,.72)}.custom-sash-visible-width-pending{fill:#8a5a1d;font:800 8px ui-monospace;text-anchor:middle;pointer-events:none}.custom-sash-profile-layer{pointer-events:none}
+/* PROFILE DATA 01.2A — system overlap audit readout */
+.custom-profile-overlap-audit{display:flex;align-items:center;flex-wrap:wrap;gap:6px 12px;margin-top:7px;padding:7px 9px;border:1px solid #34616b;border-left:3px solid #37a9b7;border-radius:4px;background:#0d2931;color:#cfe4e7;font-size:8px}
+.custom-profile-overlap-audit span{display:flex;align-items:baseline;gap:5px}
+.custom-profile-overlap-audit b,.custom-profile-overlap-audit strong{color:#eef8f9}
+.custom-profile-overlap-audit small{flex-basis:100%;color:#8ea9ae;line-height:1.4}

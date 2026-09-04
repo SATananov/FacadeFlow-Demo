@@ -1,1 +1,174 @@
 .visual-composer{min-height:0;flex:1;display:flex;flex-direction:column;overflow:hidden;background:#dfe7e9}.visual-composer-header{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:12px 18px;background:#fff;border-bottom:1px solid #aabcc1}.visual-composer-header nav{display:flex;gap:8px;font-size:10px;color:#587078}.visual-composer-header h3{margin:5px 0 0}.visual-composer-warning{padding:9px 18px;background:#fff1d7;border-bottom:1px solid #d8b66f;color:#70420f;font-weight:900}.visual-composer-toolbar{display:flex;align-items:center;gap:7px;padding:8px 12px;background:#edf2f3;border-bottom:1px solid #b6c5c9}.visual-composer-toolbar output{margin-left:auto;font-weight:800}.visual-composer-layout{min-height:0;flex:1;display:grid;grid-template-columns:245px minmax(0,1fr) 260px;gap:1px;background:#b7c5c9}.visual-library,.visual-properties{overflow:auto;padding:12px;background:#fff}.visual-library h4,.visual-properties h4{margin:0 0 12px}.visual-library h5{margin:14px 0 6px;color:#536970}.visual-library>button{display:flex;justify-content:space-between;gap:7px;width:100%;margin:0 0 5px;padding:8px;text-align:left;border:1px solid #b8c7ca;background:#f8fafb}.visual-library>button.selected{border-color:#087b91;background:#e3f3f5}.visual-library small{font-size:8px;color:#8a4a25}.visual-composer-stage{min-width:0;overflow:auto;padding:16px;background:#dce5e7}.visual-composer-stage svg{display:block;width:100%;min-width:520px;max-height:650px;background:#f9fbfb;border:1px solid #9fb2b8}.visual-empty-drop{display:grid;place-items:center;min-height:440px;border:2px dashed #829ba2;background:#f7fafa;color:#4c656d;font-weight:800}.composer-frame{fill:#d7e0e2;stroke:#263b44;stroke-width:16}.composer-field{fill:#e7f6f7;stroke:#738b92;stroke-width:2;cursor:pointer}.composer-field.selected{stroke:#e87329;stroke-width:5}.composer-opening{fill:none;stroke:#087b91;stroke-width:3}.composer-hardware{fill:#293d45;cursor:pointer}.visual-composer-stage text{fill:#334b53;font:700 12px sans-serif;text-anchor:middle}.composer-dimension line{stroke:#5e747b;stroke-width:1.5}.composer-dimension text{font-size:13px}.visual-composer-message{padding:9px;background:#fff;color:#35545d;border:1px solid #a7bbc0}.visual-legend{display:flex;flex-wrap:wrap;gap:12px;padding:7px;color:#465f67;font-size:10px}.visual-properties dl{display:grid;grid-template-columns:1fr 1fr;gap:7px;font-size:11px}.visual-properties dd{margin:0;font-weight:800}.visual-properties label{display:flex;gap:6px;margin:12px 0;font-size:10px;font-weight:800}.visual-properties small{display:block;margin-top:8px;color:#6e7f84}@media(max-width:950px){.visual-composer{overflow:auto}.visual-composer-layout{grid-template-columns:1fr}.visual-library,.visual-properties{overflow:visible}.visual-composer-header{align-items:stretch;flex-direction:column}.visual-composer-toolbar{flex-wrap:wrap}.visual-composer-toolbar output{width:100%;margin:0}}
+/* PROFILE DATA 01.2A V2 — exact Visual Composer overlap audit bridge */
+.visual-profile-overlap-audit{display:flex;align-items:center;flex-wrap:wrap;gap:5px 10px;padding:7px 9px;border:1px solid #4d8d96;border-left:3px solid #1aa6b8;background:#edf8f9;color:#274e56;font-size:9px}
+.visual-profile-overlap-audit b{color:#174f59}
+.visual-profile-overlap-audit strong{color:#0b6977}
+.visual-profile-overlap-audit small{flex-basis:100%;color:#627b81;line-height:1.35}
+.visual-profile-overlap-audit.unresolved{border-color:#b8a78b;border-left-color:#a47a43;background:#fbf6ef}
+/* PROFILE DATA 01.2A V3 — measured structural frame/mullion bands */
+.composer-field-background{pointer-events:none}
+.composer-field-hit{fill:transparent;stroke:transparent;stroke-width:2;cursor:pointer;pointer-events:all}
+.composer-field-hit.selected{stroke:#e87329;stroke-width:5}
+.composer-effective-profile-layer{pointer-events:none}
+.composer-effective-profile-band{stroke:#263b44;stroke-width:1;vector-effect:non-scaling-stroke;pointer-events:none}
+.composer-effective-profile-band.mullion{stroke-width:1.5}
+.visual-effective-profile-geometry{display:flex;align-items:center;flex-wrap:wrap;gap:5px 12px;padding:7px 9px;border:1px solid #6b9da5;border-left:3px solid #168697;background:#f2f9fa;color:#31555d;font-size:9px}
+.visual-effective-profile-geometry .visual-effective-profile-title{flex-basis:100%;color:#126a78;font:800 8px ui-monospace;letter-spacing:.3px}
+.visual-effective-profile-geometry b{color:#294b53}
+.visual-effective-profile-geometry strong{color:#0b6977}
+.visual-effective-profile-geometry small{flex-basis:100%;color:#6b7e83;line-height:1.35}
+/* PROFILE DATA 01.2A V4 — explicit left/right field target + readable side rails */
+.visual-library,
+.visual-properties{
+  color:#1f343a;
+  font-size:12px;
+  opacity:1;
+}
+.visual-library h4,
+.visual-properties h4,
+.visual-library h5,
+.visual-properties h5{
+  color:#172b31;
+}
+.visual-library p,
+.visual-library span,
+.visual-library label,
+.visual-library summary,
+.visual-properties p,
+.visual-properties span,
+.visual-properties label,
+.visual-properties summary,
+.visual-properties dt,
+.visual-properties dd{
+  color:#20343a;
+  opacity:1;
+}
+.visual-library button,
+.visual-properties button{
+  color:#20343a;
+  font-weight:800;
+  opacity:1;
+}
+.visual-library button:disabled,
+.visual-properties button:disabled{
+  color:#66777c;
+  opacity:.8;
+}
+.visual-library small,
+.visual-properties small{
+  color:#4d6268;
+  font-size:10px;
+  line-height:1.45;
+  opacity:1;
+}
+.visual-properties dl{
+  font-size:12px;
+  line-height:1.45;
+}
+.visual-properties dt{
+  color:#435960;
+  font-weight:800;
+}
+.visual-properties dd{
+  color:#172b31;
+  font-weight:900;
+}
+.visual-library .selected,
+.visual-library button[aria-pressed="true"]{
+  color:#0f3740;
+}
+.visual-field-target{
+  margin:0 0 10px;
+  padding:7px 8px;
+  border:1px solid #93aeb4;
+  border-left:3px solid #087b91;
+  background:#eef6f7;
+  color:#17373f !important;
+  font-size:11px;
+  font-weight:700;
+}
+.visual-field-target b{
+  color:#102f36;
+}
+.visual-composer-stage text{
+  fill:#20343a;
+}
+
+/* PROFILE DATA 01.2A V4.1 — final readability contrast polish
+   Scope: Visual Composer only. Disabled controls intentionally remain muted. */
+.visual-composer-toolbar output{
+  color:#17323a !important;
+  opacity:1 !important;
+  font-weight:900;
+}
+.visual-library,
+.visual-properties{
+  color:#152b32 !important;
+}
+.visual-library h4,
+.visual-properties h4{
+  color:#10252c !important;
+  font-weight:900;
+}
+.visual-library h5,
+.visual-properties h5{
+  color:#17343c !important;
+  font-weight:900;
+}
+.visual-properties dt{
+  color:#314a52 !important;
+  font-weight:800;
+}
+.visual-properties dd,
+.visual-properties dd small{
+  color:#112d35 !important;
+  opacity:1 !important;
+}
+.visual-properties dd{
+  font-weight:900;
+}
+.visual-properties > small,
+.visual-properties .field-summary,
+.visual-properties .selected-component small,
+.visual-library small:not(.composer-disabled-reason){
+  color:#3b545c !important;
+  opacity:1 !important;
+}
+.visual-properties .field-summary b,
+.visual-properties .selected-component b{
+  color:#132f37 !important;
+}
+.visual-properties label,
+.visual-library label,
+.composer-color-control{
+  color:#29444c !important;
+}
+.visual-library .composer-library-section > button,
+.visual-library .composer-library-section > div > button:not(:disabled){
+  color:#1b343b !important;
+}
+.visual-library select,
+.visual-library input,
+.visual-properties select,
+.visual-properties input{
+  color:#162f36 !important;
+}
+.visual-composer-message{
+  color:#25434b !important;
+  font-weight:700;
+}
+.visual-legend{
+  color:#334e56 !important;
+}
+.visual-profile-overlap-audit,
+.visual-effective-profile-geometry{
+  color:#25474f !important;
+}
+.visual-profile-overlap-audit small,
+.visual-effective-profile-geometry small{
+  color:#465f66 !important;
+}
+.visual-field-target,
+.visual-field-target b{
+  color:#102f36 !important;
+}

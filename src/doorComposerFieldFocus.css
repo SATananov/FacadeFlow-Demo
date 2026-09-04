@@ -1,0 +1,96 @@
+/* Door Composer field-focus polish. Visual-only: no geometry, profile, safety or machine authority. */
+.door-composer .door-field-group {
+  cursor: pointer;
+  transition: opacity 120ms ease;
+}
+
+.door-composer .door-field-group:focus {
+  outline: none;
+}
+
+.door-composer .door-field-group.inactive {
+  opacity: 0.68;
+}
+
+.door-composer .door-field-group.active {
+  opacity: 1;
+}
+
+.door-composer .door-field-selection-wash {
+  fill: rgba(232, 112, 31, 0.08);
+  pointer-events: none;
+}
+
+.door-composer .door-field-group.active .door-field-outline,
+.door-composer .door-field-group:focus-visible .door-field-outline {
+  stroke: #e8701f;
+  stroke-width: 4;
+  vector-effect: non-scaling-stroke;
+}
+
+.door-composer .door-field-group:focus-visible .door-field-outline {
+  stroke-dasharray: 8 4;
+}
+
+.door-composer .door-field-label {
+  fill: #263b43;
+  font-size: 14px;
+  font-weight: 700;
+  text-anchor: middle;
+  pointer-events: none;
+}
+
+.door-composer .door-field-label.compact {
+  font-size: 11px;
+}
+
+.door-composer .door-canvas-footer {
+  gap: 8px;
+}
+
+.door-composer .door-active-field-context {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 14px;
+  min-width: 0;
+  color: #263b43;
+}
+
+.door-composer .door-active-field-context b {
+  color: #153e4a;
+}
+
+.door-composer .door-active-field-context span {
+  color: #48616a;
+}
+
+.door-composer .door-focused-status,
+.door-composer .door-review-summary {
+  display: grid;
+  gap: 4px;
+  margin: 10px 0;
+  padding: 9px 10px;
+  border: 1px solid #b9cbd0;
+  border-radius: 4px;
+  background: #f6fafb;
+  color: #263b43;
+}
+
+.door-composer .door-focused-status.needs-input {
+  border-left: 4px solid #e8701f;
+  background: #fff8f1;
+}
+
+.door-composer .door-focused-status.ready {
+  border-left: 4px solid #0d7d8f;
+}
+
+.door-composer .door-review-summary {
+  border-left: 4px solid #c4563d;
+  background: #fff6f3;
+}
+
+.door-composer .door-review-summary small {
+  color: #5a6870;
+}

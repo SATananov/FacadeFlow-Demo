@@ -4,28 +4,29 @@ import type { CatalogueProfile, ProfileRole } from '../profileCatalogueTypes'
 import { createEmptyComposition } from '../visualComposerState'
 import { VisualTemplateComposer } from './VisualTemplateComposer'
 import { DoorVisualComposer } from './DoorVisualComposer'
-import { getDoorComposerEligibility } from '../doorComposerEligibility'
+import { createDoorComposerDemoConfiguration, getDoorComposerDemoAccess } from '../doorComposerDemoAccess'
 
 interface Props { session: HybridProductDesignerSession; profiles: CatalogueProfile[]; onSession: (updater: (current: HybridProductDesignerSession) => HybridProductDesignerSession) => void; onCloseFacadeFlow: () => void; onOpenProfileCatalogue: () => void }
 const labels = ['Тип изделие', 'Размери', 'Профилна система', 'Профили', 'Проверка'] as const
 
 export function StructuredConfigurationWizard({ session, profiles, onSession, onCloseFacadeFlow, onOpenProfileCatalogue }: Props) {
-  const [composerOpen, setComposerOpen] = useState(false),[doorComposerOpen,setDoorComposerOpen]=useState(false),[doorAcknowledged,setDoorAcknowledged]=useState(false), [composition, setComposition] = useState(createEmptyComposition)
+  const [composerOpen, setComposerOpen] = useState(false),[doorComposerOpen,setDoorComposerOpen]=useState(false),[doorAcknowledged,setDoorAcknowledged]=useState(false),[doorDemoAcknowledged,setDoorDemoAcknowledged]=useState(false), [composition, setComposition] = useState(createEmptyComposition)
   useEffect(() => { if (!composerOpen && !doorComposerOpen) return; const frame=requestAnimationFrame(()=>{const center=document.querySelector<HTMLElement>('.detail-drafting .visual-composer-stage');if(center){center.tabIndex=0;center.setAttribute('aria-label','Централна работна зона — превъртаемо съдържание');center.scrollTop=0}});return()=>cancelAnimationFrame(frame) }, [composerOpen, doorComposerOpen])
   if (!session.configuration) return null
   const configuration = reconcileStructuredConfiguration(session.configuration, profiles)
-  const doorEligibility = getDoorComposerEligibility(configuration, doorAcknowledged, profiles)
+  const doorDemoAccess = getDoorComposerDemoAccess(configuration, doorAcknowledged, doorDemoAcknowledged, profiles)
+  const doorDemoConfiguration = createDoorComposerDemoConfiguration(configuration, profiles)
   const update = (patch: Parameters<typeof updateStructuredConfiguration>[1]) => onSession((current) => ({ ...current, configuration: updateStructuredConfiguration(configuration, patch, profiles) }))
   const move = (step: StructuredConfigurationStep) => onSession((current) => ({ ...current, configuration: moveStructuredConfigurationStep(configuration, step, profiles) }))
   const confirm = () => onSession((current) => ({ ...current, configuration: confirmStructuredConfiguration(configuration, profiles) }))
-  if (composerOpen) return <VisualTemplateComposer configuration={configuration} initial={composition} onChange={setComposition} onBack={() => setComposerOpen(false)}/>
-  if(doorComposerOpen)return <DoorVisualComposer configuration={configuration} acknowledgement={doorAcknowledged} onBack={()=>setDoorComposerOpen(false)} onCloseFacadeFlow={onCloseFacadeFlow}/>
+  if (composerOpen) return <VisualTemplateComposer configuration={configuration} profiles={profiles} initial={composition} onChange={setComposition} onBack={() => setComposerOpen(false)}/>
+  if(doorComposerOpen&&doorDemoConfiguration)return <DoorVisualComposer configuration={doorDemoConfiguration} acknowledgement={doorAcknowledged} sourceProfileSystem={configuration.profileSystem} demoOnly onBack={()=>setDoorComposerOpen(false)} onCloseFacadeFlow={onCloseFacadeFlow}/>
   return <main className="hybrid-screen hybrid-configuration"><div className="hybrid-screen-heading"><h3>Конфигурация на изделието</h3><p>Семантична подготовка само за текущата сесия — без създаване на геометрия или компоненти.</p></div><StepIndicator configuration={configuration} profiles={profiles} onMove={move}/><section className="hybrid-wizard-panel">
     {configuration.wizardStep === 1 && <ProductTypeStep configuration={configuration} profiles={profiles} onSession={onSession} onNext={() => move(2)}/>} 
     {configuration.wizardStep === 2 && <DimensionsStep configuration={configuration} onUpdate={update} onBack={() => move(1)} onNext={() => move(3)}/>} 
     {configuration.wizardStep === 3 && <SystemStep configuration={configuration} profiles={profiles} onUpdate={update} onBack={() => move(2)} onNext={() => move(4)}/>} 
     {configuration.wizardStep === 4 && <ProfilesStep configuration={configuration} profiles={profiles} onUpdate={update} onOpenProfileCatalogue={onOpenProfileCatalogue} onBack={() => move(3)} onNext={() => move(5)}/>} 
-    {configuration.wizardStep === 5 && <><ReviewStep configuration={configuration} profiles={profiles} onUpdate={update} onConfirm={confirm} onOpenComposer={() => setComposerOpen(true)} onBack={() => move(4)}/>{configuration.productCategory==='DOOR'&&<div className="door-composer-entry"><label><input type="checkbox" checked={doorAcknowledged} onChange={e=>setDoorAcknowledged(e.target.checked)}/> Разбирам, че прагът е неразрешен и тази врата не може да бъде производствено потвърдена.</label>{doorEligibility.blockers.length>0&&<ul className="inline-errors" aria-live="polite">{doorEligibility.blockers.map(item=><li key={item}>{item}</li>)}</ul>}{doorEligibility.warnings.map(item=><p className="hybrid-dimension-warning" key={item}>{item}</p>)}<button disabled={!doorEligibility.eligible} onClick={()=>setDoorComposerOpen(true)}>Отвори концептуалния конструктор на врата</button></div>}</>}
+    {configuration.wizardStep === 5 && <><ReviewStep configuration={configuration} profiles={profiles} onUpdate={update} onConfirm={confirm} onOpenComposer={() => setComposerOpen(true)} onBack={() => move(4)}/>{configuration.productCategory==='DOOR'&&<div className="door-composer-entry"><label><input type="checkbox" checked={doorAcknowledged} onChange={e=>setDoorAcknowledged(e.target.checked)}/> Разбирам, че прагът е неразрешен и тази врата не може да бъде производствено потвърдена.</label><label><input type="checkbox" checked={doorDemoAcknowledged} onChange={e=>setDoorDemoAcknowledged(e.target.checked)}/> Използвай отделен DEMO режим само за концептуален тест. Текущата конфигурация и избраните каталожни профили няма да бъдат променяни.</label>{doorDemoAccess.blockers.length>0&&<ul className="inline-errors" aria-live="polite">{doorDemoAccess.blockers.map(item=><li key={item}>{item}</li>)}</ul>}{doorDemoAccess.warnings.map(item=><p className="hybrid-dimension-warning" key={item}>{item}</p>)}<button disabled={!doorDemoAccess.eligible||!doorDemoConfiguration} onClick={()=>setDoorComposerOpen(true)}>Отвори DEMO концептуалния конструктор на врата</button></div>}</>}
   </section></main>
 }
 
