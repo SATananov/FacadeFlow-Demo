@@ -48,6 +48,10 @@ test('QA01 checkpoint packaging has explicit shareable/internal modes and strict
   assert.match(checkpointScript, /src\/\*/)
 })
 
+test('QA01 checkpoint ZIP writer loads both compression assemblies for Windows PowerShell 5.1', () => {
+  assert.match(checkpointScript, /Add-Type -AssemblyName System\.IO\.Compression\r?\n/)
+  assert.match(checkpointScript, /Add-Type -AssemblyName System\.IO\.Compression\.FileSystem/)
+})
 test('QA01 status source of truth preserves closed safety boundaries and audited V8 closure', () => {
   for (const token of [
     'UI01.2B',

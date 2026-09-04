@@ -38,6 +38,7 @@ function New-PortableZip {
     [Parameter(Mandatory = $true)][string]$DestinationZip
   )
 
+  Add-Type -AssemblyName System.IO.Compression
   Add-Type -AssemblyName System.IO.Compression.FileSystem
   if (Test-Path $DestinationZip) {
     Remove-Item $DestinationZip -Force
@@ -84,6 +85,7 @@ function New-PortableZip {
 function Assert-PortableZip {
   param([Parameter(Mandatory = $true)][string]$ZipPath)
 
+  Add-Type -AssemblyName System.IO.Compression
   Add-Type -AssemblyName System.IO.Compression.FileSystem
   $archive = [System.IO.Compression.ZipFile]::OpenRead($ZipPath)
   try {
