@@ -2,9 +2,9 @@
 
 **Source-of-truth status document**
 
-Base SHAREABLE_CLEAN source checkpoint independently audited: `e227a0c`.
-Current working hardening stack: **PROFILE DATA 01.2A V8 — N-field Effective Geometry Integrity Hardening**, **V8.1 — Composer Entry / Template State Consistency** (historical V8.1.1 follow-up is folded into V8.1; there is no separate V8.1.1 closure artifact), **V8.2 — PRELUDE 482.05 Base Geometry Correction**, plus **V8.3 — Working Configuration UX**.
-V8.2 reached canonical technical verify PASS locally. Human review then identified that the separate user-facing Door DEMO entry was confusing for the intended workflow: users must be able to start with only known data and add missing technical details later. V8.3 changes this access/UX model while preserving all validation and production locks. **The combined stack remains open until V8.3 passes canonical `npm run verify`, the updated human visual audit, clean Git checks and commit.**
+Base SHAREABLE_CLEAN source checkpoint independently audited: `7071c2b`.
+**PROFILE DATA 01.2A V8 + V8.1 + V8.2 + V8.3 is functionally CLOSED / independently audited at `7071c2b`.** Historical V8.1.1 wording is folded into V8.1 and is not a separate closure artifact. V8.3 provides the working-configuration WINDOW/DOOR UX while preserving strict technical confirmation and production locks.
+The post-audit **V8.3.1 Audit Metadata & Reproducibility Hardening** maintenance layer changes only source-of-truth metadata, checkpoint provenance/reproducibility guards, runtime-version declaration and the PRELUDE system-label consistency cleanup. It does **not** reopen or change N-field geometry, Working Configuration state semantics, Visual Composer behavior, AI authority or production safety.
 
 Older phase acceptance files remain historical evidence. An acceptance filename never overrides the executable code, regression results, safety gates or this current status.
 
@@ -24,10 +24,10 @@ Older phase acceptance files remain historical evidence. An acceptance filename 
 | PROFILE DATA 01.1 | IMPLEMENTED / UPDATED BY V8.2 | PRELUDE 60 base geometry human-confirmed: 482.30 frame 64/42, 482.21 mullion 84/40, 482.05 WINDOW sash 78/56; effective assembled sash width remains separate |
 | PROFILE DATA 01.2 / 01.2A | IMPLEMENTED WORKING MODEL | PRELUDE system overlap uses human-reviewed 7 mm working value only; never production authority |
 | Visual Composer V4–V7 | IMPLEMENTED / UPDATED BY V8.3 | Explicit field focus and N-field window/door targeting; the old separate Door DEMO entry is superseded by one working-configuration workflow |
-| PROFILE DATA 01.2A V8 | IMPLEMENTED — COMBINED CLOSURE PENDING | Canonical divider ratios, explicit sash eligibility and WINDOW/DOOR profile compatibility hardening |
-| PROFILE DATA 01.2A V8.1 | IMPLEMENTED — COMBINED CLOSURE PENDING | Explicit Composer topology auto-seed, generic blank entry and topology lock/reset consistency |
-| PROFILE DATA 01.2A V8.2 | TECHNICAL VERIFY PASS — COMBINED CLOSURE PENDING | Correct 482.05 base geometry to 78/56; keep glazing-bead dimension deferred/variable and separate from 7 mm overlap |
-| PROFILE DATA 01.2A V8.3 | IMPLEMENTED — VERIFY/HUMAN AUDIT PENDING | One working-configuration UX for WINDOW/DOOR; partial technical data allowed for editing, unknowns remain unknown, strict confirmation/safety unchanged |
+| PROFILE DATA 01.2A V8 | CLOSED / INDEPENDENT AUDIT PASS | Canonical divider ratios, explicit sash eligibility and WINDOW/DOOR profile compatibility hardening |
+| PROFILE DATA 01.2A V8.1 | CLOSED / INDEPENDENT AUDIT PASS | Explicit Composer topology auto-seed, generic blank entry and topology lock/reset consistency |
+| PROFILE DATA 01.2A V8.2 | CLOSED / INDEPENDENT AUDIT PASS | Correct 482.05 base geometry to 78/56; keep glazing-bead dimension deferred/variable and separate from 7 mm overlap |
+| PROFILE DATA 01.2A V8.3 | CLOSED / INDEPENDENT AUDIT PASS | One working-configuration UX for WINDOW/DOOR; partial technical data allowed for editing, unknowns remain unknown, strict confirmation/safety unchanged |
 
 ## PRELUDE 60 effective-geometry invariants
 
@@ -102,12 +102,21 @@ npm run checkpoint:shareable
 npm run checkpoint:internal
 ```
 
-`SHAREABLE_CLEAN` runs the shareable verification contract and excludes private evidence including `local-samples/`, `*.dwg` and `*.lte`, plus Git metadata, dependencies, build/runtime output, coverage, environment files, logs and temporary files. `INTERNAL_AUDIT` runs `verify:internal`, so locked evidence regression is required before that checkpoint can be created.
+`SHAREABLE_CLEAN` runs the shareable verification contract, requires a clean working tree and strict `origin/<branch>...HEAD = 0 0` synchronization, and excludes private evidence including `local-samples/`, `*.dwg` and `*.lte`, plus Git metadata, dependencies, build/runtime output, coverage, environment files, logs and temporary files. `-SkipVerify` is not permitted for `SHAREABLE_CLEAN`. `INTERNAL_AUDIT` runs `verify:internal`, so locked evidence regression is required unless an explicit internal-only skip is used.
 
-The checkpoint ZIP is expected to contain the manifest produced by `scripts/New-FacadeFlowCheckpoint.ps1`; do not infer commit provenance only from the ZIP filename.
+The checkpoint ZIP contains both `CHECKPOINT_MANIFEST.txt` and deterministic `CHECKPOINT_CONTENT_SHA256.txt`. The content manifest lists sorted SHA-256 hashes for the payload and its own SHA-256 is recorded in the checkpoint manifest. ZIP entry order is deterministic and entry timestamps are fixed. Commit provenance must still be read from the manifest and verified against Git when the repository is available; do not infer it only from the ZIP filename.
 
 ## Next step
 
-Do **not** start a new major feature phase yet.
+The V8–V8.3 functional stack is closed. Do not reopen its geometry/state logic without a new explicit finding.
 
-First close the combined **PROFILE DATA 01.2A V8 + V8.1 + V8.2 + V8.3** working tree with full canonical verify and the updated human visual audit. The audit must confirm PRELUDE N-field geometry, Composer-entry/template-state consistency, the corrected 482.05 base geometry 78/56, partial-data working access for both WINDOW and DOOR, direct source-configuration editing, unresolved door threshold handling, and the continued separation of deferred glazing-bead semantics from the 7 mm overlap. If that passes, run staged clean checks, commit/push the combined hardening slice and create a canonical shareable checkpoint. Only then select the next feature/data phase.
+For any maintenance change after audited checkpoint `7071c2b`, run the canonical closure protocol before creating a new shareable checkpoint:
+
+```bash
+npm ci
+npm run verify
+git diff --check
+git status --short
+```
+
+Then stage only the intended maintenance files, review the staged diff, commit/push, confirm `origin/<branch>...HEAD = 0 0`, and create the canonical `SHAREABLE_CLEAN` checkpoint. After that, the next feature/data phase may be selected under a new explicit acceptance boundary.

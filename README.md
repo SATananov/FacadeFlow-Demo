@@ -2,7 +2,7 @@
 
 ## Текущ архитектурен checkpoint
 
-FacadeFlow е локална, human-gated среда за симулация, технически преглед и подготовка на структурирани продуктови данни. Текущият hardening stack е **PROFILE DATA 01.2A V8 + V8.1 + V8.2 + V8.3**. Обозначението „V8.1.1“ е исторически follow-up, който е включен в V8.1 и няма самостоятелен closure artifact. V8.3 въвежда един ясен „работна конфигурация“ workflow за прозорци и врати: след име и положителни размери потребителят може да започне композицията с наличните данни, а неизвестните система/профили остават празни и се попълват по-късно. Това не отслабва Human Confirm, unresolved-threshold или production/machine safety gates. Stack-ът не е затворен преди `npm run verify`, human visual audit, clean Git checks и commit. Историческите секции по-долу остават phase-specific запис; текущият status е в [Current Architecture Status](docs/CURRENT_ARCHITECTURE_STATUS.md).
+FacadeFlow е локална, human-gated среда за симулация, технически преглед и подготовка на структурирани продуктови данни. **PROFILE DATA 01.2A V8 + V8.1 + V8.2 + V8.3 е функционално затворен и независимо одитиран върху SHAREABLE_CLEAN checkpoint `7071c2b`.** Обозначението „V8.1.1“ е исторически follow-up, който е включен във V8.1 и няма самостоятелен closure artifact. V8.3 използва един ясен „работна конфигурация“ workflow за прозорци и врати: след име и положителни размери потребителят може да започне композицията с наличните данни, а неизвестните система/профили остават празни и се попълват по-късно. Human Confirm, unresolved-threshold и production/machine safety gates остават непроменени. След независимия audit е добавен само **V8.3.1 Audit Metadata & Reproducibility Hardening** maintenance слой; той не променя geometry, Composer state или production authority. Историческите секции по-долу остават phase-specific запис; текущият status е в [Current Architecture Status](docs/CURRENT_ARCHITECTURE_STATUS.md).
 
 ### AI01 → AI04 — human-authority pipeline
 
@@ -44,7 +44,7 @@ npm run checkpoint:shareable
 npm run checkpoint:internal
 ```
 
-`checkpoint:shareable` изпълнява shareable `npm run verify` и изключва private evidence (`local-samples/`, DWG/LTE). `checkpoint:internal` изпълнява `npm run verify:internal` и може да запази private evidence само за контролиран вътрешен audit.
+`checkpoint:shareable` изпълнява shareable `npm run verify`, изисква clean Git state и доказан `0 0` sync към `origin/<branch>`, и изключва private evidence (`local-samples/`, DWG/LTE). Shareable checkpoint не може да се създаде с `-SkipVerify`. `checkpoint:internal` изпълнява `npm run verify:internal` и може да запази private evidence само за контролиран вътрешен audit. Всеки checkpoint съдържа `CHECKPOINT_CONTENT_SHA256.txt` и payload SHA-256 в manifest-а; ZIP entries са с deterministic order/fixed timestamp, така че payload provenance не зависи от името или часа на package-ване.
 
 ## PRELUDE 60 / Visual Composer current hardening
 
@@ -77,7 +77,7 @@ npm install
 npm run dev
 ```
 
-Локална production версия: `npm run local`. Под Windows double-click върху `START_FACADEFLOW_LOCAL.cmd` отваря Nadezhda-branded dedicated Edge/Chrome app window с изолиран project-local profile. Затварянето му спира само matching server и затваря launcher terminal-а; `npm run local:serve` остава manual Ctrl+C режим. `CREATE_FACADEFLOW_DESKTOP_SHORTCUT.cmd` създава shortcut със supplied ICO. На нов компютър са необходими Node.js и еднократно ръчно `npm install`.
+Локална production версия: `npm run local`. Под Windows double-click върху `START_FACADEFLOW_LOCAL.cmd` отваря Nadezhda-branded dedicated Edge/Chrome app window с изолиран project-local profile. Затварянето му спира само matching server и затваря launcher terminal-а; `npm run local:serve` остава manual Ctrl+C режим. `CREATE_FACADEFLOW_DESKTOP_SHORTCUT.cmd` създава shortcut със supplied ICO. На нов компютър използвайте Node.js 22.12.0 като reference runtime (`.nvmrc` / `.node-version`); `package.json` допуска поддържаните Node 20.19 / 22.12+ / 24 линии и npm 10/11. След това е необходимо еднократно `npm install` (или `npm ci` за clean verification).
 
 Пълна проверка: `npm run verify`. Подробности и troubleshooting: [Локално стартиране под Windows](docs/LOCAL_WINDOWS_START_BG.md).
 

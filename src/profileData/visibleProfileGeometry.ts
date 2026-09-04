@@ -35,7 +35,7 @@ function confirmedVisibleProfileGeometry(
   const source = PRELUDE_60_CONFIRMED_BASE_GEOMETRY[profileCode]
   return Object.freeze({
     systemId: PRELUDE_60_SYSTEM_ID,
-    systemLabel: `${PRELUDE_60_SYSTEM_LABEL} mm`,
+    systemLabel: PRELUDE_60_SYSTEM_LABEL,
     profileCode,
     role: source.role,
     systemDepthMm: PRELUDE_60_SYSTEM_DEPTH_MM,

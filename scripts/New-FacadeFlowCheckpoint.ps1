@@ -7,6 +7,30 @@ param(
   [switch]$SkipVerify
 )
 
+function Get-PortableEntryMap {
+  param([Parameter(Mandatory = $true)][string]$SourceDirectory)
+
+  $fileMap = @{}
+  $entryNames = @()
+
+  Get-ChildItem -Path $SourceDirectory -Recurse -File | ForEach-Object {
+    $relative = $_.FullName.Substring($SourceDirectory.Length).TrimStart([char[]]"\/")
+    $entryName = $relative.Replace("\", "/")
+    if ($fileMap.ContainsKey($entryName)) {
+      throw "Duplicate portable ZIP entry '$entryName'."
+    }
+    $fileMap[$entryName] = $_.FullName
+    $entryNames += $entryName
+  }
+
+  [Array]::Sort($entryNames, [System.StringComparer]::Ordinal)
+  return @($entryNames | ForEach-Object {
+    [PSCustomObject]@{
+      EntryName = $_
+      FullName = $fileMap[$_]
+    }
+  })
+}
 
 function New-PortableZip {
   param(
@@ -19,6 +43,9 @@ function New-PortableZip {
     Remove-Item $DestinationZip -Force
   }
 
+  $fixedTimestamp = [DateTimeOffset]::new(1980, 1, 1, 0, 0, 0, [TimeSpan]::Zero)
+  $entries = @(Get-PortableEntryMap -SourceDirectory $SourceDirectory)
+
   $zipStream = [System.IO.File]::Open($DestinationZip, [System.IO.FileMode]::CreateNew)
   try {
     $archive = [System.IO.Compression.ZipArchive]::new(
@@ -27,13 +54,12 @@ function New-PortableZip {
       $false
     )
     try {
-      Get-ChildItem -Path $SourceDirectory -Recurse -File | ForEach-Object {
-        $relative = $_.FullName.Substring($SourceDirectory.Length).TrimStart([char[]]"\\/")
-        $entryName = $relative.Replace("\", "/")
-        $entry = $archive.CreateEntry($entryName, [System.IO.Compression.CompressionLevel]::Optimal)
+      foreach ($item in $entries) {
+        $entry = $archive.CreateEntry($item.EntryName, [System.IO.Compression.CompressionLevel]::Optimal)
+        $entry.LastWriteTime = $fixedTimestamp
         $entryStream = $entry.Open()
         try {
-          $fileStream = [System.IO.File]::OpenRead($_.FullName)
+          $fileStream = [System.IO.File]::OpenRead($item.FullName)
           try {
             $fileStream.CopyTo($entryStream)
           }
@@ -68,9 +94,48 @@ function Assert-PortableZip {
     if (-not ($archive.Entries | Where-Object { $_.FullName -like "src/*" } | Select-Object -First 1)) {
       throw "Portable ZIP guard failed: src/ hierarchy was not preserved."
     }
+
+    $entryNames = @($archive.Entries | ForEach-Object { $_.FullName })
+    $sortedEntryNames = @($entryNames)
+    [Array]::Sort($sortedEntryNames, [System.StringComparer]::Ordinal)
+    if (($entryNames -join "`n") -ne ($sortedEntryNames -join "`n")) {
+      throw "Portable ZIP guard failed: archive entries are not in deterministic ordinal order."
+    }
+
+    $duplicates = @($entryNames | Group-Object | Where-Object { $_.Count -gt 1 })
+    if ($duplicates.Count -gt 0) {
+      throw "Portable ZIP guard failed: duplicate archive entries were detected."
+    }
   }
   finally {
     $archive.Dispose()
+  }
+}
+
+function Write-DeterministicPayloadManifest {
+  param(
+    [Parameter(Mandatory = $true)][string]$SourceDirectory,
+    [Parameter(Mandatory = $true)][string]$ManifestPath
+  )
+
+  $generatedNames = @("CHECKPOINT_MANIFEST.txt", "CHECKPOINT_CONTENT_SHA256.txt")
+  $entries = @(Get-PortableEntryMap -SourceDirectory $SourceDirectory | Where-Object {
+    $generatedNames -notcontains $_.EntryName
+  })
+
+  $lines = @()
+  foreach ($item in $entries) {
+    $hash = (Get-FileHash -LiteralPath $item.FullName -Algorithm SHA256).Hash.ToLowerInvariant()
+    $lines += "$hash  $($item.EntryName)"
+  }
+
+  $utf8NoBom = [System.Text.UTF8Encoding]::new($false)
+  $content = if ($lines.Count -gt 0) { ($lines -join "`n") + "`n" } else { "" }
+  [System.IO.File]::WriteAllText($ManifestPath, $content, $utf8NoBom)
+
+  return [PSCustomObject]@{
+    FileCount = $entries.Count
+    Sha256 = (Get-FileHash -LiteralPath $ManifestPath -Algorithm SHA256).Hash.ToLowerInvariant()
   }
 }
 
@@ -82,6 +147,10 @@ Push-Location $RepoRoot
 try {
   if (-not (Test-Path ".git")) {
     throw "Checkpoint packaging requires a Git working tree."
+  }
+
+  if ($Mode -eq "ShareableClean" -and $SkipVerify) {
+    throw "ShareableClean checkpoints cannot use -SkipVerify. Run the canonical verification gate."
   }
 
   $status = @(git status --porcelain)
@@ -105,27 +174,39 @@ try {
     }
   }
 
-  $stamp = Get-Date -Format "yyyyMMdd_HHmmss"
   $shortCommit = (git rev-parse --short HEAD).Trim()
   $fullCommit = (git rev-parse HEAD).Trim()
   $branch = (git branch --show-current).Trim()
-  $sync = "not-checked"
+  $commitTime = (git show -s --format=%cI HEAD).Trim()
 
-  git rev-parse --verify origin/$branch *> $null
-  if ($LASTEXITCODE -eq 0) {
-    git fetch origin
-    if ($LASTEXITCODE -ne 0) {
-      throw "git fetch origin failed."
-    }
-    $sync = (git rev-list --left-right --count "origin/$branch...HEAD").Trim()
-    if ($sync -ne "0`t0") {
-      throw "Local branch is not synchronized with origin/$branch ($sync)."
-    }
+  if ([string]::IsNullOrWhiteSpace($branch)) {
+    throw "Checkpoint packaging requires a named branch; detached HEAD is not supported."
+  }
+
+  git remote get-url origin *> $null
+  if ($LASTEXITCODE -ne 0) {
+    throw "Checkpoint packaging requires a configured 'origin' remote."
+  }
+
+  git fetch origin
+  if ($LASTEXITCODE -ne 0) {
+    throw "git fetch origin failed. Checkpoint provenance cannot be verified."
+  }
+
+  git rev-parse --verify "refs/remotes/origin/$branch" *> $null
+  if ($LASTEXITCODE -ne 0) {
+    throw "Remote tracking branch origin/$branch does not exist. Checkpoint provenance cannot be verified."
+  }
+
+  $sync = (git rev-list --left-right --count "origin/$branch...HEAD").Trim()
+  if ($sync -ne "0`t0") {
+    throw "Local branch is not synchronized with origin/$branch ($sync)."
   }
 
   New-Item -ItemType Directory -Force -Path $OutputDirectory | Out-Null
 
   $label = if ($Mode -eq "ShareableClean") { "SHAREABLE_CLEAN" } else { "INTERNAL_AUDIT" }
+  $stamp = Get-Date -Format "yyyyMMdd_HHmmss"
   $zip = Join-Path $OutputDirectory "FacadeFlow-Demo_${label}_${shortCommit}_${stamp}.zip"
   $temp = Join-Path $env:TEMP "FacadeFlow_${label}_${shortCommit}_${stamp}"
 
@@ -139,7 +220,8 @@ try {
 
   $excludedFiles = @(
     "*.log", "*.tmp", "*.bak", "*.rej", "*.orig",
-    ".env", ".env.*"
+    ".env", ".env.*",
+    "CHECKPOINT_MANIFEST.txt", "CHECKPOINT_CONTENT_SHA256.txt"
   )
 
   if ($Mode -eq "ShareableClean") {
@@ -183,17 +265,23 @@ try {
     }
   }
 
+  $contentManifestPath = Join-Path $temp "CHECKPOINT_CONTENT_SHA256.txt"
+  $payload = Write-DeterministicPayloadManifest -SourceDirectory $temp -ManifestPath $contentManifestPath
+
   $manifest = @"
 FACADEFLOW $label CHECKPOINT
 ==============================
-Created: $(Get-Date -Format "yyyy-MM-dd HH:mm:ss zzz")
 Repository: FacadeFlow-Demo
 Branch: $branch
 Commit short: $shortCommit
 Commit full: $fullCommit
+Commit time: $commitTime
 Origin sync: $sync
 Working tree: clean
-Verification: $(if ($SkipVerify) { "SKIPPED BY EXPLICIT FLAG" } else { "npm run $verificationScript PASS" })
+Verification: $(if ($SkipVerify) { "SKIPPED BY EXPLICIT INTERNAL FLAG" } else { "npm run $verificationScript PASS" })
+Payload files: $($payload.FileCount)
+Payload manifest: CHECKPOINT_CONTENT_SHA256.txt
+Payload manifest SHA-256: $($payload.Sha256)
 Private local evidence: $(if ($Mode -eq "InternalAudit") { "retained when present" } else { "excluded" })
 
 Excluded from ZIP:
@@ -204,19 +292,25 @@ Excluded from ZIP:
 - coverage
 - .env / .env.*
 - *.log / *.tmp / *.bak / *.rej / *.orig
-$(if ($Mode -eq "ShareableClean") { "- local-samples`r`n- *.dwg / *.lte" } else { "" })
+$(if ($Mode -eq "ShareableClean") { "- local-samples`n- *.dwg / *.lte" } else { "" })
 "@
 
-  Set-Content -Path (Join-Path $temp "CHECKPOINT_MANIFEST.txt") -Value $manifest -Encoding UTF8
+  $utf8NoBom = [System.Text.UTF8Encoding]::new($false)
+  [System.IO.File]::WriteAllText(
+    (Join-Path $temp "CHECKPOINT_MANIFEST.txt"),
+    $manifest.Replace("`r`n", "`n"),
+    $utf8NoBom
+  )
 
   New-PortableZip -SourceDirectory $temp -DestinationZip $zip
   Assert-PortableZip -ZipPath $zip
 
   Write-Host ""
   Write-Host "=== FACADEFLOW CHECKPOINT READY ===" -ForegroundColor Green
-  Write-Host "MODE:   $Mode"
-  Write-Host "COMMIT: $shortCommit"
-  Write-Host "ZIP:    $zip"
+  Write-Host "MODE:       $Mode"
+  Write-Host "COMMIT:     $shortCommit"
+  Write-Host "PAYLOAD:    $($payload.Sha256)"
+  Write-Host "ZIP:        $zip"
 
   Remove-Item $temp -Recurse -Force
 }

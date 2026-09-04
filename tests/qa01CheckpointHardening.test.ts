@@ -27,7 +27,7 @@ test('QA01 regression runner discovers all tests instead of maintaining a manual
   assert.doesNotMatch(runner, /realProductionRp01_21FinalClosure\.test\.ts/)
 })
 
-test('QA01 checkpoint packaging has explicit shareable and internal modes', () => {
+test('QA01 checkpoint packaging has explicit shareable/internal modes and strict provenance guards', () => {
   assert.match(checkpointScript, /ShareableClean/)
   assert.match(checkpointScript, /InternalAudit/)
   assert.match(checkpointScript, /local-samples/)
@@ -36,12 +36,19 @@ test('QA01 checkpoint packaging has explicit shareable and internal modes', () =
   assert.match(checkpointScript, /verify:internal/)
   assert.match(checkpointScript, /New-PortableZip/)
   assert.match(checkpointScript, /Assert-PortableZip/)
-  assert.match(checkpointScript, /entryName/)
-  assert.match(checkpointScript, /Contains/)
+  assert.match(checkpointScript, /Get-PortableEntryMap/)
+  assert.match(checkpointScript, /Write-DeterministicPayloadManifest/)
+  assert.match(checkpointScript, /CHECKPOINT_CONTENT_SHA256\.txt/)
+  assert.match(checkpointScript, /StringComparer]::Ordinal/)
+  assert.match(checkpointScript, /1980, 1, 1/)
+  assert.match(checkpointScript, /git remote get-url origin/)
+  assert.match(checkpointScript, /git fetch origin/)
+  assert.match(checkpointScript, /refs\/remotes\/origin\/\$branch/)
+  assert.match(checkpointScript, /ShareableClean checkpoints cannot use -SkipVerify/)
   assert.match(checkpointScript, /src\/\*/)
 })
 
-test('QA01 status source of truth preserves closed safety boundaries and identifies PROJECT01.1 next', () => {
+test('QA01 status source of truth preserves closed safety boundaries and audited V8 closure', () => {
   for (const token of [
     'UI01.2B',
     'AI04',
@@ -49,10 +56,12 @@ test('QA01 status source of truth preserves closed safety boundaries and identif
     'machineReady',
     'productionApproved',
     'SHAREABLE_CLEAN',
-    'PROJECT01.1',
+    'V8.3.1',
+    '7071c2b',
   ]) {
     assert.match(status, new RegExp(token))
   }
+  assert.doesNotMatch(status, /V8\.3 \| IMPLEMENTED — VERIFY\/HUMAN AUDIT PENDING/)
   assert.match(acceptance, /non-feature maintenance phase/i)
   assert.match(acceptance, /must not change UI behavior/i)
 })
