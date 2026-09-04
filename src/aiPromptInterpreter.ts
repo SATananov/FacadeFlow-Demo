@@ -83,7 +83,7 @@ function parseFieldCount(text: string) {
 
 function parseOpeningType(text: string): { type: FacadeFlowIntentOpeningType; excerpt: string } | null {
   const patterns: Array<[RegExp, FacadeFlowIntentOpeningType]> = [
-    [/(?:tilt\s*[-+&/]?\s*turn|отваряемо\s*\+\s*падащо|отваряемо\s+и\s+падащо|осово\s*[- ]?обръщателно)/i, 'TILT_TURN'],
+    [/(?:tilt\s*[-+&/]?\s*turn|отваряемо\s*\+\s*падащо|отваряемо\s+и\s+падащо|осово\s*[- ]?(?:обръщателно|откидно))/i, 'TILT_TURN'],
     [/(?:плъзгащо|плъзгащ|\bsliding\b)/i, 'SLIDING'],
     [/(?:падащо|\btilt\b)/i, 'TILT'],
     [/(?:\bturn\b|\bcasement\b)/i, 'TURN'],
@@ -129,6 +129,13 @@ function captureAfterLabel(text: string, labels: string[]) {
   return match ? { value: cleanCapture(match[1]), excerpt: match[0] } : null
 }
 
+
+function captureExplicitProfileReference(text: string, labels: string[]) {
+  const escaped = labels.map((label) => label.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|')
+  const match = text.match(new RegExp(`(?:${escaped})\\s*[:=-]?\\s*([A-ZА-Я0-9][A-ZА-Я0-9._ -]{0,30}\\d[A-ZА-Я0-9._ -]{0,30})(?=\\s*(?:,|;|$))`, 'iu'))
+  return match ? { value: cleanCapture(match[1]), excerpt: match[0] } : null
+}
+
 function parseRal(text: string) {
   const match = text.match(/\bRAL\s*[-:]?\s*(\d{3,4})\b/i)
   return match ? { value: `RAL ${match[1]}`, excerpt: match[0] } : null
@@ -170,6 +177,35 @@ function positionIndex(token: string, count: number) {
   return null
 }
 
+function setFieldRoleFromText(fields: FacadeFlowIntentField[], index: number, phrase: string) {
+  if (index < 0 || index >= fields.length) return
+  const opening = parseOpeningType(phrase)
+  const operable = parseOperableSignal(phrase)
+  if (!opening && !operable) return
+  const role = opening?.type === 'FIXED' ? 'FIXED' : opening?.type === 'SLIDING' ? 'SLIDING_SASH' : 'OPENING_SASH'
+  fields[index] = {
+    ...fields[index],
+    role,
+    openingType: opening?.type,
+    unresolved: opening ? [] : ['Тип отваряне на полето'],
+  }
+}
+
+function applyCompoundFieldRoles(text: string, fields: FacadeFlowIntentField[]) {
+  if (fields.length < 2) return
+  const paired = text.match(/(?:ляв(?:ото|ия)?\s+(?:поле\s+)?и\s+д[ея]сн(?:ото|ия)?\s+(?:поле\s+)?|left\s+and\s+right\s+)(фикс(?:ирани|ирано|иран|но)?|fixed|отваряеми|отваряемо|openable|operable|плъзгащи|sliding)/i)
+  if (paired?.[1]) {
+    setFieldRoleFromText(fields, 0, paired[1])
+    setFieldRoleFromText(fields, fields.length - 1, paired[1])
+  }
+
+  const edge = text.match(/(?:двете\s+)?(?:крайните|крайни)\s+(?:полета\s+)?(фикс(?:ирани|ирано|иран|но)?|fixed|отваряеми|отваряемо|openable|operable)/i)
+  if (edge?.[1]) {
+    setFieldRoleFromText(fields, 0, edge[1])
+    setFieldRoleFromText(fields, fields.length - 1, edge[1])
+  }
+}
+
 function createFields(text: string, count: number | null, evidenceId: string): FacadeFlowIntentField[] {
   if (!count || count < 1) return []
   const fields: FacadeFlowIntentField[] = Array.from({ length: count }, (_, index) => ({
@@ -179,21 +215,13 @@ function createFields(text: string, count: number | null, evidenceId: string): F
     evidenceIds: [evidenceId],
     unresolved: ['Роля / отваряемост на полето'],
   }))
-  const matcher = /(ляв(?:ото|ото поле)?|д[ея]сн(?:ото|ото поле)?|средн(?:ото|ото поле)?|\bleft\b|\bright\b|\bcenter\b|\bmiddle\b)[^,;.]{0,35}?(фикс(?:ирано|иран|но)?|\bfixed\b|отваряемо|отваряем|\bturn\b|tilt\s*[-+&/]?\s*turn|падащо|\btilt\b|плъзгащо|\bsliding\b)/gi
+  const matcher = /(ляв(?:ото|ото поле)?|д[ея]сн(?:ото|ото поле)?|средн(?:ото|ото поле)?|\bleft\b|\bright\b|\bcenter\b|\bmiddle\b)[^,;.]{0,35}?(фикс(?:ирано|иран|но)?|\bfixed\b|отваряемо|отваряем|\bturn\b|tilt\s*[-+&/]?\s*turn|осово\s*[- ]?(?:обръщателно|откидно)|падащо|\btilt\b|плъзгащо|\bsliding\b)/gi
   for (const match of text.matchAll(matcher)) {
     const index = positionIndex(match[1], count)
     if (index === null || index < 0 || index >= fields.length) continue
-    const opening = parseOpeningType(match[2])
-    const operable = parseOperableSignal(match[2])
-    if (!opening && !operable) continue
-    const role = opening?.type === 'FIXED' ? 'FIXED' : opening?.type === 'SLIDING' ? 'SLIDING_SASH' : 'OPENING_SASH'
-    fields[index] = {
-      ...fields[index],
-      role,
-      openingType: opening?.type,
-      unresolved: opening ? [] : ['Тип отваряне на полето'],
-    }
+    setFieldRoleFromText(fields, index, match[2])
   }
+  applyCompoundFieldRoles(text, fields)
   return fields
 }
 
@@ -257,11 +285,11 @@ export function interpretFacadeFlowPrompt(sourceText: string, intentId = 'prompt
 
   const profileSystem = captureAfterLabel(text, ['профилна система', 'система', 'profile system', 'system'])
   if (profileSystem?.value) { intent.profiles.system = profileSystem.value; recognized.push(recognition('system', 'Профилна система', profileSystem.value, profileSystem.excerpt, 'MEDIUM')) }
-  const frame = captureAfterLabel(text, ['каса', 'frame profile', 'frame'])
+  const frame = captureExplicitProfileReference(text, ['каса', 'frame profile', 'frame']) ?? captureAfterLabel(text, ['каса', 'frame profile', 'frame'])
   if (frame?.value) { intent.profiles.frame = frame.value; recognized.push(recognition('frame', 'Каса', frame.value, frame.excerpt, 'MEDIUM')) }
-  const sash = captureAfterLabel(text, ['крило профил', 'профил крило', 'sash profile'])
+  const sash = captureExplicitProfileReference(text, ['крило профил', 'профил крило', 'крило', 'sash profile', 'sash']) ?? captureAfterLabel(text, ['крило профил', 'профил крило', 'sash profile'])
   if (sash?.value) { intent.profiles.sash = sash.value; recognized.push(recognition('sash', 'Крило', sash.value, sash.excerpt, 'MEDIUM')) }
-  const mullion = captureAfterLabel(text, ['делител', 'mullion profile', 'mullion'])
+  const mullion = captureExplicitProfileReference(text, ['делител', 'mullion profile', 'mullion']) ?? captureAfterLabel(text, ['делител', 'mullion profile', 'mullion'])
   if (mullion?.value) { intent.profiles.mullion = mullion.value; recognized.push(recognition('mullion', 'Делител', mullion.value, mullion.excerpt, 'MEDIUM')) }
 
   const opening = parseOpeningType(text)
