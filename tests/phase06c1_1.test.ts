@@ -8,7 +8,7 @@ const css = () => readFileSync('src/aiWorkspace.css', 'utf8')
 
 test('06C.1.1 keeps every flexible job context including direct single-product work', () => {
   const source = workspace()
-  assert.match(source, /Единично изделие/)
+  assert.match(readFileSync('src/aiWorkspaceState.ts', 'utf8'), /Единично изделие/)
   assert.match(source, /ff-ai-context-strip/)
   assert.match(source, /jobTypes\.map/)
 })
@@ -58,6 +58,6 @@ test('06C.1.1 preserves the locked 06B.2 visual contract while changing the layo
 test('06C.1.1 adds no network, persistence, AI inference or machine-output behavior', () => {
   const source = workspace()
   assert.doesNotMatch(source, /fetch\(|WebSocket|XMLHttpRequest|localStorage|indexedDB/i)
-  assert.match(source, /AI моделът още не е свързан/)
+  assert.match(source, /външен AI модел още не е свързан/)
   assert.match(source, /ГОТОВО ЗА МАШИНА: НЕ/)
 })

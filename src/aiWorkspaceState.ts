@@ -1,4 +1,6 @@
 import { createEmptyGuidedProductDraft, createGuidedDemoProductDraft, guidedProductHasInput, guidedProductToSpecification, guidedProductUnresolved, setGuidedProductReviewAccepted, updateGuidedProductDraft } from './aiGuidedProduct'
+import { facadeFlowProductIntentToSpecification } from './aiProductIntent'
+import type { FacadeFlowQuickStructuredSelection } from './aiProductQuickSelect'
 import { buildFacadeFlowDemoReviewPacket } from './aiUnifiedReview'
 import { buildFacadeFlowDemoRulesGate } from './aiRulesGate'
 import type { CatalogueProfile } from './profileCatalogueTypes'
@@ -68,9 +70,27 @@ export function selectFacadeFlowAiInputMode(session: FacadeFlowAiSession, inputM
 }
 
 export function updateFacadeFlowJobMetadata(session: FacadeFlowAiSession, patch: Partial<Pick<FacadeFlowAiSession['job'], 'name' | 'reference' | 'description'>>): FacadeFlowAiSession {
-  const job = { ...session.job, ...patch, reviewPacket: null, updatedAt: now() }
-  const captured = Boolean(job.name.trim() || job.reference.trim() || job.description.trim() || guidedProductHasInput(job.guidedProduct))
+  const clearQuickIntent = patch.description !== undefined
+  const job = { ...session.job, ...patch, ...(clearQuickIntent ? { quickProductIntent: null } : {}), reviewPacket: null, updatedAt: now() }
+  const captured = Boolean(job.name.trim() || job.reference.trim() || job.description.trim() || job.quickProductIntent || guidedProductHasInput(job.guidedProduct))
   return { ...session, job: { ...job, intakeStatus: captured ? 'SOURCE_CAPTURED' : 'EMPTY' } }
+}
+
+export function applyFacadeFlowQuickStructuredSelection(session: FacadeFlowAiSession, selection: FacadeFlowQuickStructuredSelection): FacadeFlowAiSession {
+  const specification = facadeFlowProductIntentToSpecification(selection.intent)
+  const products = [...session.job.products.filter((product) => product.id !== specification.id), specification]
+  return {
+    ...session,
+    job: {
+      ...session.job,
+      description: selection.description,
+      quickProductIntent: selection.intent,
+      products,
+      reviewPacket: null,
+      intakeStatus: 'NEEDS_REVIEW',
+      updatedAt: now(),
+    },
+  }
 }
 
 export function setFacadeFlowAiView(session: FacadeFlowAiSession, view: FacadeFlowAiSession['view']): FacadeFlowAiSession { return { ...session, view } }

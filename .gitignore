@@ -30,3 +30,15 @@ local-samples/
 *.DWG
 *.lte
 *.LTE
+
+# Local AI training environments and generated working material
+.venv/
+**/.venv/
+__pycache__/
+**/__pycache__/
+*.pyc
+tools/ai_training/input/
+tools/ai_training/output/
+node_modules/
+dist/
+tools/ai_training/local-samples/

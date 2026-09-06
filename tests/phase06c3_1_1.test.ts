@@ -25,7 +25,7 @@ void test('06C.3.1.1 removes the ambiguous visible Bulgarian guided labels witho
   assert.doesNotMatch(state, /Води ме \/ описание|Воден прозорец|Водена врата/)
   assert.match(state, /GUIDED_WINDOW/)
   assert.match(state, /GUIDED_DOOR/)
-  assert.match(workspace, /Формулярът „Стъпка по стъпка“/)
+  assert.match(workspace, /Структуриран формуляр за човешка корекция/)
 })
 
 void test('06C.3.1.1 is terminology-only and preserves all safety boundaries', () => {

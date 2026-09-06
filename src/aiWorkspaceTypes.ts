@@ -1,3 +1,5 @@
+import type { FacadeFlowProductIntent } from './aiProductIntent'
+
 export type FacadeFlowJobType = 'BUILDING' | 'HOUSE' | 'SMALL_PROJECT' | 'SINGLE_PRODUCT' | 'CUSTOM_ORDER' | 'TECHNICAL_DETAIL'
 export type FacadeFlowAiInputMode = 'DOCUMENTS' | 'DESCRIPTION' | 'SKETCH' | 'MANUAL'
 export type FacadeFlowAiWorkspaceView = 'INTAKE' | 'KNOWLEDGE_BASE'
@@ -322,6 +324,7 @@ export interface FacadeFlowJobDraft {
   jobType: FacadeFlowJobType | null
   inputMode: FacadeFlowAiInputMode | null
   description: string
+  quickProductIntent?: FacadeFlowProductIntent | null
   demoScenario: FacadeFlowAiDemoScenario | null
   guidedProduct: FacadeFlowGuidedProductDraft
   products: FacadeFlowProductSpecification[]

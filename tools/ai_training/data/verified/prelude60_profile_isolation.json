@@ -1,0 +1,87 @@
+{
+  "schema_version": 1,
+  "system": "KMG PRELUDE 60",
+  "source_pdf": "PVC Prelude_bg.pdf",
+  "source_page": 2,
+  "profiles": {
+    "482.30": {
+      "role": "FRAME",
+      "label_bg": "Каса",
+      "catalogue_section_box": [
+        46.0,
+        112.0,
+        91.0,
+        166.0
+      ],
+      "profile_body_box": [
+        48.0,
+        121.0,
+        90.5,
+        164.5
+      ],
+      "human_confirmed": {
+        "full_working_mm": 64,
+        "visible_mm": 42,
+        "zone_mm": 22,
+        "zone_sides": 1,
+        "formula": "64 - 22 = 42"
+      }
+    },
+    "482.05": {
+      "role": "SASH",
+      "label_bg": "Крило",
+      "catalogue_section_box": [
+        211.0,
+        104.0,
+        260.0,
+        183.0
+      ],
+      "profile_body_box": [
+        214.0,
+        120.0,
+        258.5,
+        175.0
+      ],
+      "human_confirmed": {
+        "full_working_mm": 78,
+        "visible_mm": 56,
+        "zone_mm": 22,
+        "zone_sides": 1,
+        "formula": "78 - 22 = 56",
+        "note": "78 е human-confirmed working dimension; не се подменя като каталогова кота."
+      }
+    },
+    "482.21": {
+      "role": "MULLION",
+      "label_bg": "Делител",
+      "catalogue_section_box": [
+        211.0,
+        241.0,
+        259.5,
+        315.0
+      ],
+      "profile_body_box": [
+        214.0,
+        255.0,
+        258.0,
+        304.0
+      ],
+      "human_confirmed": {
+        "full_working_mm": 84,
+        "visible_mm": 40,
+        "zone_mm": 22,
+        "zone_sides": 2,
+        "formula": "84 - 22 - 22 = 40"
+      }
+    }
+  },
+  "safety": {
+    "catalogue_source": true,
+    "ai_redrawn": false,
+    "human_verification_required": true,
+    "production_contour_validated": false,
+    "assembly_anchors_validated": false,
+    "machine_ready": false,
+    "production_approved": false
+  }
+}

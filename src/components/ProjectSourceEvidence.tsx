@@ -5,7 +5,9 @@ import type { CatalogueProfile, ProfileRole } from '../profileCatalogueTypes'
 import { validateCatalogueProfile } from '../profileCatalogueValidation'
 import { wp78CatalogueVisibility } from '../realData/wp78CatalogueVisibility'
 import { NADEZHDA_HUMAN_PROFILE_MEASUREMENTS } from '../realData/nadezhdaHumanProfileMeasurements'
+import { NADEZHDA_PRELUDE_VISUAL_SECTIONS } from '../profileData/visualSectionLibrary'
 import { ProfileEditor } from './ProfileEditor'
+import { ProfileSectionViewer } from './ProfileSectionViewer'
 
 interface Props {
   profiles: CatalogueProfile[]
@@ -24,6 +26,8 @@ const wp78BlockerLabels: Readonly<Record<string, string>> = {
 export function ProjectSourceEvidence({ profiles, onProfiles, onOpenCatalogue }: Props) {
   const [editing, setEditing] = useState<CatalogueProfile | null>(null)
   const [errors, setErrors] = useState<string[]>([])
+  const [selectedVisualSectionCode, setSelectedVisualSectionCode] = useState('482.05')
+  const selectedVisualSection = NADEZHDA_PRELUDE_VISUAL_SECTIONS.find((section) => section.profileCode === selectedVisualSectionCode) ?? NADEZHDA_PRELUDE_VISUAL_SECTIONS[0]
 
   const importedEvidence = (evidenceId: string) => profiles.find((profile) => profile.sourceEvidenceId === evidenceId && profile.status !== 'ARCHIVED')
   const beginReview = (evidenceId: string, role: ProfileRole) => {
@@ -70,8 +74,25 @@ export function ProjectSourceEvidence({ profiles, onProfiles, onOpenCatalogue }:
           </div>
           <code>{item.measurementFormulaBg}</code>
           <p>{item.noteBg}</p>
+          <button type="button" className="project-source-section-open" onClick={() => setSelectedVisualSectionCode(item.code)}>Покажи каталогово сечение</button>
         </section>)}
       </div>
+      <section className="project-source-section-library" aria-labelledby="project-source-section-library-title">
+        <div className="project-source-section-library-head">
+          <div>
+            <span>PROFILE DATA 03.2.1 · VERIFIED CATALOGUE VISUAL LIBRARY</span>
+            <b id="project-source-section-library-title">Каталогови сечения · PRELUDE 60</b>
+            <small>Показва директно извлечените профилни сечения от каталога PRELUDE. Human-confirmed измервателната семантика остава отделна; изображението не се обявява за изолиран производствен CAD контур.</small>
+          </div>
+          <strong>CATALOGUE VISUAL</strong>
+        </div>
+        <div className="project-source-section-tabs" role="tablist" aria-label="Избор на каталогово профилно сечение">
+          {NADEZHDA_PRELUDE_VISUAL_SECTIONS.map((section) => <button key={section.profileCode} type="button" role="tab" aria-selected={selectedVisualSection.profileCode === section.profileCode} onClick={() => setSelectedVisualSectionCode(section.profileCode)}>
+            <b>{section.profileCode}</b><span>{section.roleLabelBg}</span><small>{section.formulaBg}</small>
+          </button>)}
+        </div>
+        <ProfileSectionViewer section={selectedVisualSection}/>
+      </section>
       <div className="project-source-human-rule"><b>Потвърдено правило за видима ширина</b><span>Каса: 64 − 22 = 42 mm · Крило: 78 − 22 = 56 mm · Делител: 84 − 22 − 22 = 40 mm. Правилото е knowledge evidence и не отключва автоматично производствена геометрия.</span></div>
       <footer className="project-source-safety">ИЗТОЧНИК: НАДЕЖДА · ТЕХНИЧЕСКИ КОНТАКТ: БАТ ТРИФОН · БЕЗ АВТОМАТИЧЕН CATALOGUE MERGE · ПРАВИЛА: НЕВАЛИДИРАНИ · ГОТОВ ЗА МАШИНА: НЕ · ПРОИЗВОДСТВЕНО ОДОБРЕН: НЕ</footer>
     </article>

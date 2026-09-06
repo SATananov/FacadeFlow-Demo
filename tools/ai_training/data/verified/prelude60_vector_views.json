@@ -1,0 +1,100 @@
+{
+  "schema_version": 1,
+  "system": "KMG PRELUDE 60",
+  "source_pdf": "PVC Prelude_bg.pdf",
+  "source_page": 2,
+  "coordinate_system": "PDF points, origin top-left as exposed by PyMuPDF page coordinates",
+  "profiles": {
+    "482.30": {
+      "role": "FRAME",
+      "label_bg": "Каса",
+      "section_only_box": [
+        44,
+        91,
+        96,
+        168
+      ],
+      "section_with_dimensions_box": [
+        34,
+        88,
+        112,
+        182
+      ],
+      "catalogue_dimensions": {
+        "system_depth_mm": 60,
+        "overall_extent_mm": 64,
+        "visible_mm": 42
+      },
+      "human_confirmed": {
+        "full_working_mm": 64,
+        "visible_mm": 42,
+        "zone_mm": 22,
+        "zone_sides": 1,
+        "formula": "64 - 22 = 42"
+      }
+    },
+    "482.05": {
+      "role": "SASH",
+      "label_bg": "Крило",
+      "section_only_box": [
+        212,
+        96,
+        268,
+        185
+      ],
+      "section_with_dimensions_box": [
+        198,
+        90,
+        282,
+        198
+      ],
+      "catalogue_dimensions": {
+        "system_depth_mm": 60,
+        "overall_extent_mm": 56
+      },
+      "human_confirmed": {
+        "full_working_mm": 78,
+        "visible_mm": 56,
+        "zone_mm": 22,
+        "zone_sides": 1,
+        "formula": "78 - 22 = 56",
+        "note": "78 is human-confirmed working interpretation, not silently substituted into the catalogue drawing."
+      }
+    },
+    "482.21": {
+      "role": "MULLION",
+      "label_bg": "Делител",
+      "section_only_box": [
+        212,
+        239,
+        270,
+        319
+      ],
+      "section_with_dimensions_box": [
+        198,
+        232,
+        284,
+        334
+      ],
+      "catalogue_dimensions": {
+        "system_depth_mm": 60,
+        "overall_extent_mm": 84,
+        "visible_mm": 40
+      },
+      "human_confirmed": {
+        "full_working_mm": 84,
+        "visible_mm": 40,
+        "zone_mm": 22,
+        "zone_sides": 2,
+        "formula": "84 - 22 - 22 = 40"
+      }
+    }
+  },
+  "safety": {
+    "verified_catalogue_visual": true,
+    "isolated_production_contour": false,
+    "assembly_anchors_validated": false,
+    "machine_ready": false,
+    "production_approved": false
+  }
+}

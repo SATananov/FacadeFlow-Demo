@@ -45,46 +45,112 @@ function unitMultiplier(unit: string | undefined) {
   return 1
 }
 
-function parseDimensions(text: string) {
+function toMillimetres(value: number, unit: string | undefined) {
+  return Number((value * unitMultiplier(unit)).toFixed(6))
+}
+
+type ParsedDimensions =
+  | { status: 'PARSED'; widthMm: number; heightMm: number; excerpt: string }
+  | { status: 'AMBIGUOUS_UNITS'; excerpt: string }
+
+function parseDimensions(text: string): ParsedDimensions | null {
   const patterns = [
-    /\b(\d{1,5}(?:[.,]\d+)?)\s*(mm|мм|cm|см|m|м)?\s*[xх×]\s*(\d{1,5}(?:[.,]\d+)?)\s*(mm|мм|cm|см|m|м)?\b/i,
-    /\b(\d{1,5}(?:[.,]\d+)?)\s*(mm|мм|cm|см|m|м)?\s+(?:на|by)\s+(\d{1,5}(?:[.,]\d+)?)\s*(mm|мм|cm|см|m|м)?\b/i,
+    /\b(\d{1,5}(?:[.,]\d+)?)\s*(mm|мм|cm|см|m|м)?\s*[xх×]\s*(\d{1,5}(?:[.,]\d+)?)\s*(mm|мм|cm|см|m|м)?(?!\s*(?:mm|мм|cm|см|m|м))/i,
+    /\b(\d{1,5}(?:[.,]\d+)?)\s*(mm|мм|cm|см|m|м)?\s+(?:на|by)\s+(\d{1,5}(?:[.,]\d+)?)\s*(mm|мм|cm|см|m|м)?(?!\s*(?:mm|мм|cm|см|m|м))/i,
   ]
   for (const pattern of patterns) {
     const match = text.match(pattern)
     if (!match) continue
-    const sharedUnit = match[2] || match[4]
-    const width = Number(match[1].replace(',', '.')) * unitMultiplier(match[2] || sharedUnit)
-    const height = Number(match[3].replace(',', '.')) * unitMultiplier(match[4] || sharedUnit)
-    if (width > 0 && height > 0) return { widthMm: width, heightMm: height, excerpt: match[0] }
+    const widthRaw = match[1]
+    const heightRaw = match[3]
+    const widthValue = Number(widthRaw.replace(',', '.'))
+    const heightValue = Number(heightRaw.replace(',', '.'))
+    const widthUnit = match[2]?.toLowerCase()
+    const heightUnit = match[4]?.toLowerCase()
+    if (!(widthValue > 0 && heightValue > 0)) continue
+
+    if (widthUnit && heightUnit) {
+      return {
+        status: 'PARSED',
+        widthMm: toMillimetres(widthValue, widthUnit),
+        heightMm: toMillimetres(heightValue, heightUnit),
+        excerpt: match[0],
+      }
+    }
+
+    if (!widthUnit && !heightUnit) {
+      if (/[.,]/.test(widthRaw) || /[.,]/.test(heightRaw)) return { status: 'AMBIGUOUS_UNITS', excerpt: match[0] }
+      return { status: 'PARSED', widthMm: widthValue, heightMm: heightValue, excerpt: match[0] }
+    }
+
+    const sharedUnit = widthUnit || heightUnit
+    const bareRaw = widthUnit ? heightRaw : widthRaw
+    const bareValue = widthUnit ? heightValue : widthValue
+    const canShare = sharedUnit === 'cm' || sharedUnit === 'см'
+      ? !/[.,]/.test(bareRaw) && bareValue >= 10
+      : sharedUnit === 'm' || sharedUnit === 'м'
+        ? bareValue <= 20
+        : !/[.,]/.test(bareRaw) && bareValue >= 50
+
+    if (!canShare) return { status: 'AMBIGUOUS_UNITS', excerpt: match[0] }
+    return {
+      status: 'PARSED',
+      widthMm: toMillimetres(widthValue, widthUnit || sharedUnit),
+      heightMm: toMillimetres(heightValue, heightUnit || sharedUnit),
+      excerpt: match[0],
+    }
   }
   return null
 }
 
 function parseQuantity(text: string) {
-  const patterns = [
+  const numericPatterns = [
     /(?:qty|quantity|количество)\s*[:=]?\s*(\d{1,4})\b/i,
-    /\b(\d{1,4})\s*(?:бр\.?|броя|pieces?|pcs?)\b/i,
+    /\b(\d{1,4})\s*(?:бр\.?(?=\s|[,;.]|$)|броя(?=\s|[,;.]|$)|pieces?\b|pcs?\b)/i,
   ]
-  for (const pattern of patterns) {
+  for (const pattern of numericPatterns) {
     const match = text.match(pattern)
     if (match && Number(match[1]) > 0) return { quantity: Number(match[1]), excerpt: match[0] }
+  }
+  const wordMatch = text.match(/(един|една|едно|два|две|три|четири|пет|шест|one|two|three|four|five|six)\s*(?:бр\.?(?=\s|[,;.]|$)|броя(?=\s|[,;.]|$)|pieces?\b|pcs?\b)/i)
+  if (wordMatch) {
+    const quantity = numberWords[wordMatch[1].toLocaleLowerCase('bg')]
+    if (quantity > 0) return { quantity, excerpt: wordMatch[0] }
   }
   return null
 }
 
 function parseFieldCount(text: string) {
-  const numeric = text.match(/(\d{1,2})\s*(?:полета|поле|\bfields?\b|\bsections?\b)/i)
+  const orientation = '(?:(?:вертикални|хоризонтални|vertical|horizontal)\\s+)?'
+  const numeric = text.match(new RegExp(`(\\d{1,2})\\s*${orientation}(?:полета|поле|fields?|sections?)`, 'i'))
   if (numeric && Number(numeric[1]) > 0 && Number(numeric[1]) <= 12) return { count: Number(numeric[1]), excerpt: numeric[0] }
-  const words = text.match(/(един|едно|два|две|три|четири|пет|шест|\btwo\b|\bthree\b|\bfour\b|\bfive\b|\bsix\b)\s+(?:полета|поле|fields?|sections?)/i)
+  const words = text.match(new RegExp(`(един|едно|два|две|три|четири|пет|шест|two|three|four|five|six)\\s+${orientation}(?:полета|поле|fields?|sections?)`, 'i'))
   if (words) return { count: numberWords[words[1].toLocaleLowerCase('bg')], excerpt: words[0] }
   return null
+}
+
+function parseExplicitSingleLeafTopology(text: string) {
+  const match = text.match(/(?:едно\s+(?:високо\s+)?(?:отваряемо\s+)?(?:крило|листо)|един\s+(?:висок\s+)?(?:отваряем\s+)?(?:лист|leaf)|еднокрил(?:а|ен|о)?(?=\s|[,;.]|$)|single[- ]leaf)/iu)
+  return match ? { count: 1, excerpt: match[0] } : null
+}
+
+function parseLowerPanelSemantics(text: string) {
+  const panel = text.match(/(?:долен|долния|долната|долно|lower|bottom)\s+(?:(?:непрозрачен|плътен|solid|opaque)\s+)?(?:панел|panel)/i)
+  const divider = text.match(/(?:хоризонтален\s+делител|horizontal\s+(?:divider|transom))/i)
+  if (!panel) return null
+  const height = text.match(/(?:долен|долния|долната|долно|lower|bottom)[^,;.]{0,100}?(?:панел|panel)(?:[^,;.]{0,60}?(?:височина|height)\s*(?:на|of|[:=])?|\s*(?:на|of|[:=])?)\s*(\d{2,4}(?:[.,]\d+)?)\s*(mm|мм|cm|см|m|м)/i)
+  const upperGlazed = text.match(/(?:горн(?:ата|а)\s+част[^,;.]{0,40}?(?:остъклена|стъкло)|upper\s+(?:part|zone)[^,;.]{0,40}?(?:glazed|glass))/i)
+  return {
+    heightMm: height ? toMillimetres(Number(height[1].replace(',', '.')), height[2]) : undefined,
+    upperZoneRole: upperGlazed ? 'GLAZING' as const : 'UNRESOLVED' as const,
+    excerpt: [divider?.[0], panel?.[0], height?.[0], upperGlazed?.[0]].filter(Boolean).join(' · '),
+  }
 }
 
 function parseOpeningType(text: string): { type: FacadeFlowIntentOpeningType; excerpt: string } | null {
   const patterns: Array<[RegExp, FacadeFlowIntentOpeningType]> = [
     [/(?:tilt\s*[-+&/]?\s*turn|отваряемо\s*\+\s*падащо|отваряемо\s+и\s+падащо|осово\s*[- ]?(?:обръщателно|откидно))/i, 'TILT_TURN'],
-    [/(?:плъзгащо|плъзгащ|\bsliding\b)/i, 'SLIDING'],
+    [/(?:плъзгащо|плъзгащ|плъзгаща|плъзгащи|плъзга|плъзгат|\bsliding\b|\bslides?\b)/i, 'SLIDING'],
     [/(?:падащо|\btilt\b)/i, 'TILT'],
     [/(?:\bturn\b|\bcasement\b)/i, 'TURN'],
     [/(?:фикс(?:ирано|иран|но)?|\bfixed\b)/i, 'FIXED'],
@@ -97,16 +163,37 @@ function parseOpeningType(text: string): { type: FacadeFlowIntentOpeningType; ex
 }
 
 function parseOperableSignal(text: string): { excerpt: string } | null {
-  const match = text.match(/(?:отваряемо|отваряем|\boperable\b|\bopenable\b|\bopening sash\b)/i)
+  const match = text.match(/(?:отваряемо|отваряем|се\s+отваря|отваря\s+се|\boperable\b|\bopenable\b|\bopening sash\b|\bopens?\b)/i)
   return match ? { excerpt: match[0] } : null
 }
 
 function parseOpeningDirection(text: string): { direction: FacadeFlowIntentOpeningDirection; excerpt: string } | null {
   const patterns: Array<[RegExp, FacadeFlowIntentOpeningDirection]> = [
-    [/(?:посока|отваряне|opening)\s*[:=-]?\s*(?:ляво|лява|\bleft\b)/i, 'LEFT'],
-    [/(?:посока|отваряне|opening)\s*[:=-]?\s*(?:дясно|дясна|\bright\b)/i, 'RIGHT'],
+    [/(?:посока|отваряне|opening)\s*[:=-]?\s*(?:ляво|лява|наляво|\bleft\b)/i, 'LEFT'],
+    [/(?:посока|отваряне|opening)\s*[:=-]?\s*(?:дясно|дясна|надясно|\bright\b)/i, 'RIGHT'],
     [/(?:ляво|\bleft\b)[ -]?(?:отваряне|opening)/i, 'LEFT'],
     [/(?:дясно|\bright\b)[ -]?(?:отваряне|opening)/i, 'RIGHT'],
+    [/(?:се\s+)?отваря(?:\s+се)?[^,;.]{0,18}?(?:наляво|към\s+ляво)/i, 'LEFT'],
+    [/(?:се\s+)?отваря(?:\s+се)?[^,;.]{0,18}?(?:надясно|към\s+дясно)/i, 'RIGHT'],
+    [/\b(?:turn|opens?)\s+(?:to\s+(?:the\s+)?)?left\b/i, 'LEFT'],
+    [/\b(?:turn|opens?)\s+(?:to\s+(?:the\s+)?)?right\b/i, 'RIGHT'],
+    [/(?:tilt\s*[-+&/]?\s*turn|\bturn\b|отваряемо|отваряем|отваря)\s+(?:наляво|към\s+ляво|\bleft\b)/i, 'LEFT'],
+    [/(?:tilt\s*[-+&/]?\s*turn|\bturn\b|отваряемо|отваряем|отваря)\s+(?:надясно|към\s+дясно|\bright\b)/i, 'RIGHT'],
+  ]
+  for (const [pattern, direction] of patterns) {
+    const match = text.match(pattern)
+    if (match) return { direction, excerpt: match[0] }
+  }
+  return null
+}
+
+
+function parseSlidingDirection(text: string): { direction: FacadeFlowIntentOpeningDirection; excerpt: string } | null {
+  const patterns: Array<[RegExp, FacadeFlowIntentOpeningDirection]> = [
+    [/(?:плъзга(?:що|щ|ща|т)?|плъзване|slide|slides|sliding)[^,;.]{0,24}?(?:наляво|към\s+ляво|\bleft\b)/i, 'LEFT'],
+    [/(?:плъзга(?:що|щ|ща|т)?|плъзване|slide|slides|sliding)[^,;.]{0,24}?(?:надясно|към\s+дясно|\bright\b)/i, 'RIGHT'],
+    [/(?:наляво|към\s+ляво|\bleft\b)[^,;.]{0,24}?(?:плъзга(?:що|щ|ща|т)?|плъзване|slide|slides|sliding)/i, 'LEFT'],
+    [/(?:надясно|към\s+дясно|\bright\b)[^,;.]{0,24}?(?:плъзга(?:що|щ|ща|т)?|плъзване|slide|slides|sliding)/i, 'RIGHT'],
   ]
   for (const [pattern, direction] of patterns) {
     const match = text.match(pattern)
@@ -130,24 +217,50 @@ function captureAfterLabel(text: string, labels: string[]) {
 }
 
 
-function captureExplicitProfileReference(text: string, labels: string[]) {
+function captureExplicitProfileReferences(text: string, labels: string[]) {
   const escaped = labels.map((label) => label.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|')
-  const match = text.match(new RegExp(`(?:${escaped})\\s*[:=-]?\\s*([A-ZА-Я0-9][A-ZА-Я0-9._ -]{0,30}\\d[A-ZА-Я0-9._ -]{0,30})(?=\\s*(?:,|;|$))`, 'iu'))
-  return match ? { value: cleanCapture(match[1]), excerpt: match[0] } : null
+  const matcher = new RegExp(`(?:${escaped})\\s*[:=-]?\\s*([A-ZА-Я0-9]*\\d[A-ZА-Я0-9]*(?:[._-][A-ZА-Я0-9]+)+|[A-ZА-Я]+[-_]?[0-9]+[A-ZА-Я0-9._-]*)(?=\\s*(?:,|;|\\.|\\s+(?:и|and)\\s+|$))`, 'giu')
+  return [...text.matchAll(matcher)].map((match) => ({
+    value: cleanCapture(match[1])!,
+    excerpt: match[0],
+  }))
+}
+
+function distinctProfileReferences(references: Array<{ value: string; excerpt: string }>) {
+  const byKey = new Map<string, { value: string; excerpt: string }>()
+  for (const reference of references) {
+    const key = reference.value.toLocaleUpperCase('bg')
+    if (!byKey.has(key)) byKey.set(key, reference)
+  }
+  return [...byKey.values()]
 }
 
 function parseRal(text: string) {
-  const match = text.match(/\bRAL\s*[-:]?\s*(\d{3,4})\b/i)
-  return match ? { value: `RAL ${match[1]}`, excerpt: match[0] } : null
+  const matches = [...text.matchAll(/\bRAL\s*[-:]?\s*(\d{3,4})\b/gi)]
+  const values = [...new Set(matches.map((match) => `RAL ${match[1]}`))]
+  if (values.length > 1) return { status: 'CONFLICT' as const, values, excerpt: matches.map((match) => match[0]).join(' / ') }
+  const match = matches[0]
+  return match ? { status: 'PARSED' as const, value: values[0], excerpt: match[0] } : null
 }
 
 function parseGlazing(text: string) {
-  const triple = text.match(/(?:троен\s+стъклопакет|\btriple\s+glaz(?:ing|ed unit)\b)/i)
-  if (triple) return { value: triple[0], excerpt: triple[0] }
-  const double = text.match(/(?:двоен\s+стъклопакет|\bdouble\s+glaz(?:ing|ed unit)\b)/i)
-  if (double) return { value: double[0], excerpt: double[0] }
+  const tripleMatches = [...text.matchAll(/(?:(?:троен|triple)\s+(?:стъклопакет|glaz(?:ing|ed unit)))/gi)]
+  const doubleMatches = [...text.matchAll(/(?:(?:двоен|double)\s+(?:стъклопакет|glaz(?:ing|ed unit)))/gi)]
+  if (tripleMatches.length && doubleMatches.length) {
+    return {
+      status: 'CONFLICT' as const,
+      values: [doubleMatches[0][0], tripleMatches[0][0]],
+      excerpt: `${doubleMatches[0][0]} / ${tripleMatches[0][0]}`,
+    }
+  }
+  const upperGlazed = text.match(/(?:горн(?:ата|а)\s+част[^,;.]{0,40}?(?:остъклена|стъкло)|upper\s+(?:part|zone)[^,;.]{0,40}?(?:glazed|glass))/i)
+  if (upperGlazed) return { status: 'PARSED' as const, value: 'Горна остъклена зона', excerpt: upperGlazed[0] }
+  const triple = text.match(/(?:(?:троен|triple)\s+(?:стъклопакет|glaz(?:ing|ed unit)))/i)
+  if (triple) return { status: 'PARSED' as const, value: triple[0], excerpt: triple[0] }
+  const double = text.match(/(?:(?:двоен|double)\s+(?:стъклопакет|glaz(?:ing|ed unit)))/i)
+  if (double) return { status: 'PARSED' as const, value: double[0], excerpt: double[0] }
   const generic = text.match(/(?:стъклопакет|стъкло|\bglazing unit\b|\bglass\b|\bpanel\b|панел)(?:\s+[^,;.]{0,60})?/i)
-  return generic ? { value: cleanCapture(generic[0])!, excerpt: generic[0] } : null
+  return generic ? { status: 'PARSED' as const, value: cleanCapture(generic[0])!, excerpt: generic[0] } : null
 }
 
 function parseHandle(text: string) {
@@ -158,16 +271,21 @@ function parseHandle(text: string) {
 }
 
 function parseHinges(text: string) {
-  const quantity = text.match(/(\d{1,2}|един|една|едно|два|две|три|четири|пет|шест|one|two|three|four|five|six)\s*(?:(?:скрити|видими|concealed|hidden|visible)\s+)?(?:панти|панта|hinges?)/i)
+  const quantityPattern = /(\d{1,2}|един|една|едно|два|две|три|четири|пет|шест|one|two|three|four|five|six)\s*(?:(?:скрити|видими|concealed|hidden|visible)\s+)?(?:панти|панта|hinges?)/gi
+  const quantityMatches = [...text.matchAll(quantityPattern)]
+  const quantities = [...new Set(quantityMatches.map((match) => {
+    const token = match[1].toLocaleLowerCase('bg')
+    return /^\d+$/.test(token) ? Number(token) : numberWords[token]
+  }).filter((value): value is number => Number.isFinite(value)))]
   const descriptor = text.match(/(?:скрити|видими|\bconcealed\b|\bhidden\b|\bvisible\b)\s+(?:панти|hinges?)/i)
-  const quantityToken = quantity?.[1]?.toLocaleLowerCase('bg')
-  const parsedQuantity = quantityToken ? (/^\d+$/.test(quantityToken) ? Number(quantityToken) : numberWords[quantityToken]) : undefined
   return {
-    quantity: parsedQuantity,
+    quantity: quantities.length === 1 ? quantities[0] : undefined,
+    quantityConflict: quantities.length > 1 ? quantities : undefined,
     descriptor: descriptor ? cleanCapture(descriptor[0]) : undefined,
-    excerpt: [quantity?.[0], descriptor?.[0]].filter(Boolean).join(' · ') || undefined,
+    excerpt: [quantityMatches.map((match) => match[0]).join(' / '), descriptor?.[0]].filter(Boolean).join(' · ') || undefined,
   }
 }
+
 
 function positionIndex(token: string, count: number) {
   const value = token.toLocaleLowerCase('bg')
@@ -186,26 +304,59 @@ function positionIndex(token: string, count: number) {
   return null
 }
 
-function setFieldRoleFromText(fields: FacadeFlowIntentField[], index: number, phrase: string) {
+function parseFieldLocalDirection(text: string): { direction: FacadeFlowIntentOpeningDirection; excerpt: string } | null {
+  const explicit = parseSlidingDirection(text) ?? parseOpeningDirection(text)
+  if (explicit) return explicit
+  const left = text.match(/(?:наляво|към\s+ляво|^\s*left\b)/i)
+  if (left) return { direction: 'LEFT', excerpt: left[0] }
+  const right = text.match(/(?:надясно|към\s+дясно|^\s*right\b)/i)
+  if (right) return { direction: 'RIGHT', excerpt: right[0] }
+  return null
+}
+
+function setFieldRoleFromText(fields: FacadeFlowIntentField[], index: number, phrase: string, contextualOpeningType?: FacadeFlowIntentOpeningType) {
   if (index < 0 || index >= fields.length) return
   const opening = parseOpeningType(phrase)
   const operable = parseOperableSignal(phrase)
-  if (!opening && !operable) return
-  const role = opening?.type === 'FIXED' ? 'FIXED' : opening?.type === 'SLIDING' ? 'SLIDING_SASH' : 'OPENING_SASH'
+  const direction = parseFieldLocalDirection(phrase)
+  const swing = parseSwing(phrase)
+  if (!opening && !operable && !direction && !swing) return
+  const current = fields[index]
+  const openingType = opening?.type
+    ?? (operable && direction ? 'TURN' : undefined)
+    ?? (direction && contextualOpeningType ? contextualOpeningType : current.openingType)
+  const role = openingType === 'FIXED'
+    ? 'FIXED'
+    : openingType === 'SLIDING'
+      ? 'SLIDING_SASH'
+      : openingType || operable || direction || swing
+        ? 'OPENING_SASH'
+        : current.role
+  const unresolved: string[] = []
+  if (role === 'OPENING_SASH' && !openingType) unresolved.push('Тип отваряне на полето')
+  if ((openingType === 'TURN' || openingType === 'TILT_TURN') && !(direction?.direction ?? current.openingDirection)) unresolved.push('Посока ляво / дясно')
   fields[index] = {
-    ...fields[index],
+    ...current,
     role,
-    openingType: opening?.type,
-    unresolved: opening ? [] : ['Тип отваряне на полето'],
+    openingType,
+    openingDirection: direction?.direction ?? current.openingDirection,
+    swing: swing?.swing ?? current.swing,
+    unresolved,
   }
 }
 
 function applyCompoundFieldRoles(text: string, fields: FacadeFlowIntentField[]) {
   if (fields.length < 2) return
-  const paired = text.match(/(?:ляв(?:ото|ия)?\s+(?:поле\s+)?и\s+д[ея]сн(?:ото|ия)?\s+(?:поле\s+)?|left\s+and\s+right\s+)(фикс(?:ирани|ирано|иран|но)?|fixed|отваряеми|отваряемо|openable|operable|плъзгащи|sliding)/i)
+  const paired = text.match(/(?:ляв(?:ото|ия)?\s+(?:поле\s+)?и\s+д[ея]сн(?:ото|ия)?\s+(?:поле\s+)?|left\s+and\s+right\s+)(?:(?:са|are)\s+)?(фикс(?:ирани|ирано|иран|но)?|fixed|отваряеми|отваряемо|openable|operable|плъзгащи|sliding)/i)
   if (paired?.[1]) {
     setFieldRoleFromText(fields, 0, paired[1])
     setFieldRoleFromText(fields, fields.length - 1, paired[1])
+  }
+
+  const bothSliding = text.match(/(?:и\s+)?двете(?:\s+(?:полета|крила))?\s+(?:(?:са|are)\s+)?(плъзгащи|sliding)/i)
+  if (bothSliding?.[1] && fields.length === 2) {
+    setFieldRoleFromText(fields, 0, bothSliding[1])
+    setFieldRoleFromText(fields, 1, bothSliding[1])
   }
 
   const edge = text.match(/(?:двете\s+)?(?:крайните|крайни)\s+(?:полета\s+)?(фикс(?:ирани|ирано|иран|но)?|fixed|отваряеми|отваряемо|openable|operable)/i)
@@ -214,7 +365,7 @@ function applyCompoundFieldRoles(text: string, fields: FacadeFlowIntentField[]) 
     setFieldRoleFromText(fields, fields.length - 1, edge[1])
   }
 
-  const ordinalPair = /(първ(?:ото|ия)?|втор(?:ото|ия)?|трет(?:ото|ия)?|четвърт(?:ото|ия)?|пет(?:ото|ия)?|шест(?:ото|ия)?|first|second|third|fourth|fifth|sixth)\s+(?:поле\s+)?и\s+(първ(?:ото|ия)?|втор(?:ото|ия)?|трет(?:ото|ия)?|четвърт(?:ото|ия)?|пет(?:ото|ия)?|шест(?:ото|ия)?|first|second|third|fourth|fifth|sixth)\s+(?:поле\s+)?(фикс(?:ирани|ирано|иран|но)?|fixed|отваряеми|отваряемо|openable|operable|плъзгащи|sliding)/gi
+  const ordinalPair = /(първ(?:ото|ия)?|втор(?:ото|ия)?|трет(?:ото|ия)?|четвърт(?:ото|ия)?|пет(?:ото|ия)?|шест(?:ото|ия)?|first|second|third|fourth|fifth|sixth)\s+(?:поле\s+)?и\s+(първ(?:ото|ия)?|втор(?:ото|ия)?|трет(?:ото|ия)?|четвърт(?:ото|ия)?|пет(?:ото|ия)?|шест(?:ото|ия)?|first|second|third|fourth|fifth|sixth)\s+(?:поле\s+)?(?:(?:са|are)\s+)?(фикс(?:ирани|ирано|иран|но)?|fixed|отваряеми|отваряемо|openable|operable|плъзгащи|sliding)/gi
   for (const match of text.matchAll(ordinalPair)) {
     const firstIndex = positionIndex(match[1], fields.length)
     const secondIndex = positionIndex(match[2], fields.length)
@@ -232,11 +383,26 @@ function createFields(text: string, count: number | null, evidenceId: string): F
     evidenceIds: [evidenceId],
     unresolved: ['Роля / отваряемост на полето'],
   }))
-  const matcher = /(ляв(?:ото|ото поле)?|д[ея]сн(?:ото|ото поле)?|средн(?:ото|ото поле)?|първ(?:ото|ото поле)?|втор(?:ото|ото поле)?|трет(?:ото|ото поле)?|четвърт(?:ото|ото поле)?|пет(?:ото|ото поле)?|шест(?:ото|ото поле)?|\bleft\b|\bright\b|\bcenter\b|\bmiddle\b|\bfirst\b|\bsecond\b|\bthird\b|\bfourth\b|\bfifth\b|\bsixth\b)[^,;.]{0,35}?(фикс(?:ирано|иран|но)?|\bfixed\b|отваряемо|отваряем|\bturn\b|tilt\s*[-+&/]?\s*turn|осово\s*[- ]?(?:обръщателно|откидно)|падащо|\btilt\b|плъзгащо|\bsliding\b)/gi
-  for (const match of text.matchAll(matcher)) {
+  const fieldActionLookahead = '(?:поле\\b|fixed\\b|фикс(?:ирано|иран|ирани|но)?\\b|tilt(?:[- ]turn)?\\b|turn\\b|sliding\\b|плъзга\\w*|отваряем\\w*)'
+  const position = `(ляв(?:ото|ия)|ляво(?=\\s+${fieldActionLookahead})|д[ея]сн(?:ото|ия)|д[ея]сно(?=\\s+${fieldActionLookahead})|средн(?:ото|ия)|средно(?=\\s+${fieldActionLookahead})|първ(?:ото|ия)|първо(?=\\s+${fieldActionLookahead})|втор(?:ото|ия)|второ(?=\\s+${fieldActionLookahead})|трет(?:ото|ия)|трето(?=\\s+${fieldActionLookahead})|четвърт(?:ото|ия)|четвърто(?=\\s+${fieldActionLookahead})|пет(?:ото|ия)|пето(?=\\s+${fieldActionLookahead})|шест(?:ото|ия)|шесто(?=\\s+${fieldActionLookahead})|left(?=\\s+(?:field\\b|fixed\\b|tilt(?:[- ]turn)?\\b|turn\\b|sliding\\b|openable\\b|operable\\b))|right(?=\\s+(?:field\\b|fixed\\b|tilt(?:[- ]turn)?\\b|turn\\b|sliding\\b|openable\\b|operable\\b))|center(?=\\s+(?:field\\b|fixed\\b|tilt(?:[- ]turn)?\\b|turn\\b|sliding\\b|openable\\b|operable\\b))|middle(?=\\s+(?:field\\b|fixed\\b|tilt(?:[- ]turn)?\\b|turn\\b|sliding\\b|openable\\b|operable\\b))|first(?=\\s+(?:field\\b|fixed\\b|tilt(?:[- ]turn)?\\b|turn\\b|sliding\\b|openable\\b|operable\\b))|second(?=\\s+(?:field\\b|fixed\\b|tilt(?:[- ]turn)?\\b|turn\\b|sliding\\b|openable\\b|operable\\b))|third(?=\\s+(?:field\\b|fixed\\b|tilt(?:[- ]turn)?\\b|turn\\b|sliding\\b|openable\\b|operable\\b))|fourth(?=\\s+(?:field\\b|fixed\\b|tilt(?:[- ]turn)?\\b|turn\\b|sliding\\b|openable\\b|operable\\b))|fifth(?=\\s+(?:field\\b|fixed\\b|tilt(?:[- ]turn)?\\b|turn\\b|sliding\\b|openable\\b|operable\\b))|sixth(?=\\s+(?:field\\b|fixed\\b|tilt(?:[- ]turn)?\\b|turn\\b|sliding\\b|openable\\b|operable\\b)))`
+  const contextualOpeningType: FacadeFlowIntentOpeningType | undefined = /(?:плъзга|\bslid)/i.test(text) ? 'SLIDING' : undefined
+  const clauseMatcher = new RegExp(`${position}\\s*(?:поле|field)?\\s*(?:е|is)?\\s*([^,;.]{1,110})`, 'giu')
+  for (const match of text.matchAll(clauseMatcher)) {
     const index = positionIndex(match[1], count)
     if (index === null || index < 0 || index >= fields.length) continue
-    setFieldRoleFromText(fields, index, match[2])
+    setFieldRoleFromText(fields, index, match[2], contextualOpeningType)
+  }
+  const numericClauseMatcher = /(?:поле|field)\s*#?\s*(\d{1,2})\s*(?:е|се|is|[:=-])?\s*([^,;.]{1,110})/giu
+  for (const match of text.matchAll(numericClauseMatcher)) {
+    const index = Number(match[1]) - 1
+    if (index < 0 || index >= fields.length) continue
+    setFieldRoleFromText(fields, index, match[2], contextualOpeningType)
+  }
+  const compactClauseMatcher = /\bF(\d{1,2})\s*[:=-]\s*([^,;.]{1,110})/giu
+  for (const match of text.matchAll(compactClauseMatcher)) {
+    const index = Number(match[1]) - 1
+    if (index < 0 || index >= fields.length) continue
+    setFieldRoleFromText(fields, index, match[2], contextualOpeningType)
   }
   applyCompoundFieldRoles(text, fields)
   return fields
@@ -282,39 +448,89 @@ export function interpretFacadeFlowPrompt(sourceText: string, intentId = 'prompt
     intent.category = 'WINDOW'; recognized.push(recognition('category', 'Тип', 'Прозорец', text.match(/(?:прозорец|прозорци|\bwindow\b|\bwindows\b)/i)![0]))
   } else if (/(?:врата|врати|\bdoor\b|\bdoors\b)/i.test(text)) {
     intent.category = 'DOOR'; recognized.push(recognition('category', 'Тип', 'Врата', text.match(/(?:врата|врати|\bdoor\b|\bdoors\b)/i)![0]))
+  } else if (/(?:плъзгащ(?:а|а се|и|о)?\s+(?:конструкция|система)|плъзгащи\s+(?:панели|крила)|\bsliding\s+(?:construction|system|panels?|sashes?))/i.test(text)) {
+    const slidingFamily = text.match(/(?:плъзгащ(?:а|а се|и|о)?\s+(?:конструкция|система)|плъзгащи\s+(?:панели|крила)|\bsliding\s+(?:construction|system|panels?|sashes?))/i)![0]
+    intent.category = 'COMBINED'; recognized.push(recognition('category', 'Тип', 'Плъзгаща конструкция', slidingFamily))
   }
 
   const mark = text.match(/\b(?:W|D|WIN|DOOR)[-_ ]?\d{1,4}\b/i)
   if (mark) { intent.mark = mark[0].replace(/\s+/g, '-').toUpperCase(); recognized.push(recognition('mark', 'Марка', intent.mark, mark[0])) }
 
+  const dimensionWarnings: string[] = []
   const dimensions = parseDimensions(text)
-  if (dimensions) {
+  if (dimensions?.status === 'PARSED') {
     intent.dimensions = { widthMm: dimensions.widthMm, heightMm: dimensions.heightMm }
     recognized.push(recognition('dimensions', 'Размери', `${dimensions.widthMm} × ${dimensions.heightMm} mm`, dimensions.excerpt))
+  } else if (dimensions?.status === 'AMBIGUOUS_UNITS') {
+    intent.unresolved.push('Единици на общите размери')
+    dimensionWarnings.push(`Размерите „${dimensions.excerpt}“ имат двусмислени или липсващи единици и не са приети автоматично.`)
   }
 
   const quantity = parseQuantity(text)
   if (quantity) { intent.quantity = quantity.quantity; recognized.push(recognition('quantity', 'Количество', String(quantity.quantity), quantity.excerpt)) }
 
   const fields = parseFieldCount(text)
-  intent.fields = createFields(text, fields?.count ?? null, evidenceId)
-  if (fields) recognized.push(recognition('fields', 'Полета', String(fields.count), fields.excerpt))
+  const singleLeaf = fields ? null : parseExplicitSingleLeafTopology(text)
+  const fieldTopology = fields ?? singleLeaf
+  intent.fields = createFields(text, fieldTopology?.count ?? null, evidenceId)
+  if (fieldTopology) recognized.push(recognition('fields', 'Полета', String(fieldTopology.count), fieldTopology.excerpt))
 
-  const profileSystem = captureAfterLabel(text, ['профилна система', 'система', 'profile system', 'system'])
+  const explicitKnownPrelude = text.match(/\b(?:KMG\s+)?PRELUDE\s*60\b/i)
+  const profileSystem = captureAfterLabel(text, ['профилна система', 'профил система', 'система профили', 'система', 'profile system', 'profile family', 'system'])
+    ?? (explicitKnownPrelude ? { value: 'PRELUDE 60', excerpt: explicitKnownPrelude[0] } : null)
   if (profileSystem?.value) { intent.profiles.system = profileSystem.value; recognized.push(recognition('system', 'Профилна система', profileSystem.value, profileSystem.excerpt, 'MEDIUM')) }
-  const frame = captureExplicitProfileReference(text, ['каса', 'frame profile', 'frame']) ?? captureAfterLabel(text, ['каса', 'frame profile', 'frame'])
-  if (frame?.value) { intent.profiles.frame = frame.value; recognized.push(recognition('frame', 'Каса', frame.value, frame.excerpt, 'MEDIUM')) }
-  const sash = captureExplicitProfileReference(text, ['крило профил', 'профил крило', 'крило', 'sash profile', 'sash']) ?? captureAfterLabel(text, ['крило профил', 'профил крило', 'sash profile'])
-  if (sash?.value) { intent.profiles.sash = sash.value; recognized.push(recognition('sash', 'Крило', sash.value, sash.excerpt, 'MEDIUM')) }
-  const mullion = captureExplicitProfileReference(text, ['делител', 'mullion profile', 'mullion']) ?? captureAfterLabel(text, ['делител', 'mullion profile', 'mullion'])
-  if (mullion?.value) { intent.profiles.mullion = mullion.value; recognized.push(recognition('mullion', 'Делител', mullion.value, mullion.excerpt, 'MEDIUM')) }
+
+  const profileConflictWarnings: string[] = []
+  const resolveProfileRole = (
+    roleName: string,
+    recognizedId: string,
+    recognizedLabel: string,
+    explicitLabels: string[],
+    fallbackLabels: string[],
+  ) => {
+    const explicit = distinctProfileReferences(captureExplicitProfileReferences(text, explicitLabels))
+    if (explicit.length > 1) {
+      intent.unresolved.push(`Конфликт за профил ${roleName}: ${explicit.map((item) => item.value).join(' / ')}`)
+      profileConflictWarnings.push(`Открити са противоречиви профилни референции за ${roleName}; не е избрана автоматично стойност.`)
+      return undefined
+    }
+    const captured = explicit[0] ?? captureAfterLabel(text, fallbackLabels)
+    if (captured?.value) recognized.push(recognition(recognizedId, recognizedLabel, captured.value, captured.excerpt, 'MEDIUM'))
+    return captured?.value
+  }
+
+  intent.profiles.frame = resolveProfileRole(
+    'каса',
+    'frame',
+    'Каса',
+    ['профил за каса', 'профил каса', 'рамков профил', 'каса', 'frame profile', 'frame section', 'frame'],
+    ['профил за каса', 'профил каса', 'рамков профил', 'каса', 'frame profile', 'frame section', 'frame'],
+  )
+  intent.profiles.sash = resolveProfileRole(
+    'крило',
+    'sash',
+    'Крило',
+    ['крило профил', 'профил крило', 'профил за крило', 'крило', 'sash profile', 'sash section', 'sash'],
+    ['крило профил', 'профил крило', 'профил за крило', 'sash profile', 'sash section'],
+  )
+  intent.profiles.mullion = resolveProfileRole(
+    'делител',
+    'mullion',
+    'Делител',
+    ['делители', 'делителя', 'делител', 'профил делител', 'делител профил', 'профил за делител', 'mullion profile', 'mullion section', 'mullion'],
+    ['профил делител', 'делител профил', 'профил за делител', 'mullion profile', 'mullion section'],
+  )
 
   const opening = parseOpeningType(text)
   const operable = parseOperableSignal(text)
-  const direction = parseOpeningDirection(text)
+  const direction = opening?.type === 'SLIDING' ? (intent.fields.length === 1 ? (parseSlidingDirection(text) ?? parseOpeningDirection(text)) : null) : parseOpeningDirection(text)
   const swing = parseSwing(text)
-  if (opening) recognized.push(recognition('opening', 'Отваряемост', openingTypeDisplay[opening.type], opening.excerpt))
-  else if (operable) recognized.push(recognition('opening', 'Отваряемост', 'ОТВАРЯЕМО · тип неуточнен', operable.excerpt, 'MEDIUM'))
+  const hasFixedField = intent.fields.some((field) => field.role === 'FIXED')
+  const hasOpenableField = intent.fields.some((field) => field.role === 'OPENING_SASH' || field.role === 'SLIDING_SASH')
+  const hasMixedFieldOpening = intent.fields.length > 1 && hasFixedField && hasOpenableField
+  if (hasMixedFieldOpening) recognized.push(recognition('opening', 'Отваряемост', 'Смесена конструкция', text))
+  else if (opening) recognized.push(recognition('opening', 'Отваряемост', openingTypeDisplay[opening.type], opening.excerpt))
+  else if (operable) recognized.push(recognition('opening', 'Отваряемост', direction ? 'Отваряемо' : 'ОТВАРЯЕМО · тип неуточнен', operable.excerpt, direction ? 'HIGH' : 'MEDIUM'))
   if (direction) recognized.push(recognition('direction', 'Посока', openingDirectionDisplay[direction.direction], direction.excerpt))
   if (swing) recognized.push(recognition('swing', 'Навътре / навън', swingDisplay[swing.swing], swing.excerpt))
 
@@ -323,33 +539,81 @@ export function interpretFacadeFlowPrompt(sourceText: string, intentId = 'prompt
     intent.fields[0] = {
       ...current,
       role: opening ? (opening.type === 'FIXED' ? 'FIXED' : opening.type === 'SLIDING' ? 'SLIDING_SASH' : 'OPENING_SASH') : operable ? 'OPENING_SASH' : current.role,
-      openingType: opening?.type,
+      openingType: opening?.type ?? (operable && direction ? 'TURN' : undefined),
       openingDirection: direction?.direction,
       swing: swing?.swing,
-      unresolved: opening ? [] : operable ? ['Тип отваряне на полето'] : current.unresolved,
+      unresolved: opening || (operable && direction) ? [] : operable ? ['Тип отваряне на полето'] : current.unresolved,
     }
   } else if (intent.fields.length > 0 && (opening || operable) && !intent.fields.some((field) => field.openingType || field.role === 'OPENING_SASH' || field.role === 'SLIDING_SASH')) {
     intent.unresolved.push('Отваряемостта е разпозната, но не е еднозначно свързана с конкретно поле.')
   }
-  if (intent.fields.length > 1 && direction) intent.unresolved.push('Посоката на отваряне е разпозната, но не е еднозначно свързана с конкретно поле.')
-  if (intent.fields.length > 1 && swing) intent.unresolved.push('Навътре / навън е разпознато, но не е еднозначно свързано с конкретно поле.')
+  const fieldHasBoundDirection = intent.fields.some((field) => field.openingDirection === 'LEFT' || field.openingDirection === 'RIGHT')
+  const fieldHasBoundSwing = intent.fields.some((field) => field.swing === 'INWARD' || field.swing === 'OUTWARD')
+  if (intent.fields.length > 1 && direction && !fieldHasBoundDirection) intent.unresolved.push('Посоката на отваряне е разпозната, но не е еднозначно свързана с конкретно поле.')
+  if (intent.fields.length > 1 && swing && !fieldHasBoundSwing) intent.unresolved.push('Навътре / навън е разпознато, но не е еднозначно свързано с конкретно поле.')
 
+  const lowerPanel = parseLowerPanelSemantics(text)
+  if (lowerPanel && intent.fields.length === 1) {
+    const current = intent.fields[0]!
+    intent.fields[0] = {
+      ...current,
+      lowerPanel: {
+        semanticRole: 'LOWER_PANEL_ZONE',
+        dividerOrientation: 'HORIZONTAL',
+        heightMm: lowerPanel.heightMm,
+        upperZoneRole: lowerPanel.upperZoneRole,
+        lowerZoneRole: 'PANEL',
+        evidenceIds: [evidenceId],
+        unresolved: lowerPanel.heightMm === undefined ? ['Височина на долния панел'] : [],
+      },
+    }
+    recognized.push(recognition('lower-panel', 'Долен панел', lowerPanel.heightMm ? `${lowerPanel.heightMm} mm` : 'Височина неуточнена', lowerPanel.excerpt || 'долен панел', lowerPanel.heightMm ? 'HIGH' : 'MEDIUM'))
+    recognized.push(recognition('internal-divider', 'Вътрешен делител', 'Хоризонтален', lowerPanel.excerpt || 'хоризонтален делител'))
+    if (lowerPanel.heightMm === undefined) intent.unresolved.push('Височина на долния панел')
+  } else if (lowerPanel && intent.fields.length !== 1) {
+    intent.unresolved.push('Долният панел е разпознат, но не е еднозначно свързан с едно конкретно крило.')
+  }
+
+  const semanticConflictWarnings: string[] = []
   const ral = parseRal(text)
-  if (ral) { intent.finish.exterior = ral.value; recognized.push(recognition('finish', 'Цвят', ral.value, ral.excerpt)) }
-  else {
-    const colour = text.match(/(?:антрацит|анодизирано|черен|черна|бял|бяла|сив|сива|\bblack\b|\bwhite\b|\banthracite\b|\bgrey\b|\bgray\b)/i)
-    if (colour && !/дръжка|handle/i.test(text.slice(Math.max(0, colour.index! - 18), colour.index! + colour[0].length + 18))) {
-      intent.finish.exterior = colour[0]; recognized.push(recognition('finish', 'Цвят', colour[0], colour[0], 'MEDIUM'))
+  if (ral?.status === 'CONFLICT') {
+    intent.unresolved.push(`Конфликт за цвят / покритие: ${ral.values.join(' / ')}`)
+    semanticConflictWarnings.push('Открити са противоречиви стойности за цвят / покритие; не е избрана автоматично стойност.')
+  } else if (ral?.status === 'PARSED') {
+    intent.finish.exterior = ral.value
+    recognized.push(recognition('finish', 'Цвят', ral.value, ral.excerpt))
+  } else {
+    const colourPattern = /(?:антрацит|анодизирано|черен|черна|бял|бяла|сив|сива|\bblack\b|\bwhite\b|\banthracite\b|\bgrey\b|\bgray\b)/giu
+    for (const colour of text.matchAll(colourPattern)) {
+      const index = colour.index ?? 0
+      const before = text.slice(Math.max(0, index - 14), index)
+      const after = text.slice(index + colour[0].length, index + colour[0].length + 14)
+      if (/(?:дръжка|handle)\s*$/i.test(before) || /^\s*(?:дръжка|handle)(?=\s|[,;.]|$)/i.test(after)) continue
+      intent.finish.exterior = colour[0]
+      recognized.push(recognition('finish', 'Цвят', colour[0], colour[0], 'MEDIUM'))
+      break
     }
   }
 
   const glazing = parseGlazing(text)
-  if (glazing) { intent.glazing.description = glazing.value; recognized.push(recognition('glazing', 'Стъкло / пълнеж', glazing.value, glazing.excerpt, 'MEDIUM')) }
+  if (glazing?.status === 'CONFLICT') {
+    intent.unresolved.push(`Конфликт за стъкло / пълнеж: ${glazing.values.join(' / ')}`)
+    semanticConflictWarnings.push('Открити са противоречиви стойности за стъкло / пълнеж; не е избрана автоматично стойност.')
+  } else if (glazing?.status === 'PARSED') {
+    intent.glazing.description = glazing.value
+    recognized.push(recognition('glazing', 'Стъкло / пълнеж', glazing.value, glazing.excerpt, 'MEDIUM'))
+  }
 
   const handle = parseHandle(text)
   if (handle) { intent.hardwareDefaults.handle = handle.value; recognized.push(recognition('handle', 'Дръжка', handle.value, handle.excerpt, 'MEDIUM')) }
   const hinges = parseHinges(text)
-  if (hinges.quantity) { intent.hardwareDefaults.hingeQuantity = hinges.quantity; recognized.push(recognition('hinge-quantity', 'Панти', String(hinges.quantity), hinges.excerpt || `${hinges.quantity}`, 'MEDIUM')) }
+  if (hinges.quantityConflict) {
+    intent.unresolved.push(`Конфликт за брой панти: ${hinges.quantityConflict.join(' / ')}`)
+    semanticConflictWarnings.push('Открити са противоречиви стойности за брой панти; не е избрана автоматично стойност.')
+  } else if (hinges.quantity) {
+    intent.hardwareDefaults.hingeQuantity = hinges.quantity
+    recognized.push(recognition('hinge-quantity', 'Панти', String(hinges.quantity), hinges.excerpt || `${hinges.quantity}`, 'MEDIUM'))
+  }
   if (hinges.descriptor) { intent.hardwareDefaults.hinges = hinges.descriptor; recognized.push(recognition('hinges', 'Тип панти', hinges.descriptor, hinges.excerpt || hinges.descriptor, 'MEDIUM')) }
   const hardware = captureAfterLabel(text, ['обков', 'hardware'])
   if (hardware?.value) { intent.hardwareDefaults.mechanism = hardware.value; recognized.push(recognition('hardware', 'Обков', hardware.value, hardware.excerpt, 'MEDIUM')) }
@@ -364,6 +628,9 @@ export function interpretFacadeFlowPrompt(sourceText: string, intentId = 'prompt
 
   for (const field of intent.fields) {
     if (field.role === 'OPENING_SASH' && !field.openingType) intent.unresolved.push(`Тип отваряне за поле ${field.order + 1}`)
+    if (field.role === 'OPENING_SASH' && (field.openingType === 'TURN' || field.openingType === 'TILT_TURN') && !field.openingDirection) {
+      intent.unresolved.push(`Посока ляво / дясно за поле ${field.order + 1}`)
+    }
   }
 
   if (intent.category === 'UNRESOLVED') intent.unresolved.push('Тип изделие')
@@ -377,7 +644,7 @@ export function interpretFacadeFlowPrompt(sourceText: string, intentId = 'prompt
   intent.status = 'NEEDS_REVIEW'
 
   const validation = validateFacadeFlowProductIntent(intent)
-  const warnings = validation.warnings.map(aiUiMessageBg)
+  const warnings = [...validation.warnings.map(aiUiMessageBg), ...dimensionWarnings, ...profileConflictWarnings, ...semanticConflictWarnings]
   if (recognized.some((item) => item.confidence === 'MEDIUM')) warnings.push('Някои стойности са извлечени от свободен текст с локални детерминистични правила и изискват човешка проверка.')
   if (/(?:\ball\b|всички)/i.test(normalized) && intent.fields.length > 1 && opening) warnings.push('Общото описание за отваряемост не се прилага автоматично към всички полета.')
 

@@ -16,7 +16,7 @@ test('AI01.4 replaces the permanently disabled placeholder with the prompt inter
 test('AI01.4 visibly states local/no-network/human-review boundaries', () => {
   assert.match(panel, /без външен модел \/ без мрежа/)
   assert.match(panel, /AUTOMATIC GEOMETRY: NO · RULES VALIDATED: NO · MACHINE READY: NO/)
-  assert.match(workspace, /Външен AI модел още не е свързан/)
+  assert.match(workspace, /външен AI модел още не е свързан/)
 })
 
 test('AI01.4 prompt interpreter contains no network, machine or dynamic-code execution path', () => {

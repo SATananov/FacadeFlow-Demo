@@ -22,6 +22,7 @@ export interface FacadeFlowAi03ProposalField {
   openingType?: FacadeFlowIntentField['openingType']
   openingDirection?: FacadeFlowIntentField['openingDirection']
   swing?: FacadeFlowIntentField['swing']
+  lowerPanel?: FacadeFlowIntentField['lowerPanel']
   sourceFieldId: string
   evidenceIds: string[]
   unresolved: string[]
@@ -134,6 +135,7 @@ function proposalField(field: FacadeFlowIntentField, rect: FacadeFlowAi03Proposa
     openingType: field.openingType,
     openingDirection: field.openingDirection,
     swing: field.swing,
+    lowerPanel: field.lowerPanel ? { ...field.lowerPanel, evidenceIds: [...field.lowerPanel.evidenceIds], unresolved: [...field.lowerPanel.unresolved] } : undefined,
     sourceFieldId: field.id,
     evidenceIds: [...field.evidenceIds],
     unresolved: [...field.unresolved],
@@ -161,7 +163,10 @@ export function buildFacadeFlowParametricConstructionProposal(intent: FacadeFlow
   const assumptions: FacadeFlowAi03Assumption[] = []
   const unresolved = [...intent.unresolved]
 
-  if (intent.category !== 'WINDOW' && intent.category !== 'DOOR') blockers.push('AI03 V1 поддържа предложения само за прозорец или врата.')
+  const isSlidingCombined = intent.category === 'COMBINED'
+    && intent.fields.length > 0
+    && intent.fields.every((field) => field.role === 'SLIDING_SASH')
+  if (intent.category !== 'WINDOW' && intent.category !== 'DOOR' && !isSlidingCombined) blockers.push('AI03 поддържа прозорци, врати и изрично описани плъзгащи конструкции.')
   if (!finitePositive(intent.dimensions.widthMm)) blockers.push('Нужна е обща ширина, преди да се генерира пропорционално геометрично предложение.')
   if (!finitePositive(intent.dimensions.heightMm)) blockers.push('Нужна е обща височина, преди да се генерира пропорционално геометрично предложение.')
   if (!intent.fields.length) blockers.push('Топологията на полетата не е уточнена; AI03 няма да приема, че изделието има едно поле.')
@@ -203,14 +208,19 @@ export function buildFacadeFlowParametricConstructionProposal(intent: FacadeFlow
 
   for (const field of fields) {
     if (field.role === 'UNRESOLVED') unresolved.push(`Роля на поле ${field.order + 1}`)
-    if (field.role === 'OPENING_SASH' && (!field.openingType || field.openingType === 'UNRESOLVED')) unresolved.push(`Тип отваряне за поле ${field.order + 1}`)
+    if ((field.role === 'OPENING_SASH' || field.role === 'SLIDING_SASH') && (!field.openingType || field.openingType === 'UNRESOLVED')) unresolved.push(`Тип отваряне за поле ${field.order + 1}`)
     if (field.role === 'OPENING_SASH' && (!field.openingDirection || field.openingDirection === 'UNRESOLVED')) warnings.push(`Посоката на поле ${field.order + 1} не е зададена и не се визуализира като потвърдено отваряне.`)
+    if (field.role === 'SLIDING_SASH' && (!field.openingDirection || field.openingDirection === 'UNRESOLVED')) warnings.push(`Посоката на плъзгане за поле ${field.order + 1} не е зададена и остава неуточнена.`)
   }
   if (intent.hardwareDefaults.hingeQuantity && intent.hardwareDefaults.hingeQuantity > 0) unresolved.push('Позиции на пантите')
   if (intent.hardwareDefaults.handle) unresolved.push('Позиция / височина на дръжката')
   if (intent.profiles.system && !intent.profiles.frame) warnings.push('Профилната система е известна, но точният профил за каса не е потвърден.')
-  if (intent.profiles.system && fields.some((field) => field.role === 'OPENING_SASH') && !intent.profiles.sash) warnings.push('Има отваряемо поле, но точният профил за крило не е потвърден.')
+  if (intent.profiles.system && fields.some((field) => field.role === 'OPENING_SASH' || field.role === 'SLIDING_SASH') && !intent.profiles.sash) warnings.push('Има поле с крило, но точният профил за крило не е потвърден.')
   if (dividers.length && !intent.profiles.mullion) warnings.push('Предложението съдържа делители, но точният профил за делител не е потвърден.')
+  if (fields.some((field) => field.lowerPanel)) {
+    warnings.push('Вътрешният хоризонтален делител / долната панелна зона се показва само концептуално и не се прехвърля автоматично към конструктора.')
+    if (!intent.profiles.mullion) unresolved.push('Профил на вътрешния хоризонтален делител')
+  }
 
   return {
     schemaVersion: 'AI03.1',

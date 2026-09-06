@@ -3,19 +3,30 @@ import {
   buildFacadeFlowParametricConstructionProposal,
   humanReviewFacadeFlowParametricProposal,
   type FacadeFlowAi03ParametricProposal,
-  type FacadeFlowAi03ProposalField,
 } from '../aiParametricConstructionProposal'
 import type { FacadeFlowProductIntent } from '../aiProductIntent'
+import { buildFacadeFlowConstructionGraph } from '../aiConstructionGraph'
+import {
+  buildFacadeFlowConstructionDrawing,
+  type FacadeFlowConstructionDrawing,
+  type FacadeFlowConstructionDrawingField,
+} from '../aiConstructionDrawing'
 import { aiUiMessageBg } from '../aiUiLanguageBg'
+import { resolveFacadeFlowAiDrawingVisualGrammar } from '../aiDrawingVisualGrammar'
+import { createOpeningGeometry } from '../visualComposerOpeningGeometry'
+import { TechnicalProfileInspector } from './TechnicalProfileInspector'
+import { TechnicalZoomModal } from './TechnicalZoomModal'
+import { AiDrawingProfileSections } from './AiDrawingProfileSections'
+import { facadeFlowAiDrawingCalloutForProfile } from '../aiDrawingProfileSections'
 
-const AI03_SAFETY_MARKERS = 'AUTO-GENERATED PROPOSAL: YES · AUTOMATIC ACCEPTANCE: NO · CONSTRUCTOR HANDOFF: NO · RULES VALIDATED: NO · MACHINE READY: NO'
+const AI03_SAFETY_MARKERS = 'AUTO-GENERATED PROPOSAL: YES · AI05.3 GRAPH-DRAWING: YES · AUTOMATIC ACCEPTANCE: NO · EXACT PROFILE CONTOUR: NO · RULES VALIDATED: NO · MACHINE READY: NO'
 
-const roleLabel: Record<FacadeFlowAi03ProposalField['role'], string> = {
-  FIXED: 'ФИКСИРАНО',
-  OPENING_SASH: 'ОТВАРЯЕМО',
-  SLIDING_SASH: 'ПЛЪЗГАЩО',
-  PANEL: 'ПАНЕЛ',
-  UNRESOLVED: 'НЕУТОЧНЕНО',
+const drawingRoleLabel: Record<FacadeFlowConstructionDrawingField['semanticRole'], string> = {
+  FIXED_FIELD: 'ФИКСИРАНО',
+  OPENABLE_FIELD: 'ОТВАРЯЕМО',
+  SLIDING_FIELD: 'ПЛЪЗГАЩО',
+  PANEL_FIELD: 'ПАНЕЛ',
+  UNRESOLVED_FIELD: 'НЕУТОЧНЕНО',
 }
 
 const statusLabel: Record<FacadeFlowAi03ParametricProposal['status'], string> = {
@@ -35,32 +46,14 @@ function proposalFingerprint(proposal: FacadeFlowAi03ParametricProposal) {
     sourceIntentId: proposal.sourceIntentId,
     dimensions: proposal.dimensions,
     basis: proposal.geometryBasis,
-    fields: proposal.fields.map((field) => [field.id, field.rect, field.role, field.openingType, field.openingDirection]),
+    fields: proposal.fields.map((field) => [field.id, field.rect, field.role, field.openingType, field.openingDirection, field.lowerPanel]),
     dividers: proposal.dividers.map((divider) => [divider.orientation, divider.positionRatio, divider.basis]),
     assumptions: proposal.assumptions.map((item) => item.id),
     blockers: proposal.blockers,
   })
 }
 
-function openingPath(field: FacadeFlowAi03ProposalField, x: number, y: number, width: number, height: number) {
-  if (field.role !== 'OPENING_SASH') return null
-  const inset = Math.max(5, Math.min(width, height) * 0.08)
-  const left = x + inset
-  const right = x + width - inset
-  const top = y + inset
-  const bottom = y + height - inset
-  if (field.openingType === 'TILT') return `M ${left} ${top} L ${(left + right) / 2} ${bottom} L ${right} ${top}`
-  if (field.openingType === 'TILT_TURN') {
-    if (field.openingDirection === 'LEFT') return `M ${left} ${top} L ${right} ${(top + bottom) / 2} L ${left} ${bottom} M ${left} ${top} L ${(left + right) / 2} ${bottom} L ${right} ${top}`
-    if (field.openingDirection === 'RIGHT') return `M ${right} ${top} L ${left} ${(top + bottom) / 2} L ${right} ${bottom} M ${left} ${top} L ${(left + right) / 2} ${bottom} L ${right} ${top}`
-    return `M ${left} ${top} L ${(left + right) / 2} ${bottom} L ${right} ${top}`
-  }
-  if (field.openingType === 'TURN' && field.openingDirection === 'LEFT') return `M ${left} ${top} L ${right} ${(top + bottom) / 2} L ${left} ${bottom}`
-  if (field.openingType === 'TURN' && field.openingDirection === 'RIGHT') return `M ${right} ${top} L ${left} ${(top + bottom) / 2} L ${right} ${bottom}`
-  return null
-}
-
-function ProposalDrawing({ proposal }: { proposal: FacadeFlowAi03ParametricProposal }) {
+function ProposalDrawing({ proposal, drawing, className = '' }: { proposal: FacadeFlowAi03ParametricProposal; drawing: FacadeFlowConstructionDrawing; className?: string }) {
   const canvas = { width: 720, height: 430, left: 72, top: 48, right: 36, bottom: 72 }
   const availableWidth = canvas.width - canvas.left - canvas.right
   const availableHeight = canvas.height - canvas.top - canvas.bottom
@@ -70,25 +63,45 @@ function ProposalDrawing({ proposal }: { proposal: FacadeFlowAi03ParametricPropo
   const x = canvas.left + (availableWidth - width) / 2
   const y = canvas.top + (availableHeight - height) / 2
 
-  return <svg className="ff-ai03-drawing" viewBox={`0 0 ${canvas.width} ${canvas.height}`} role="img" aria-label={`Концептуално параметрично предложение ${proposal.dimensions.widthMm} на ${proposal.dimensions.heightMm} милиметра`}>
+  return <svg className={`ff-ai03-drawing ${className}`.trim()} viewBox={`0 0 ${canvas.width} ${canvas.height}`} role="img" aria-label={`AI05.3 конструктивно 2D предложение ${proposal.dimensions.widthMm} на ${proposal.dimensions.heightMm} милиметра`}>
     <rect className="ff-ai03-frame" x={x} y={y} width={width} height={height}/>
-    {proposal.fields.map((field) => {
+    <text className="ff-ai053-semantic-tag frame" x={x + 8} y={y - 13}>{drawing.frame?.profileRef ? `${facadeFlowAiDrawingCalloutForProfile(drawing.frame.profileRef) ?? '—'} · КАСА · ${drawing.frame.profileRef}` : 'КАСА · профил непотвърден'}</text>
+    {drawing.fields.map((field) => {
       const fx = x + field.rect.xRatio * width
       const fy = y + field.rect.yRatio * height
       const fw = field.rect.widthRatio * width
       const fh = field.rect.heightRatio * height
-      const path = openingPath(field, fx, fy, fw, fh)
-      return <g key={field.id} className={`ff-ai03-field role-${field.role.toLowerCase()}`}>
+      const visual = resolveFacadeFlowAiDrawingVisualGrammar(field)
+      const geometry = visual.composerDirection ? createOpeningGeometry(visual.composerDirection, fx + 14, fy + 14, Math.max(0, fw - 28), Math.max(0, fh - 28)) : null
+      const lowerPanelHeight = field.lowerPanel?.heightRatio !== undefined ? fh * field.lowerPanel.heightRatio : null
+      const lowerPanelTop = lowerPanelHeight !== null ? fy + fh - lowerPanelHeight : null
+      const arrowY = fy + fh / 2
+      const arrowLeft = fx + Math.max(22, fw * 0.24)
+      const arrowRight = fx + fw - Math.max(22, fw * 0.24)
+      return <g key={field.sourceFieldId} className={`ff-ai03-field role-${field.semanticRole.toLowerCase()}`}>
         <rect x={fx + 4} y={fy + 4} width={Math.max(0, fw - 8)} height={Math.max(0, fh - 8)}/>
-        {path && <path className="ff-ai03-opening" d={path}/>} 
-        {field.role === 'OPENING_SASH' && !path && <path className="ff-ai03-opening unresolved" d={`M ${fx + 10} ${fy + 10} L ${fx + fw - 10} ${fy + fh - 10}`}/>} 
+        {field.lowerPanel && lowerPanelTop !== null && lowerPanelHeight !== null && <g className="ff-ai03-lower-panel">
+          <rect className="ff-ai03-lower-panel-zone" x={fx + 17} y={lowerPanelTop} width={Math.max(0, fw - 34)} height={Math.max(0, lowerPanelHeight - 17)}/>
+          <line className="ff-ai03-internal-divider" x1={fx + 16} y1={lowerPanelTop} x2={fx + fw - 16} y2={lowerPanelTop}/>
+          <text className="ff-ai03-lower-panel-label" x={fx + fw / 2} y={Math.min(fy + fh - 28, lowerPanelTop + Math.max(17, lowerPanelHeight * 0.28))}>{field.lowerPanel.heightMm ? `ДОЛЕН ПАНЕЛ · ${field.lowerPanel.heightMm} mm` : 'ДОЛЕН ПАНЕЛ'}</text>
+        </g>}
+        {field.lowerPanel && lowerPanelTop === null && <text className="ff-ai03-lower-panel-label unresolved" x={fx + fw / 2} y={fy + fh - 34}>ДОЛЕН ПАНЕЛ · ВИСОЧИНА НЕУТОЧНЕНА</text>}
+        {visual.showSashOutline && <rect className="ff-ai03-sash-outline" x={fx + 16} y={fy + 16} width={Math.max(0, fw - 32)} height={Math.max(0, fh - 32)}/>}
+        {geometry?.sidePath && <path className="ff-ai03-opening" d={geometry.sidePath}/>}
+        {geometry?.tiltPath && <path className="ff-ai03-opening tilt" d={geometry.tiltPath}/>}
+        {visual.showSlidingArrow && <g className={`ff-ai03-sliding-arrow${visual.sideDirectionKnown ? '' : ' unresolved'}`}>
+          {(visual.sideDirection === 'LEFT' || !visual.sideDirectionKnown) && <><line x1={arrowRight} y1={arrowY} x2={arrowLeft} y2={arrowY}/><path d={`M ${arrowLeft + 8} ${arrowY - 6} L ${arrowLeft} ${arrowY} L ${arrowLeft + 8} ${arrowY + 6}`}/></>}
+          {(visual.sideDirection === 'RIGHT' || !visual.sideDirectionKnown) && <><line x1={arrowLeft} y1={arrowY + (visual.sideDirectionKnown ? 0 : 10)} x2={arrowRight} y2={arrowY + (visual.sideDirectionKnown ? 0 : 10)}/><path d={`M ${arrowRight - 8} ${arrowY + (visual.sideDirectionKnown ? -6 : 4)} L ${arrowRight} ${arrowY + (visual.sideDirectionKnown ? 0 : 10)} L ${arrowRight - 8} ${arrowY + (visual.sideDirectionKnown ? 6 : 16)}`}/></>}
+        </g>}
         <text x={fx + fw / 2} y={fy + Math.min(28, fh * 0.18)}>{`Поле ${field.order + 1}`}</text>
-        <text className="ff-ai03-field-role" x={fx + fw / 2} y={fy + Math.min(48, fh * 0.3)}>{roleLabel[field.role]}</text>
+        <text className="ff-ai03-field-role" x={fx + fw / 2} y={fy + Math.min(48, fh * 0.3)}>{drawingRoleLabel[field.semanticRole]}</text>
+        {(field.semanticRole === 'OPENABLE_FIELD' || field.semanticRole === 'SLIDING_FIELD') && <text className={`ff-ai03-opening-label${visual.sideDirectionRequired && !visual.sideDirectionKnown ? ' unresolved' : ''}`} x={fx + fw / 2} y={fy + Math.min(68, fh * 0.42)}>{visual.labelBg}</text>}
+        {field.sash && <text className="ff-ai053-semantic-tag sash" x={fx + fw / 2} y={fy + fh - 16}>{field.sash.profileRef ? `${facadeFlowAiDrawingCalloutForProfile(field.sash.profileRef) ?? '—'} · КРИЛО · ${field.sash.profileRef}` : 'КРИЛО · профил непотвърден'}</text>}
       </g>
     })}
-    {proposal.dividers.map((divider) => divider.orientation === 'VERTICAL'
-      ? <line key={divider.id} className={divider.basis === 'EXPLICIT' ? 'ff-ai03-divider explicit' : 'ff-ai03-divider proposed'} x1={x + divider.positionRatio * width} y1={y} x2={x + divider.positionRatio * width} y2={y + height}/>
-      : <line key={divider.id} className={divider.basis === 'EXPLICIT' ? 'ff-ai03-divider explicit' : 'ff-ai03-divider proposed'} x1={x} y1={y + divider.positionRatio * height} x2={x + width} y2={y + divider.positionRatio * height}/>) }
+    {drawing.mullions.map((mullion) => mullion.orientation === 'VERTICAL'
+      ? <g key={`mullion-${mullion.order}`}><line className={mullion.exactPositionKnown ? 'ff-ai03-divider explicit' : 'ff-ai03-divider proposed'} x1={x + mullion.positionRatio * width} y1={y} x2={x + mullion.positionRatio * width} y2={y + height}/><text className="ff-ai053-semantic-tag mullion below" x={x + mullion.positionRatio * width} y={y + height + 13}>{mullion.profileRef ? `${facadeFlowAiDrawingCalloutForProfile(mullion.profileRef) ?? '—'} · ДЕЛ. ${mullion.profileRef}` : 'ДЕЛИТЕЛ · профил непотвърден'}</text></g>
+      : <g key={`mullion-${mullion.order}`}><line className={mullion.exactPositionKnown ? 'ff-ai03-divider explicit' : 'ff-ai03-divider proposed'} x1={x} y1={y + mullion.positionRatio * height} x2={x + width} y2={y + mullion.positionRatio * height}/><text className="ff-ai053-semantic-tag mullion" x={x + 8} y={y + mullion.positionRatio * height - 6}>{mullion.profileRef ? `${facadeFlowAiDrawingCalloutForProfile(mullion.profileRef) ?? '—'} · ДЕЛИТЕЛ · ${mullion.profileRef}` : 'ДЕЛИТЕЛ · профил непотвърден'}</text></g>) }
     <line className="ff-ai03-dimension" x1={x} y1={y + height + 28} x2={x + width} y2={y + height + 28}/>
     <text className="ff-ai03-dimension-label" x={x + width / 2} y={y + height + 52}>{proposal.dimensions.widthMm} mm</text>
     <line className="ff-ai03-dimension" x1={x - 28} y1={y} x2={x - 28} y2={y + height}/>
@@ -98,17 +111,34 @@ function ProposalDrawing({ proposal }: { proposal: FacadeFlowAi03ParametricPropo
 
 export function ParametricConstructionProposalPanel({ intent, sourceLabel, onOpenEditableConstructor }: { intent: FacadeFlowProductIntent; sourceLabel: string; onOpenEditableConstructor?: (proposal: FacadeFlowAi03ParametricProposal) => { ok: boolean; message: string } }) {
   const baseProposal = useMemo(() => buildFacadeFlowParametricConstructionProposal(intent), [intent])
+  const constructionGraph = useMemo(() => buildFacadeFlowConstructionGraph(intent), [intent])
+  const constructionDrawing = useMemo(() => buildFacadeFlowConstructionDrawing(intent, constructionGraph), [intent, constructionGraph])
+  const technicalProfileCodes = useMemo(() => [
+    constructionDrawing.frame?.profileRef,
+    ...constructionDrawing.fields.map((field) => field.sash?.profileRef),
+    ...constructionDrawing.mullions.map((mullion) => mullion.profileRef),
+  ].filter((value): value is string => Boolean(value)), [constructionDrawing])
   const fingerprint = useMemo(() => proposalFingerprint(baseProposal), [baseProposal])
   const [reviewFingerprint, setReviewFingerprint] = useState('')
   const [topologyCheckedState, setTopologyCheckedState] = useState(false)
   const [assumptionsAcceptedState, setAssumptionsAcceptedState] = useState(false)
   const [handoffFingerprint, setHandoffFingerprint] = useState('')
   const [handoffMessage, setHandoffMessage] = useState('')
+  const [drawingOpen, setDrawingOpen] = useState(true)
+  const [drawingZoomOpen, setDrawingZoomOpen] = useState(false)
+  const [drawingZoom, setDrawingZoom] = useState(1)
+  const [profileInspectorOpen, setProfileInspectorOpen] = useState(false)
+  const [profileInspectorCode, setProfileInspectorCode] = useState<string | null>(null)
   const isCurrentReview = reviewFingerprint === fingerprint
   const topologyChecked = isCurrentReview && topologyCheckedState
   const assumptionsAccepted = isCurrentReview && assumptionsAcceptedState
   const proposal = humanReviewFacadeFlowParametricProposal(baseProposal, { topologyChecked, assumptionsAccepted })
   const handoffAcknowledged = handoffFingerprint === fingerprint
+  const openProfileInspector = (code: string) => {
+    setProfileInspectorCode(code)
+    setProfileInspectorOpen(true)
+    window.setTimeout(() => document.getElementById('ff-profile-inspector-title')?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 0)
+  }
   const setReview = (patch: { topologyChecked?: boolean; assumptionsAccepted?: boolean }) => {
     const nextTopology = isCurrentReview ? topologyCheckedState : false
     const nextAssumptions = isCurrentReview ? assumptionsAcceptedState : false
@@ -133,9 +163,10 @@ export function ParametricConstructionProposalPanel({ intent, sourceLabel, onOpe
 
     {proposal.blockers.length > 0 ? <div className="ff-ai03-blocked"><strong>Няма достатъчно доказателства за безопасно геометрично предложение.</strong><ul>{proposal.blockers.map((item) => <li key={item}>{aiUiMessageBg(item)}</li>)}</ul></div> : <div className="ff-ai03-layout">
       <section className="ff-ai03-canvas" aria-label="2D предложение">
-        <div className="ff-ai03-card-heading"><span>2D ПРЕДЛОЖЕНИЕ</span><b>{proposal.dimensions.widthMm} × {proposal.dimensions.heightMm} mm</b></div>
-        <ProposalDrawing proposal={proposal}/>
-        <small>{proposal.geometryBasis === 'EQUAL_DISTRIBUTION_PROPOSAL' ? 'Пунктираните делители са предложение за равномерно разпределение, а не доказани проектни размери.' : 'Плътните делители са позиционирани според наличните доказателства в структурираните продуктови данни.'}</small>
+        <div className="ff-ai03-card-heading"><span>AI ЧЕРТЕЖ · КОНЦЕПТУАЛЕН 2D</span><div className="ff-ai03-canvas-actions"><b>{proposal.dimensions.widthMm} × {proposal.dimensions.heightMm} mm</b><button type="button" onClick={() => setDrawingOpen((value) => !value)} aria-expanded={drawingOpen}>{drawingOpen ? 'Свий' : 'Разгъни'}</button><button type="button" onClick={() => { setDrawingZoom(1); setDrawingZoomOpen(true) }}>Увеличи</button></div></div>
+        {drawingOpen && <><div className="ff-ai03-drawing-stage ff-technical-grid" role="button" tabIndex={0} aria-label="Увеличи концептуалния AI чертеж" onClick={() => { setDrawingZoom(1); setDrawingZoomOpen(true) }} onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); setDrawingZoom(1); setDrawingZoomOpen(true) } }}><span className="ff-technical-zoom-hint">Клик за увеличение</span><ProposalDrawing proposal={proposal} drawing={constructionDrawing}/></div>
+        <small><b>НЕ Е ПРОИЗВОДСТВЕНА ГЕОМЕТРИЯ.</b> {constructionDrawing.basis === 'PROPOSED_EQUAL_FIELD_DISTRIBUTION' ? 'Пунктираните делители са автоматично визуално предложение за човешки преглед.' : 'Плътните делители използват вече налични позиции от структурираните продуктови данни.'} Точни сглобени профилни възли, производствени приспадания и допуски не са приложени.</small>
+        <AiDrawingProfileSections intent={intent} drawing={constructionDrawing} onInspectProfile={openProfileInspector}/></>}
       </section>
       <aside className="ff-ai03-summary">
         <section className="ff-ai03-facts">
@@ -149,6 +180,8 @@ export function ParametricConstructionProposalPanel({ intent, sourceLabel, onOpe
         </div>
       </aside>
     </div>}
+
+    {!proposal.blockers.length && technicalProfileCodes.length > 0 && <TechnicalProfileInspector key={profileInspectorCode ?? 'profile-inspector'} profileCodes={technicalProfileCodes} requestedCode={profileInspectorCode} open={profileInspectorOpen} onOpenChange={setProfileInspectorOpen}/>}
 
     {!proposal.blockers.length && <div className="ff-ai03-human-gate">
       <div className="ff-ai03-human-gate-head"><span>ЧОВЕШКА ПРОВЕРКА</span><strong>{proposal.status === 'HUMAN_REVIEWED' ? '✓ Предложението е прегледано' : 'Потвърждението е задължително'}</strong></div>
@@ -165,6 +198,10 @@ export function ParametricConstructionProposalPanel({ intent, sourceLabel, onOpe
       <footer data-safety="AUTOMATIC CONSTRUCTOR HANDOFF: NO · HUMAN-APPROVED PROPOSAL: YES · RULES VALIDATED: NO · MACHINE READY: NO">АВТОМАТИЧЕН ПРЕХОД КЪМ КОНСТРУКТОРА: НЕ · ПРЕДЛОЖЕНИЕТО Е ОДОБРЕНО ОТ ЧОВЕК: ДА · ПРАВИЛА ВАЛИДИРАНИ: НЕ · ГОТОВО ЗА МАШИНА: НЕ</footer>
     </section>}
 
-    <footer data-safety={AI03_SAFETY_MARKERS}>ГЕОМЕТРИЧНО ПРЕДЛОЖЕНИЕ: ДА · АВТОМАТИЧНО ПРИЕМАНЕ: НЕ · АВТОМАТИЧЕН ПРЕХОД КЪМ КОНСТРУКТОРА: НЕ · ПРАВИЛА ВАЛИДИРАНИ: НЕ · ГОТОВО ЗА МАШИНА: НЕ</footer>
+    <TechnicalZoomModal open={drawingZoomOpen} title={`AI чертеж · ${proposal.dimensions.widthMm} × ${proposal.dimensions.heightMm} mm`} subtitle="Концептуална топология за човешки преглед · не е производствена геометрия" zoom={drawingZoom} onZoom={setDrawingZoom} onReset={() => setDrawingZoom(1)} onClose={() => setDrawingZoomOpen(false)}>
+      <div className="ff-ai03-drawing-modal-wrap"><ProposalDrawing proposal={proposal} drawing={constructionDrawing} className="ff-ai03-drawing-modal"/></div>
+    </TechnicalZoomModal>
+
+    <footer data-safety={AI03_SAFETY_MARKERS}>КОНЦЕПТУАЛЕН 2D ЧЕРТЕЖ: ДА · НЕ Е ПРОИЗВОДСТВЕНА ГЕОМЕТРИЯ · ТОЧЕН ПРОФИЛЕН КОНТУР: НЕ · АВТОМАТИЧНО ПРИЕМАНЕ: НЕ · ПРАВИЛА ВАЛИДИРАНИ: НЕ · ГОТОВО ЗА МАШИНА: НЕ</footer>
   </section>
 }

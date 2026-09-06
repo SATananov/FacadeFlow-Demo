@@ -1,0 +1,76 @@
+{
+  "schema_version": 1,
+  "system": "KMG PRELUDE 60",
+  "safety": {
+    "human_review_required": true,
+    "rules_validated": false,
+    "machine_ready": false,
+    "production_approved": false
+  },
+  "profiles": [
+    {
+      "code": "482.30",
+      "role": "FRAME",
+      "label_bg": "Каса",
+      "catalogue": {
+        "source": "KMG PRELUDE 60",
+        "page": 2,
+        "system_depth_mm": 60,
+        "vertical_extent_mm": 64,
+        "visible_leg_mm": 42,
+        "verified_visual_reference": true
+      },
+      "human_confirmed": {
+        "source": "NADEZHDA_HUMAN_CONFIRMED",
+        "full_working_dimension_mm": 64,
+        "visible_dimension_mm": 42,
+        "holder_zone_mm": 22,
+        "holder_zone_sides": 1,
+        "formula": "64 - 22 = 42"
+      }
+    },
+    {
+      "code": "482.05",
+      "role": "SASH",
+      "label_bg": "Крило",
+      "catalogue": {
+        "source": "KMG PRELUDE 60",
+        "page": 2,
+        "system_depth_mm": 60,
+        "vertical_extent_mm": 56,
+        "visible_leg_mm": 56,
+        "verified_visual_reference": true
+      },
+      "human_confirmed": {
+        "source": "NADEZHDA_HUMAN_CONFIRMED",
+        "full_working_dimension_mm": 78,
+        "visible_dimension_mm": 56,
+        "holder_zone_mm": 22,
+        "holder_zone_sides": 1,
+        "formula": "78 - 22 = 56",
+        "note": "78 е human-confirmed working dimension; не е директно число от каталожната картинка."
+      }
+    },
+    {
+      "code": "482.21",
+      "role": "MULLION",
+      "label_bg": "Делител",
+      "catalogue": {
+        "source": "KMG PRELUDE 60",
+        "page": 2,
+        "system_depth_mm": 60,
+        "vertical_extent_mm": 84,
+        "visible_leg_mm": 40,
+        "verified_visual_reference": true
+      },
+      "human_confirmed": {
+        "source": "NADEZHDA_HUMAN_CONFIRMED",
+        "full_working_dimension_mm": 84,
+        "visible_dimension_mm": 40,
+        "holder_zone_mm": 22,
+        "holder_zone_sides": 2,
+        "formula": "84 - 22 - 22 = 40"
+      }
+    }
+  ]
+}

@@ -1,0 +1,53 @@
+{
+  "schema_version": 1,
+  "system": "KMG PRELUDE 60",
+  "profiles": {
+    "482.30": {
+      "role": "FRAME",
+      "label_bg": "Каса",
+      "working_total_mm": 64,
+      "visible_mm": 42,
+      "zones_mm": [
+        22
+      ],
+      "equation": "64 - 22 = 42",
+      "placement_status": "CANDIDATE_NOT_YET_BOUND_TO_CONTOUR"
+    },
+    "482.05": {
+      "role": "SASH",
+      "label_bg": "Крило",
+      "working_total_mm": 78,
+      "visible_mm": 56,
+      "zones_mm": [
+        22
+      ],
+      "equation": "78 - 22 = 56",
+      "placement_status": "UNCONFIRMED_ON_CONTOUR",
+      "note": "78 is human-confirmed working dimension; do not silently present it as the catalogue's shown dimension."
+    },
+    "482.21": {
+      "role": "MULLION",
+      "label_bg": "Делител",
+      "working_total_mm": 84,
+      "visible_mm": 40,
+      "zones_mm": [
+        22,
+        22
+      ],
+      "equation": "84 - 22 - 22 = 40",
+      "placement_status": "CANDIDATE_NOT_YET_BOUND_TO_CONTOUR"
+    }
+  },
+  "terminology": {
+    "preferred_bg": "работна зона към държателя / зона, която не остава видима",
+    "do_not_claim_yet": "стъклодържателят сам по себе си е широк точно 22 mm"
+  },
+  "safety": {
+    "catalogue_vector_is_source_of_truth": true,
+    "human_confirmed_measurement_semantics": true,
+    "geometric_anchor_points_validated": false,
+    "production_contour_validated": false,
+    "machine_ready": false,
+    "production_approved": false
+  }
+}

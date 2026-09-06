@@ -37,6 +37,16 @@ export interface FacadeFlowIntentHardware {
   lock?: string
 }
 
+export interface FacadeFlowIntentLowerPanel {
+  semanticRole: 'LOWER_PANEL_ZONE'
+  dividerOrientation: 'HORIZONTAL'
+  heightMm?: number
+  upperZoneRole: 'GLAZING' | 'UNRESOLVED'
+  lowerZoneRole: 'PANEL'
+  evidenceIds: string[]
+  unresolved: string[]
+}
+
 export interface FacadeFlowIntentField {
   id: string
   order: number
@@ -48,6 +58,7 @@ export interface FacadeFlowIntentField {
   swing?: FacadeFlowIntentSwing
   sashProfile?: string
   hardware?: FacadeFlowIntentHardware
+  lowerPanel?: FacadeFlowIntentLowerPanel
   evidenceIds: string[]
   unresolved: string[]
 }
@@ -150,6 +161,11 @@ export function validateFacadeFlowProductIntent(intent: FacadeFlowProductIntent)
     fieldIds.add(field.id)
     if (!Number.isInteger(field.order) || field.order < 0) errors.push(`Field ${field.id || '<empty>'} requires a non-negative integer order.`)
     if (!positiveFinite(field.widthMm) || !positiveFinite(field.heightMm)) errors.push(`Field ${field.id || '<empty>'} dimensions must be positive when provided.`)
+    if (field.lowerPanel) {
+      if (!positiveFinite(field.lowerPanel.heightMm)) errors.push(`Field ${field.id || '<empty>'} lower panel height must be positive when provided.`)
+      if (field.lowerPanel.heightMm !== undefined && intent.dimensions.heightMm !== undefined && field.lowerPanel.heightMm >= intent.dimensions.heightMm) errors.push(`Field ${field.id || '<empty>'} lower panel height must be smaller than the overall product height.`)
+      for (const evidenceId of field.lowerPanel.evidenceIds) if (!evidenceIds.has(evidenceId)) errors.push(`Field ${field.id || '<empty>'} lower panel references missing evidence ${evidenceId}.`)
+    }
     for (const evidenceId of field.evidenceIds) if (!evidenceIds.has(evidenceId)) errors.push(`Field ${field.id || '<empty>'} references missing evidence ${evidenceId}.`)
   }
 

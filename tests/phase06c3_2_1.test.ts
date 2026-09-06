@@ -21,7 +21,7 @@ void test('06C.3.2.1 localizes current-product and gate-copy while retaining int
   assert.match(workspace, /НУЖЕН ЧОВЕШКИ ПРЕГЛЕД/)
   assert.match(workspace, /ПОТВЪРДЕНО ОТ ЧОВЕК/)
   assert.match(workspace, /Човешки преглед \/ потвърждение/)
-  assert.match(workspace, /прегледан пакет ≠ потвърдено изделие/)
+  assert.match(workspace, /ДЕМО пакетът е прегледан от човек · изделието остава непотвърдено/)
   assert.match(workspace, /СИМУЛАЦИЯ · ГОТОВО ЗА МАШИНА: НЕ/)
 })
 

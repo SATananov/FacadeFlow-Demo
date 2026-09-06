@@ -1,0 +1,23 @@
+{
+  "482.30": {
+    "source": "PVC Prelude_bg.pdf",
+    "page": 2,
+    "asset": "482_30_catalogue_crop.png",
+    "kind": "faithful catalogue crop",
+    "production_geometry": false
+  },
+  "482.05": {
+    "source": "PVC Prelude_bg.pdf",
+    "page": 2,
+    "asset": "482_05_catalogue_crop.png",
+    "kind": "faithful catalogue crop",
+    "production_geometry": false
+  },
+  "482.21": {
+    "source": "PVC Prelude_bg.pdf",
+    "page": 2,
+    "asset": "482_21_catalogue_crop.png",
+    "kind": "faithful catalogue crop",
+    "production_geometry": false
+  }
+}

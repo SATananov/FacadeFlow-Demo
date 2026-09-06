@@ -96,6 +96,7 @@ export function buildFacadeFlowAi04ConstructorHandoff(
   const geometryBasis = proposal.geometryBasis
   if (!proposal.fields.length || !geometryBasis) blockers.push('Липсва прегледана геометрична основа.')
   if (proposal.fields.some((field) => field.role === 'SLIDING_SASH' || field.role === 'PANEL')) blockers.push('AI04 V1 не прехвърля плъзгащо крило или панел към конструктора за нестандартни изделия, защото тези роли нямат еквивалент в текущия модел за редактируема геометрия.')
+  if (proposal.fields.some((field) => field.lowerPanel)) blockers.push('AI04 V1 не прехвърля вътрешен хоризонтален делител / долна панелна зона, защото вложената геометрия още няма lossless еквивалент в конструктора.')
 
   const exactFrame = profileByExactEvidence(profiles, 'FRAME', proposal.profileSummary.system, proposal.profileSummary.frame)
   const exactSash = profileByExactEvidence(profiles, 'SASH', proposal.profileSummary.system, proposal.profileSummary.sash)

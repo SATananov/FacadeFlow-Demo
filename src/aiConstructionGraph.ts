@@ -25,6 +25,16 @@ export interface FacadeFlowConstructionGraphSashNode {
   swing?: FacadeFlowIntentField['swing']
 }
 
+export interface FacadeFlowConstructionGraphLowerPanelNode {
+  kind: 'INTERNAL_ZONE'
+  semanticRole: 'LOWER_PANEL_ZONE'
+  dividerOrientation: 'HORIZONTAL'
+  heightMm?: number
+  upperZoneRole: 'GLAZING' | 'UNRESOLVED'
+  lowerZoneRole: 'PANEL'
+  sourceFieldId: string
+}
+
 export interface FacadeFlowConstructionGraphFieldNode {
   kind: 'FIELD'
   semanticRole: FacadeFlowConstructionGraphFieldRole
@@ -32,6 +42,7 @@ export interface FacadeFlowConstructionGraphFieldNode {
   order: number
   sourceRole: FacadeFlowIntentField['role']
   sash?: FacadeFlowConstructionGraphSashNode
+  lowerPanel?: FacadeFlowConstructionGraphLowerPanelNode
 }
 
 export interface FacadeFlowConstructionGraphMullionNode {
@@ -106,6 +117,17 @@ function buildFieldNode(field: FacadeFlowIntentField, defaultSashProfile?: strin
           swing: field.swing,
         }
       : undefined,
+    lowerPanel: field.lowerPanel
+      ? {
+          kind: 'INTERNAL_ZONE',
+          semanticRole: 'LOWER_PANEL_ZONE',
+          dividerOrientation: field.lowerPanel.dividerOrientation,
+          heightMm: field.lowerPanel.heightMm,
+          upperZoneRole: field.lowerPanel.upperZoneRole,
+          lowerZoneRole: field.lowerPanel.lowerZoneRole,
+          sourceFieldId: field.id,
+        }
+      : undefined,
   }
 }
 
@@ -164,6 +186,8 @@ export function buildFacadeFlowConstructionGraph(intent: FacadeFlowProductIntent
   for (const field of fields) {
     if (field.role === 'UNRESOLVED') unresolved.push(`Роля на поле ${field.order + 1}`)
     if (field.role === 'OPENING_SASH' && !field.openingType) unresolved.push(`Тип отваряне за поле ${field.order + 1}`)
+    if (field.lowerPanel?.heightMm === undefined) unresolved.push(`Височина на долния панел за поле ${field.order + 1}`)
+    if (field.lowerPanel) warnings.push(`Поле ${field.order + 1} съдържа вътрешен хоризонтален делител / долна панелна зона; това е семантична визуализация, не производствена геометрия.`)
   }
 
   if (fields.length > 1 && !explicitDividers) {

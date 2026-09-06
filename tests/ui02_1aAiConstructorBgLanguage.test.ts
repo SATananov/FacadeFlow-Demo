@@ -28,8 +28,8 @@ const visible = stripInternalAttributes([workspace, prompt, documents, proposal,
 
 test('UI02.1A presents AI01 prompt flow in Bulgarian while keeping AI/CAD technical identifiers', () => {
   for (const marker of [
-    'ЛОКАЛНО РАЗЧИТАНЕ НА ОПИСАНИЕ',
-    'СВОБОДНО ОПИСАНИЕ / РАЗЧИТАНЕ НА ТЕКСТ',
+    'ЛОКАЛНО РАЗЧИТАНЕ → AI ЧЕРТЕЖ',
+    'РАЗПОЗНАТО ОТ ОПИСАНИЕТО',
     'ИЗИСКВА ПРОВЕРКА',
     'НЕВАЛИДНА ЧЕРНОВА',
     'АВТОМАТИЧНА ГЕОМЕТРИЯ: НЕ',
@@ -85,7 +85,7 @@ test('UI02.1A keeps internal AI01-AI04 phase ids out of user-facing labels and g
   assert.deepEqual(phaseInQuotedUiText, [])
   assert.equal(promptBridge.includes("'AI01 ИЗТОЧНИК ОТ ОПИСАНИЕ"), false)
   assert.equal(documentBridge.includes("'AI02 ДОКУМЕНТЕН ИЗТОЧНИК"), false)
-  for (const label of ['Опиши изделието с нормален език', 'ПРОЕКТНИ ДОКУМЕНТИ · ЛОКАЛНО РАЗЧИТАНЕ', 'ПРЕГЛЕД НА ПРЕДЛОЖЕНИЕТО', 'ПРОДЪЛЖИ В КОНСТРУКТОРА']) assert.ok(visible.includes(label), label)
+  for (const label of ['Създай изделието', 'Опиши изделието с AI', 'ПРОЕКТНИ ДОКУМЕНТИ · ЛОКАЛНО РАЗЧИТАНЕ', 'ПРЕГЛЕД НА ПРЕДЛОЖЕНИЕТО', 'ПРОДЪЛЖИ В КОНСТРУКТОРА']) assert.ok(visible.includes(label), label)
 })
 
 test('UI02.1A removes the audited mixed-language phrases from the visible AI/constructor presentation layer', () => {
