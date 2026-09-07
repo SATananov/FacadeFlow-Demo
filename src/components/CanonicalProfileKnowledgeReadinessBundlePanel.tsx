@@ -10,6 +10,7 @@ import {
 } from '../aiCanonicalProfileEvidenceResolutionDecision'
 import { buildCanonicalProfileEvidenceResolutionAggregation } from '../aiCanonicalProfileEvidenceResolutionAggregation'
 import { buildCanonicalProfileKnowledgeReadinessSummary } from '../aiCanonicalProfileKnowledgeReadinessSummary'
+import { CanonicalProfileSystemKnowledgeGatePanel } from './CanonicalProfileSystemKnowledgeGatePanel'
 
 interface Props {
   readiness: CanonicalProfileAssemblyEvidenceReadiness
@@ -127,6 +128,8 @@ export function CanonicalProfileKnowledgeReadinessBundlePanel({ readiness, ledge
       <p><strong>Production rules validated:</strong> NO</p>
       <p><strong>Production unlock:</strong> NO</p>
       <p><strong>Machine ready:</strong> NO</p>
+
+      <CanonicalProfileSystemKnowledgeGatePanel readiness={readiness} aggregation={aggregation} summary={summary} />
 
       <footer data-safety="BUNDLE 03.15-03.17: KNOWLEDGE RESOLUTION ONLY · SOURCE READINESS MUTATION NO · MANUFACTURER APPROVAL NO · VERIFIED ASSEMBLY NODE COMPLETE NO · EXACT JOINT GEOMETRY NO · PRODUCTION COMPATIBILITY NO · RULES VALIDATED NO · PRODUCTION UNLOCK NO · MACHINE READY NO">
         03.15–03.17 BUNDLE · KNOWLEDGE COVERAGE ONLY · SOURCE READINESS НЕ СЕ ПРЕПИСВА · MANUFACTURER APPROVAL: НЕ · EXACT JOINT GEOMETRY: НЕ · PRODUCTION COMPATIBILITY: НЕ · PRODUCTION UNLOCK: НЕ · MACHINE READY: НЕ
