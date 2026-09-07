@@ -9,6 +9,7 @@ import {
   type CanonicalProfileAssemblyEvidenceApplicationRecord,
 } from '../aiCanonicalProfileAssemblyEvidenceApplicationGate'
 import { buildCanonicalProfileCandidateEvidenceLedger } from '../aiCanonicalProfileCandidateEvidenceLedger'
+import { CanonicalProfileKnowledgeReadinessBundlePanel } from './CanonicalProfileKnowledgeReadinessBundlePanel'
 import {
   buildCanonicalProfileEvidenceRequirementSatisfactionGate,
   createCanonicalProfileEvidenceRequirementReviewRecord,
@@ -155,6 +156,12 @@ export function CanonicalProfileEvidenceApplicationBundlePanel({ readiness, subm
       <p><strong>Verified assembly node evidence:</strong> NO</p>
       <p><strong>Exact joint geometry verified:</strong> NO</p>
       <p><strong>Production unlock:</strong> NO</p>
+
+      <CanonicalProfileKnowledgeReadinessBundlePanel
+        readiness={readiness}
+        ledger={candidateLedger}
+        requirementReviews={requirementReviews}
+      />
 
       <footer data-safety="BUNDLE 03.12-03.14: EXPLICIT APPLICATION YES · CANDIDATE EVIDENCE ONLY · KNOWLEDGE REQUIREMENT REVIEW YES · SOURCE READINESS MUTATION NO · MANUFACTURER APPROVAL NO · VERIFIED ASSEMBLY NODE NO · EXACT JOINT GEOMETRY NO · AUTOMATIC GEOMETRY NO · PRODUCTION COMPATIBILITY NO · PRODUCTION UNLOCK NO · MACHINE READY NO">
         03.12–03.14 BUNDLE · CANDIDATE EVIDENCE ONLY · KNOWLEDGE REQUIREMENT REVIEW · SOURCE READINESS НЕ СЕ ПРЕПИСВА · MANUFACTURER APPROVAL: НЕ · EXACT JOINT GEOMETRY: НЕ · PRODUCTION UNLOCK: НЕ · MACHINE READY: НЕ
