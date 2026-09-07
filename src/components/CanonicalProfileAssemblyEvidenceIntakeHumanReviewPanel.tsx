@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import type { CanonicalProfileAssemblyEvidenceReadiness } from '../aiCanonicalProfileAssemblyEvidenceReadiness'
 import type { CanonicalProfileAssemblyEvidenceSubmissionRecord } from '../aiCanonicalProfileAssemblyEvidenceIntake'
+import { CanonicalProfileEvidenceApplicationBundlePanel } from './CanonicalProfileEvidenceApplicationBundlePanel'
 import {
   buildCanonicalProfileAssemblyEvidenceIntakeHumanReviewGate,
   createCanonicalProfileAssemblyEvidenceIntakeHumanReviewRecord,
@@ -102,6 +103,12 @@ export function CanonicalProfileAssemblyEvidenceIntakeHumanReviewPanel({ readine
       <footer data-safety="SOURCE HUMAN REVIEW ONLY: YES · ACCEPTED SOURCE APPLIED TO EVIDENCE LEDGER: NO · REQUIREMENT SATISFIED: NO · VALIDATED EVIDENCE CREATED: NO · MANUFACTURER APPROVAL: NO · VERIFIED ASSEMBLY NODE EVIDENCE CREATED: NO · EXACT JOINT GEOMETRY VERIFIED: NO · EVIDENCE MATURITY AUTO UPGRADE: NO · AUTOMATIC GEOMETRY: NO · PRODUCTION COMPATIBILITY: NO · PRODUCTION UNLOCK: NO · MACHINE READY: NO">
         SOURCE HUMAN REVIEW ONLY: ДА · ACCEPTED SOURCE ≠ APPLIED EVIDENCE · REQUIREMENT SATISFIED: НЕ · VALIDATED EVIDENCE: НЕ · MANUFACTURER APPROVAL: НЕ · VERIFIED ASSEMBLY NODE: НЕ · EXACT JOINT GEOMETRY: НЕ · AUTO MATURITY UPGRADE: НЕ · AUTOMATIC GEOMETRY: НЕ · PRODUCTION UNLOCK: НЕ · ГОТОВО ЗА МАШИНА: НЕ
       </footer>
+
+      <CanonicalProfileEvidenceApplicationBundlePanel
+        readiness={readiness}
+        submissions={submissions}
+        sourceReviews={records}
+      />
     </section>
   )
 }
