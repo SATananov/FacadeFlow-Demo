@@ -11,6 +11,7 @@ import { Product3DPreview } from './Product3DPreview'
 import { CanonicalProfileAssignmentReviewPanel } from './CanonicalProfileAssignmentReviewPanel'
 import { CanonicalProfile3DInspectionPanel } from './CanonicalProfile3DInspectionPanel'
 import { CanonicalProfile3DHumanReviewGatePanel } from './CanonicalProfile3DHumanReviewGatePanel'
+import { CanonicalProfileTechnicalSemanticsPanel } from './CanonicalProfileTechnicalSemanticsPanel'
 
 export interface CanonicalProfileRealConceptual3DPanelProps {
   proposal: FacadeFlowAi03ParametricProposal
@@ -149,6 +150,7 @@ export function CanonicalProfileRealConceptual3DPanel({
             onSelectNode={setSelectedId}
           />
           <CanonicalProfile3DHumanReviewGatePanel evidence={inspection} />
+          <CanonicalProfileTechnicalSemanticsPanel bridge={bridge} />
         </>
       )}
 
