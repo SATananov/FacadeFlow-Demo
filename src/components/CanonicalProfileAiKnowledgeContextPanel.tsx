@@ -5,6 +5,7 @@ import type { CanonicalProfileSystemKnowledgeGate } from '../aiCanonicalProfileS
 import { buildCanonicalProfileAiDecisionContext } from '../aiCanonicalProfileAiDecisionContext'
 import { buildCanonicalProfileAiClaimBoundary } from '../aiCanonicalProfileAiClaimBoundary'
 import { buildCanonicalProfileAiConsumableKnowledgeContext } from '../aiCanonicalProfileAiConsumableKnowledgeContext'
+import { CanonicalProfileEvidenceRequestResponsePanel } from './CanonicalProfileEvidenceRequestResponsePanel'
 
 interface Props {
   relationMatrix: CanonicalProfileRelationKnowledgeReadinessMatrix
@@ -63,6 +64,8 @@ export function CanonicalProfileAiKnowledgeContextPanel({ relationMatrix, system
       <p><strong>Production rules validated:</strong> NO</p>
       <p><strong>Production unlock:</strong> NO</p>
       <p><strong>Machine ready:</strong> NO</p>
+
+      <CanonicalProfileEvidenceRequestResponsePanel aiContext={aiContext} />
 
       <footer data-safety="BUNDLE 03.21-03.23: AI KNOWLEDGE CONTEXT ONLY · UNKNOWN STAYS UNKNOWN · NO TECHNICAL GUESSING · MANUFACTURER APPROVAL NO · EXACT JOINT GEOMETRY NO · PRODUCTION COMPATIBILITY NO · AUTOMATIC PROFILE SELECTION NO · AUTOMATIC GEOMETRY NO · PRODUCTION UNLOCK NO · MACHINE READY NO">
         03.21–03.23 BUNDLE · AI МОЖЕ ДА КАЖЕ „ЗНАМ / НЕ ЗНАМ / ТРЯБВА HUMAN EVIDENCE“ · НЕ МОЖЕ ДА ИЗМИСЛЯ ЛИПСВАЩИ ТЕХНИЧЕСКИ ДАННИ
