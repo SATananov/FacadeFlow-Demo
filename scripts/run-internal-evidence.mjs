@@ -1,6 +1,6 @@
 import { existsSync, readdirSync, rmSync } from 'node:fs'
 import { spawnSync } from 'node:child_process'
-import { basename, dirname, join, resolve } from 'node:path'
+import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const scriptDir = dirname(fileURLToPath(import.meta.url))
@@ -10,12 +10,15 @@ const privateEvidenceDir = join(repoRoot, 'local-samples', 'phase05a')
 const runtimeRoot = join(repoRoot, '.facadeflow-runtime', 'internal-evidence')
 const viteBin = join(repoRoot, 'node_modules', 'vite', 'bin', 'vite.js')
 
+const isInternalEvidenceTest = (name) => /\.internal\.test\.tsx?$/.test(name)
+const testBaseName = (name) => name.replace(/\.tsx?$/, '')
+
 const testFiles = readdirSync(testsDir)
-  .filter((name) => name.endsWith('.internal.test.ts'))
+  .filter(isInternalEvidenceTest)
   .sort((a, b) => a.localeCompare(b))
 
 if (testFiles.length === 0) {
-  console.error('No tests/*.internal.test.ts private-evidence tests found.')
+  console.error('No tests/*.internal.test.ts or tests/*.internal.test.tsx private-evidence tests found.')
   process.exit(1)
 }
 
@@ -36,7 +39,7 @@ console.log('This suite is intentionally not part of SHAREABLE_CLEAN verificatio
 
 for (const [index, name] of testFiles.entries()) {
   const sourceFile = join(testsDir, name)
-  const testBase = basename(name, '.ts')
+  const testBase = testBaseName(name)
   const outDir = join(runtimeRoot, testBase)
   const outputFile = join(outDir, `${testBase}.js`)
 

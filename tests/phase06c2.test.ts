@@ -8,13 +8,13 @@ import { createEmptyGuidedProductDraft } from '../src/aiGuidedProduct'
 
 const read = (path: string) => readFileSync(path, 'utf8')
 
-test('06C.2 locks the real Nadezhda Vадим-2 XML/LTE evidence facts and hashes', () => {
+test('06C.2 locks the anonymized Nadezhda PROJECT_EVIDENCE_A XML/LTE-derived evidence facts and redacted fingerprints', () => {
   assert.equal(nadezhdaSourceEvidence.xmlPieceCount, 46)
   assert.equal(nadezhdaSourceEvidence.lteRecordCount, 84)
   assert.equal(nadezhdaSourceEvidence.matchedXmlBarcodesInLte, 46)
   assert.equal(nadezhdaSourceEvidence.machiningCount, 220)
-  assert.equal(nadezhdaSourceEvidence.xmlSha256, '1FAFBDE7A13A28936EDC9FE9382DB5F50DA6B22D8168CF5959D95AE053E8DF08')
-  assert.equal(nadezhdaSourceEvidence.lteSha256, '6D753E558A1EA330573F2555F34603CD406EC9C6842A4CAB4EE210D1450A272A')
+  assert.equal(nadezhdaSourceEvidence.xmlSha256, 'SHAREABLE_REDACTED_XML_SHA256')
+  assert.equal(nadezhdaSourceEvidence.lteSha256, 'SHAREABLE_REDACTED_LTE_SHA256')
 })
 
 test('06C.2 exposes exactly the four observed profile codes without inferring a role', () => {

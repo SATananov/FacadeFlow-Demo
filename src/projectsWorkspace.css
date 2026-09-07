@@ -41,7 +41,7 @@
 /* UI01.2B — clean project/source evidence presentation. */
 .project-source-evidence{display:grid;gap:14px}
 .project-source-card{overflow:hidden;border:1px solid #c4d4d8;border-radius:7px;background:#fff}
-.project-source-card-vadim{border-top:3px solid #168697}.project-source-card-wp78{border-top:3px solid #8aa8af}
+.project-source-card-projectEvidenceA{border-top:3px solid #168697}.project-source-card-wp78{border-top:3px solid #8aa8af}
 .project-source-head{display:flex;align-items:flex-start;justify-content:space-between;gap:18px;padding:16px 18px;border-bottom:1px solid #dbe5e7;background:linear-gradient(180deg,#fbfdfd,#f4f8f9)}
 .project-source-head h4{margin:3px 0 5px;color:#173740;font-size:18px}.project-source-head p{max-width:780px;margin:0;color:#657b81;font-size:10px;line-height:1.55}
 .project-source-kicker{display:block;color:#168091;font:800 9px/1 ui-monospace;letter-spacing:1px}

@@ -45,7 +45,7 @@ re-reviewed; a later change requires a future explicit audit/versioning phase.
 
 Even a human-confirmed candidate remains:
 
-- sourced from the single `Вадим-2` project only;
+- sourced from the single `PROJECT_EVIDENCE_A` project only;
 - not cross-project corroborated;
 - not universally applicable;
 - not machine-ready;
@@ -64,7 +64,7 @@ RP01.3 keeps:
 
 ## Real-sample acceptance facts
 
-Against the existing locked `local-samples/phase05a` Vadim XML/LTE pair, the current
+Against the existing locked `local-samples/phase05a` ProjectEvidenceA XML/LTE pair, the current
 RP01.2 corpus yields 74 review candidates:
 
 - 4 repeated cut-tuple candidates;

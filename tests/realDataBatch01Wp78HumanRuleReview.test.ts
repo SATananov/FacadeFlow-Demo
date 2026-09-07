@@ -60,7 +60,7 @@ test('WP78.5 does not allow a decision record when the underlying rule evaluatio
   assert.ok(eligibility.reasons.includes('RULE_EVALUATION_INCOMPLETE'))
 })
 
-test('WP78.5 requires explicit acknowledgement before confirming source-only 78,22 with a Vadim project evidence gap', () => {
+test('WP78.5 requires explicit acknowledgement before confirming source-only 78,22 with a ProjectEvidenceA project evidence gap', () => {
   const input = {
     ...baseInput,
     request: { system: 'WP 78', role: 'SASH' as const, code: '78,22' },

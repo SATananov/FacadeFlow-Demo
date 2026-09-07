@@ -19,7 +19,7 @@ const sampleDir = join(process.cwd(), 'local-samples', 'phase05a')
 const sampleNames = readdirSync(sampleDir)
 const xmlName = sampleNames.find((name) => extname(name).toLowerCase() === '.xml')
 const lteName = sampleNames.find((name) => extname(name).toLowerCase() === '.lte')
-if (!xmlName || !lteName) throw new Error('RP01.4 requires the locked Vadim XML/LTE sample pair.')
+if (!xmlName || !lteName) throw new Error('RP01.4 requires the locked ProjectEvidenceA XML/LTE sample pair.')
 
 const xml = readFileSync(join(sampleDir, xmlName), 'utf8')
 const lte = readFileSync(join(sampleDir, lteName)).toString('latin1')
@@ -27,7 +27,7 @@ const aggregation = aggregateSkyGlazingObservationPatterns(
   extractSkyGlazingXmlObservations(xml),
   extractSkyGlazingLteObservations(lte),
 )
-const candidateSet = buildProductionPatternCandidateSet(aggregation, 'Вадим-2')
+const candidateSet = buildProductionPatternCandidateSet(aggregation, 'PROJECT_EVIDENCE_A')
 const candidate = candidateSet.candidates.find((item) =>
   item.profileCode === '78.01'
   && item.kind === 'CUT_TUPLE'

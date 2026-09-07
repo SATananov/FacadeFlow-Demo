@@ -15,7 +15,7 @@ const sampleDir = join(process.cwd(), 'local-samples', 'phase05a')
 const sampleNames = readdirSync(sampleDir)
 const xmlName = sampleNames.find((name) => extname(name).toLowerCase() === '.xml')
 const lteName = sampleNames.find((name) => extname(name).toLowerCase() === '.lte')
-if (!xmlName || !lteName) throw new Error('RP01.2 requires the locked Vadim XML/LTE sample pair.')
+if (!xmlName || !lteName) throw new Error('RP01.2 requires the locked ProjectEvidenceA XML/LTE sample pair.')
 
 const xml = readFileSync(join(sampleDir, xmlName), 'utf8')
 const lte = readFileSync(join(sampleDir, lteName)).toString('latin1')
@@ -30,7 +30,7 @@ const profile = (code: string) => {
 const frequencyMap = (patterns: readonly { key: string; count: number }[]) =>
   Object.fromEntries(patterns.map((pattern) => [pattern.key, pattern.count]))
 
-test('RP01.2 aggregates the locked Vadim observation corpus without creating production rules', () => {
+test('RP01.2 aggregates the locked ProjectEvidenceA observation corpus without creating production rules', () => {
   assert.equal(aggregation.profileCount, 4)
   assert.equal(aggregation.xmlObservationCount, 46)
   assert.equal(aggregation.lteObservationCount, 84)

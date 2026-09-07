@@ -32,19 +32,19 @@ const sampleDir = join(process.cwd(), 'local-samples', 'phase05a')
 const sampleNames = readdirSync(sampleDir)
 const xmlName = sampleNames.find((name) => extname(name).toLowerCase() === '.xml')
 const lteName = sampleNames.find((name) => extname(name).toLowerCase() === '.lte')
-if (!xmlName || !lteName) throw new Error('RP01.7 requires the locked Vadim XML/LTE sample pair.')
+if (!xmlName || !lteName) throw new Error('RP01.7 requires the locked ProjectEvidenceA XML/LTE sample pair.')
 
 const xml = readFileSync(join(sampleDir, xmlName), 'utf8')
 const lte = readFileSync(join(sampleDir, lteName)).toString('latin1')
-const vadimCandidateSet = buildProductionPatternCandidateSet(
+const projectEvidenceACandidateSet = buildProductionPatternCandidateSet(
   aggregateSkyGlazingObservationPatterns(
     extractSkyGlazingXmlObservations(xml),
     extractSkyGlazingLteObservations(lte),
   ),
-  'Вадим-2',
+  'PROJECT_EVIDENCE_A',
 )
 
-const repeated7801Cut = vadimCandidateSet.candidates.find((candidate) =>
+const repeated7801Cut = projectEvidenceACandidateSet.candidates.find((candidate) =>
   candidate.profileCode === '78.01'
   && candidate.kind === 'CUT_TUPLE'
   && candidate.sourcePatternKey === 'sxB=135|dxB=135|sxC=90|dxC=90')
@@ -121,9 +121,9 @@ function eligibleFixture() {
     5,
   )
   const secondSet = syntheticProjectSet('SYNTHETIC_TEST_PROJECT_B', [secondCandidate])
-  const candidateSets = [vadimCandidateSet, secondSet] as const
+  const candidateSets = [projectEvidenceACandidateSet, secondSet] as const
   const currentCandidates = [
-    ...vadimCandidateSet.candidates,
+    ...projectEvidenceACandidateSet.candidates,
     ...secondSet.candidates,
   ]
 
@@ -166,18 +166,18 @@ function eligibleFixture() {
   }
 }
 
-test('RP01.7 cannot record a promotion review for the current real Vadim-only corpus', () => {
-  const corroborationSet = buildProductionPatternCrossProjectCorroboration([vadimCandidateSet])
+test('RP01.7 cannot record a promotion review for the current real ProjectEvidenceA-only corpus', () => {
+  const corroborationSet = buildProductionPatternCrossProjectCorroboration([projectEvidenceACandidateSet])
   const gates = buildCrossProjectHumanPromotionGateAssessmentSet(
     corroborationSet,
-    [vadimCandidateSet],
+    [projectEvidenceACandidateSet],
     [],
   )
   const realGate = gates.assessments.find((gate) =>
     gate.profileCode === repeated7801Cut.profileCode
     && gate.candidateKind === repeated7801Cut.kind
     && gate.sourcePatternKey === repeated7801Cut.sourcePatternKey)
-  if (!realGate) throw new Error('RP01.7 real Vadim gate missing.')
+  if (!realGate) throw new Error('RP01.7 real ProjectEvidenceA gate missing.')
 
   const result = recordHumanPromotionReview(
     [],
@@ -305,7 +305,7 @@ test('RP01.7 invalidates the promotion review when current gate evidence changes
   )
   const changedGate = assessCrossProjectHumanPromotionGate(
     fixture.corroboration,
-    [vadimCandidateSet, changedSecondSet],
+    [projectEvidenceACandidateSet, changedSecondSet],
     fixture.reviewEntries,
   )
   const assessment = assessHumanPromotionReviewRecord(review.record, changedGate)

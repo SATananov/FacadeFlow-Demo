@@ -12,7 +12,7 @@ test('UI01.2B renders clean Bulgarian project evidence labels', () => {
   for (const mojibake of ['Рџ', 'РµР', 'Р°Р', 'РЅР']) assert.equal(evidence.includes(mojibake), false, `mojibake: ${mojibake}`)
 })
 
-test('UI01.2B presents Vadim metrics and profile evidence as FacadeFlow cards', () => {
+test('UI01.2B presents ProjectEvidenceA metrics and profile evidence as FacadeFlow cards', () => {
   assert.match(evidence, /project-source-metrics/)
   assert.match(evidence, /project-source-profile-grid/)
   assert.match(evidence, /project-source-review-actions/)

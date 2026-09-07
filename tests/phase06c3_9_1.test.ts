@@ -81,7 +81,7 @@ test('06C.3.9.1 activation candidate is only a future review candidate and never
 test('06C.3.9.1 dry run never uses a real Nadezhda profile code or source file as test input', () => {
   const source = readFileSync('src/aiRealDataDryRun.ts', 'utf8')
   for (const realCode of ['78.01', '78.27', '78.33', '78.51']) assert.doesNotMatch(source, new RegExp(realCode.replace('.', '\\.')))
-  assert.doesNotMatch(source, /Вадим|Vadim|Пещерско/)
+  assert.doesNotMatch(source, /PROJECT_EVIDENCE_A|ProjectEvidenceA|Пещерско/)
   assert.match(source, /DEMO_DRY_RUN_SOURCE\.xml/)
 })
 

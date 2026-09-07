@@ -12,7 +12,7 @@ RP01.11 does not execute the expression and does not create a runtime adapter.
 
 ## Current real-corpus truth
 
-The locked real corpus still contains only `Вадим-2`, so the real chain remains blocked upstream.
+The locked real corpus still contains only `PROJECT_EVIDENCE_A`, so the real chain remains blocked upstream.
 `SYNTHETIC_TEST_PROJECT_B` is used only inside focused tests and is not claimed as a real project.
 
 ## Human decision

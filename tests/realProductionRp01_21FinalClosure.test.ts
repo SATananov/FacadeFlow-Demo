@@ -66,7 +66,7 @@ test('RP01.21 records the current real-corpus truth without inventing cross-proj
   const manifest = RP01_FINAL_CLOSURE_MANIFEST
 
   assert.equal(manifest.realCorpusProjectCount, 1)
-  assert.deepEqual(manifest.realCorpusProjects, ['Вадим-2'])
+  assert.deepEqual(manifest.realCorpusProjects, ['PROJECT_EVIDENCE_A'])
   assert.equal(
     manifest.realCrossProjectCorroborationAvailable,
     false,

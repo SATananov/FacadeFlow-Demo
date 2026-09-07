@@ -6,14 +6,14 @@ Status: IMPLEMENTED / HUMAN VISUAL VERIFY REQUIRED
 
 Project/source context belongs in **Projects**. Normalized profile records belong in **Profile Catalogue**.
 
-- `Вадим-2 · XML + LTE` is shown as source-backed project evidence in Projects.
+- `PROJECT_EVIDENCE_A · XML + LTE` is shown as source-backed project evidence in Projects.
 - `WP 78 / REAL DATA BATCH 01` is shown as read-only source evidence in Projects.
 - Profile Catalogue no longer duplicates those project dashboards.
 - A normalized `CatalogueProfile` may preserve `sourceEvidenceId` / `sourceEvidenceLabel` provenance back to Projects.
 
 ## Human review
 
-Nadezhda/Vadim profile evidence remains immutable. FRAME / SASH / MULLION role assignment is an explicit human review action using the existing pending-review and `ProfileEditor` flow. Only the separate normalized catalogue record is added after confirmation.
+Nadezhda/ProjectEvidenceA profile evidence remains immutable. FRAME / SASH / MULLION role assignment is an explicit human review action using the existing pending-review and `ProfileEditor` flow. Only the separate normalized catalogue record is added after confirmation.
 
 ## Boundaries
 

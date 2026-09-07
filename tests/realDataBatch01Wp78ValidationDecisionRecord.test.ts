@@ -76,7 +76,7 @@ test('WP78.6 records VALIDATED_FOR_CONTEXT only after every supplied human revie
   assert.deepEqual(record.confirmedEvaluationIds, ['evaluation-frame', 'evaluation-divider'])
 })
 
-test('WP78.6 can close a source-only sash context after WP78.5 has explicitly acknowledged the Vadim evidence gap', () => {
+test('WP78.6 can close a source-only sash context after WP78.5 has explicitly acknowledged the ProjectEvidenceA evidence gap', () => {
   const sash = createWp78HumanRuleReviewRecord({
     request: { system: 'WP 78', role: 'SASH', code: '78,22' },
     evaluation: evaluation('evaluation-sash', 'PROFILE_COMPATIBILITY'),

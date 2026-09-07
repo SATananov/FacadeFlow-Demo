@@ -66,7 +66,7 @@ simulation or production outcome should be.
 
 ## Current real-corpus truth
 
-The locked real corpus still contains only `Вадим-2`.
+The locked real corpus still contains only `PROJECT_EVIDENCE_A`.
 
 The real chain remains blocked upstream because there is no second real corroborating project.
 Focused RP01.17 tests use synthetic reviewed-scenario evidence to exercise the exact-scope query

@@ -12,7 +12,7 @@ The phase does not create a production-executable rule and does not create any m
 
 ## Current real-corpus truth
 
-The locked real corpus still contains only `Вадим-2`.
+The locked real corpus still contains only `PROJECT_EVIDENCE_A`.
 
 Therefore current real data still has:
 

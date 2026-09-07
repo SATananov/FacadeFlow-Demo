@@ -15,14 +15,14 @@ test('WP78.4 accepts verified frame evidence only as context for human rule revi
   assert.equal(row.rulesValidated, false)
 })
 
-test('WP78.4 accepts verified divider evidence from source plus Vadim project observation', () => {
+test('WP78.4 accepts verified divider evidence from source plus ProjectEvidenceA project observation', () => {
   const row = evaluateWp78ProfileEvidenceGate({ system: 'WP 78', role: 'MULLION', code: '78.33' })
   assert.equal(row.evidenceClass, 'SOURCE_VERIFIED_PROJECT_OBSERVED')
   assert.equal(row.sourceCodeLiteral, '78,33')
   assert.equal(row.projectObserved, true)
 })
 
-test('WP78.4 keeps 78,22 source-verified but explicitly records the Vadim project evidence gap', () => {
+test('WP78.4 keeps 78,22 source-verified but explicitly records the ProjectEvidenceA project evidence gap', () => {
   const row = evaluateWp78ProfileEvidenceGate({ system: 'WP 78', role: 'SASH', code: '78,22' })
   assert.equal(row.evidenceClass, 'SOURCE_VERIFIED_SOURCE_ONLY')
   assert.equal(row.decision, 'ELIGIBLE_WITH_PROJECT_EVIDENCE_GAP')

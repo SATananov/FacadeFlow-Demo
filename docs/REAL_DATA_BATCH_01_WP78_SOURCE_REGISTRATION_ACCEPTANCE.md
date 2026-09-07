@@ -30,4 +30,4 @@ This batch is source registration only.
 - `productionApproved = false`
 - `humanAuditRequired = true`
 
-The existing Nadezhda `Вадим-2` group-78 evidence remains separate. Its dot-form observed codes are not rewritten or used as the source for the WP 78 records.
+The existing Nadezhda `PROJECT_EVIDENCE_A` group-78 evidence remains separate. Its dot-form observed codes are not rewritten or used as the source for the WP 78 records.

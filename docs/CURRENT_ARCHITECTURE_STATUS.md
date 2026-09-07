@@ -2,75 +2,154 @@
 
 **Source-of-truth status document**
 
-Base SHAREABLE_CLEAN source checkpoint independently audited: `7071c2b`.
-**PROFILE DATA 01.2A V8 + V8.1 + V8.2 + V8.3 is functionally CLOSED / independently audited at `7071c2b`.** Historical V8.1.1 wording is folded into V8.1 and is not a separate closure artifact. V8.3 provides the working-configuration WINDOW/DOOR UX while preserving strict technical confirmation and production locks.
-The post-audit **V8.3.1 Audit Metadata & Reproducibility Hardening** maintenance layer changes only source-of-truth metadata, checkpoint provenance/reproducibility guards, runtime-version declaration and the PRELUDE system-label consistency cleanup. It does **not** reopen or change N-field geometry, Working Configuration state semantics, Visual Composer behavior, AI authority or production safety.
+## Baseline and maintenance state
 
-Older phase acceptance files remain historical evidence. An acceptance filename never overrides the executable code, regression results, safety gates or this current status.
+Current independently audited GitHub/ZIP base: **`9d185aa`** (`workflow: integrate conceptual drawing through manufacturing gates`).
 
-## Current architecture state
+This working tree includes **QA02 — Regression, Workflow & Documentation Hardening** on top of that base. QA02 is a maintenance delta and is not considered closed until the target repository passes canonical local verification, is committed/pushed, is synchronized `0 0` with origin, and is packaged through the canonical checkpoint generator.
 
-| Area | Current status | Boundary |
+Historical acceptance documents remain historical evidence. Their older checkpoint wording does not override executable code, current regression results, safety gates, or this status document.
+
+## Current architecture map
+
+| Area | Current status | Authority / boundary |
 | --- | --- | --- |
-| UI01.1–UI01.2B | IMPLEMENTED / previously accepted | Unified navigation, Projects foundation and source/catalogue visual separation |
-| UI02.1A–UI02.1B | IMPLEMENTED | Bulgarian-language consistency for AI constructor and import surfaces |
-| AI01 | CLOSED / ACCEPTED FOUNDATION | Prompt → canonical Product Intent; unresolved values remain unresolved |
-| AI02 | CLOSED / ACCEPTED FOUNDATION | Document evidence → same canonical Product Intent; conflicts stay human-reviewed |
-| AI03 | CLOSED / ACCEPTED FOUNDATION | Parametric proposal only; no automatic constructor or production authority |
-| AI04 | CLOSED / ACCEPTED FOUNDATION | Explicit human-reviewed editable handoff only |
-| WP78 | CLOSED / ACCEPTED FOUNDATION | Evidence-aware contextual review; no generic production authority |
-| RP01.1–RP01.21 | CLOSED / ACCEPTED FOUNDATION | Evidence/simulation/read-only authority groups only |
-| PROJECT01.1–PROJECT01.3B | IMPLEMENTED | Project lifecycle, creation workspace, detail actions and BG UI consistency |
-| PROFILE DATA 01.1 | IMPLEMENTED / UPDATED BY V8.2 | PRELUDE 60 base geometry human-confirmed: 482.30 frame 64/42, 482.21 mullion 84/40, 482.05 WINDOW sash 78/56; effective assembled sash width remains separate |
-| PROFILE DATA 01.2 / 01.2A | IMPLEMENTED WORKING MODEL | PRELUDE system overlap uses human-reviewed 7 mm working value only; never production authority |
-| Visual Composer V4–V7 | IMPLEMENTED / UPDATED BY V8.3 | Explicit field focus and N-field window/door targeting; the old separate Door DEMO entry is superseded by one working-configuration workflow |
-| PROFILE DATA 01.2A V8 | CLOSED / INDEPENDENT AUDIT PASS | Canonical divider ratios, explicit sash eligibility and WINDOW/DOOR profile compatibility hardening |
-| PROFILE DATA 01.2A V8.1 | CLOSED / INDEPENDENT AUDIT PASS | Explicit Composer topology auto-seed, generic blank entry and topology lock/reset consistency |
-| PROFILE DATA 01.2A V8.2 | CLOSED / INDEPENDENT AUDIT PASS | Correct 482.05 base geometry to 78/56; keep glazing-bead dimension deferred/variable and separate from 7 mm overlap |
-| PROFILE DATA 01.2A V8.3 | CLOSED / INDEPENDENT AUDIT PASS | One working-configuration UX for WINDOW/DOOR; partial technical data allowed for editing, unknowns remain unknown, strict confirmation/safety unchanged |
+| UI01–UI02 | IMPLEMENTED FOUNDATION | Unified navigation/workspaces and BG consistency; no production authority |
+| PROJECT01 | IMPLEMENTED FOUNDATION | Project lifecycle, source context and project actions |
+| AI01 | CLOSED FOUNDATION | Prompt → canonical Product Intent; unknowns stay unresolved |
+| AI02 | CLOSED FOUNDATION | Document/source evidence → same Product Intent; conflicts remain human-reviewed |
+| AI03 | CLOSED FOUNDATION | Conceptual parametric proposal only; no automatic geometry acceptance |
+| AI04 | CLOSED FOUNDATION | Explicit human-reviewed editable constructor handoff only |
+| AI05 | IMPLEMENTED KNOWLEDGE/DRAWING FOUNDATION | Construction language/graph, drawing learning and canonical profile assignment/review; no production promotion |
+| REAL USER WORKFLOW V1 | IMPLEMENTED | Natural-language clarification, explicit human answers, knowledge gaps, no automatic profile selection |
+| REAL USER WORKFLOW V2–V6 | IMPLEMENTED INTEGRATED MILESTONE | V2 conceptual drawing; V3 corrections; V4 constructor preparation; V5/V6 intentionally LOCKED |
+| WP78 | CLOSED FOUNDATION | Evidence-aware contextual review only |
+| RP01.1–RP01.21 | CLOSED FOUNDATION | Evidence/simulation/read-only authority groups only |
+| PROFILE DATA V1 / 01.x–02.x | IMPLEMENTED WORKING MODEL | PRELUDE working geometry/catalogue semantics; not production formulas |
+| PROFILE DATA 03 | IMPLEMENTED KNOWLEDGE/EVIDENCE CHAIN | Identity → semantics → compatibility → evidence → readiness/gates → AI context/clarification; still fail-closed |
+| Visual Composer | IMPLEMENTED | WINDOW/DOOR working configuration, explicit topology and field focus |
+| Import / OCR / DWG foundations | IMPLEMENTED / SAFETY-LIMITED | Human-reviewed local evidence/read-only tooling; no automatic production conversion |
+| QA01 | IMPLEMENTED FOUNDATION | Canonical verification/checkpoint primitives |
+| QA02 | IMPLEMENTED DELTA / LOCAL VERIFY REQUIRED | TS+TSX regression completeness, single normal prompt workflow, current docs |
 
-## PRELUDE 60 effective-geometry invariants
+## REAL USER WORKFLOW
 
-- 482.30: `FRAME`, base visible width 42 mm, human-confirmed base geometry.
-- 482.21: `MULLION`, base visible width 40 mm, human-confirmed base geometry.
-- 482.05: current application `SASH` bridge for **WINDOW** only; base profile geometry is human-confirmed as 78 mm height / 56 mm visible width. This does not automatically define effective assembled sash width.
-- 482.26 / 482.27: catalogue-only door-sash entries; not selectable until explicit human mapping/geometry review.
-- Arithmetic differences are 22 mm for frame (64-42), 22 mm for sash (78-56) and 44 mm for mullion (84-40), but these differences are not used as an automatic glazing-bead formula.
-- Glazing-bead review is deferred: one reviewed example is 20 mm and 22 mm is common, therefore no universal bead constant or bead geometry calculation is enabled.
-- Glazing-bead dimension and sash overlap are separate concepts.
+### V1 — Natural-language clarification
+
+V1 begins from the current human prompt and builds a canonical candidate intent.
+
+Invariants:
+
+- recognized facts and unresolved fields remain distinguishable;
+- required structural clarification cannot be bypassed by deferring it;
+- human answers create a new candidate interpretation;
+- PRELUDE codes may be proposed for confirmation but are never automatically selected;
+- unsupported systems remain explicit knowledge gaps;
+- changing source description invalidates derived V1 state;
+- `automaticProfileSelectionAllowed = false`;
+- `automaticGeometryAllowed = false`;
+- `productionUnlockAllowed = false`;
+- `machineReady = false`.
+
+### V2–V6 — Integrated milestone
+
+Canonical normal-prompt journey:
+
+`human prompt → V1 clarification → V2 conceptual drawing → V3 conversational correction → V2 re-review → V4 explicit editable-constructor preparation → V5 locked production validation → V6 locked manufacturing handoff`
+
+**V2:** builds conceptual parametric drawing/proposal and requires Human Review.
+**V3:** applies deterministic candidate edits and invalidates stale drawing review.
+**V4:** exposes profile roles/working semantics and allows explicit editable constructor preparation only after review.
+**V5:** remains `LOCKED` until authoritative engineering/production knowledge exists.
+**V6:** remains `LOCKED`; DWG/DXF/MACHINE_JOB are future targets only.
+
+QA02 removes the parallel legacy AI03 Human Review panel from this normal natural-language prompt path. The direct structured quick-entry route remains separate and retains its current legacy proposal panel until a future explicit migration phase.
+
+## PROFILE DATA current invariants
+
+### PRELUDE working semantics
+
+- `482.30` — `FRAME`: 64 mm working dimension / 42 mm visible width.
+- `482.05` — current application `SASH` bridge for **WINDOW**: 78 mm working dimension / 56 mm visible width.
+- `482.21` — `MULLION`: 84 mm working dimension / 40 mm visible width.
+- `482.26` / `482.27` — catalogue-only door-sash entries; not automatically selectable/mapped.
 - PRELUDE sash overlap: 7 mm human-reviewed working value, editable and exact-production-confirmation-required.
-- Overlap may apply only when an explicit compatible sash profile is selected.
-- Template divider geometry uses canonical numeric `positionRatio`; rounded percentage labels are presentation-only.
-- Double / Triple / Quad N-field adjacency must be regression-tested together with PRELUDE effective visible geometry.
+- Glazing-bead dimension and sash overlap are separate concepts.
+- Reviewed glazing-bead observations do not create a universal bead constant.
+- Arithmetic differences between base dimensions are not automatic production formulas.
+- Template divider geometry uses canonical numeric `positionRatio`; display percentages are presentation-only.
 
-## Composer-entry invariants
+### PROFILE DATA 03 knowledge/evidence chain
 
-- `composerTemplateId` is the explicit canonical bridge between structured configuration and the initial Composer topology.
-- Choosing a concrete preset such as Double / Triple / Quad seeds that exact matching window or door composition when Composer opens.
-- Choosing the generic/no-preselected-composition route keeps Composer empty and leaves the template library available for local selection.
-- Renaming the product does not silently discard an already selected topology; switching to generic is an explicit action.
-- While an explicit topology is configured, Composer cannot silently switch to another topology from the left library. A topology change belongs back in the structured configuration step.
-- Reset inside an explicitly seeded Composer resets edits to the same topology instead of erasing or replacing the canonical topology.
-- WINDOW and DOOR use the current structured configuration directly in the working composer. Missing system/profile data may stay empty and be entered later.
-- Door threshold remains `UNRESOLVED`; conceptual review requires acknowledgement inside the door composer, while production/machine readiness stays locked.
-- Internal historical `DEMO-*` template/profile identifiers may remain for regression/provenance, but they are not the user-facing product-workflow concept.
+Current chain includes:
+
+1. visual section library / profile shape visualization;
+2. knowledge provenance and catalogue visual-truth controls;
+3. canonical profile identity;
+4. canonical technical semantics;
+5. canonical compatibility semantics;
+6. assembly evidence foundation;
+7. assembly evidence Human Review, summary and readiness;
+8. manual evidence intake and review;
+9. evidence application bundles;
+10. knowledge readiness bundles;
+11. system knowledge gates;
+12. AI knowledge context;
+13. evidence request / safe-response composition;
+14. AI clarification intake.
+
+This architecture allows AI to know **what evidence exists, where it came from, how it was reviewed, and what remains unknown**. It does not authorize the jump from catalogue knowledge to production execution.
+
+## Production-validation blockers
+
+V5 must stay locked while any required authoritative layer is missing, including:
+
+- manufacturer assembly compatibility;
+- exact joint/section geometry;
+- production deductions;
+- manufacturing tolerances;
+- validated deterministic engineering rules;
+- context-specific compatibility validation.
+
+A human-reviewed catalogue dimension or working overlap is not sufficient to unlock production.
+
+## Manufacturing blockers
+
+V6 must stay locked while there is no separate validated manufacturing boundary covering:
+
+- approved production geometry;
+- approved deductions/tolerances;
+- target manufacturing format semantics;
+- export validation;
+- machine/vendor compatibility;
+- explicit machine communication authorization.
+
+Current application state therefore preserves:
+
+- automatic manufacturing export = NO;
+- machine connectivity = NO;
+- machine ready = NO;
+- production approved = NO.
 
 ## Safety invariants
 
 The following remain non-negotiable across the architecture:
 
-- Human review is required before AI proposal handoff to editable constructor geometry.
-- `HUMAN_REVIEWED` is not engineering approval and is not production approval.
+- Human Review is required where AI candidates/proposals cross into editable construction preparation.
+- `HUMAN_REVIEWED` is not engineering approval and not production approval.
 - Project/source evidence is not automatically promoted to a normalized catalogue fact or generic rule.
 - `VALIDATED_FOR_CONTEXT` is context-only.
+- Knowledge readiness is not production readiness.
+- Automatic profile selection is forbidden unless a future explicit authority layer changes that contract.
 - No phase may set `machineReady`, `productionApproved`, `productionExecutable`, `engineeringAuthorityGranted`, or equivalent production authority automatically.
 - No machine communication or production instruction generation is authorized.
-- PRELUDE working overlap does not authorize cutting, machining, export or production dimensions.
-- Real local evidence remains private and must not be included in a `SHAREABLE_CLEAN` checkpoint.
+- PRELUDE working semantics/overlap do not authorize cutting, machining or production dimensions.
+- Private local evidence must not be included in a `SHAREABLE_CLEAN` checkpoint.
+- Shareable derived project evidence is anonymized as `PROJECT_EVIDENCE_A`; original private project/customer labels, sample barcodes and source-file SHA-256 fingerprints are not part of the shareable tracked representation.
 
-## Canonical verification
+## Canonical verification — QA02 contract
 
-The canonical repository verification command is:
+Canonical repository verification:
 
 ```bash
 npm run verify
@@ -78,39 +157,67 @@ npm run verify
 
 It runs:
 
-1. every shareable `tests/*.test.ts` file through `npm run test:regression`, excluding explicitly private `*.internal.test.ts`;
+1. shareable regression through `npm run test:regression`;
 2. `npm run lint`;
 3. `npm run build`.
 
-Locked/private RP01 evidence tests are intentionally separate under `*.internal.test.ts`. `npm run test:internal-evidence` requires `local-samples/phase05a`, and `npm run verify:internal` runs shareable regression + internal evidence + lint + build for controlled InternalAudit checkpoints.
+After QA02 the shareable regression runner discovers both:
 
-For a closure/checkpoint also run:
+- `tests/*.test.ts`
+- `tests/*.test.tsx`
+
+and excludes both:
+
+- `*.internal.test.ts`
+- `*.internal.test.tsx`
+
+This supersedes older QA01 wording that mentioned only `.test.ts`. Existing `.test.tsx` Human Review/UI integration suites are therefore part of canonical verification.
+
+Controlled internal verification:
+
+```bash
+npm run verify:internal
+```
+
+adds the internal-evidence runner, which uses the same TypeScript/TSX extension contract and requires the private `local-samples/phase05a` evidence checkout.
+
+For closure also run:
 
 ```bash
 git diff --check
 git status --short
 ```
 
-A clean checkpoint must be created only from a clean Git working tree.
+A clean checkpoint must be created only from a clean Git working tree after intended changes are committed.
 
 ## Checkpoint packaging
 
-Use the canonical scripts:
+Use:
 
 ```powershell
 npm run checkpoint:shareable
 npm run checkpoint:internal
 ```
 
-`SHAREABLE_CLEAN` runs the shareable verification contract, requires a clean working tree and strict `origin/<branch>...HEAD = 0 0` synchronization, and excludes private evidence including `local-samples/`, `*.dwg` and `*.lte`, plus Git metadata, dependencies, build/runtime output, coverage, environment files, logs and temporary files. `-SkipVerify` is not permitted for `SHAREABLE_CLEAN`. `INTERNAL_AUDIT` runs `verify:internal`, so locked evidence regression is required unless an explicit internal-only skip is used.
+`SHAREABLE_CLEAN`:
 
-The checkpoint ZIP contains both `CHECKPOINT_MANIFEST.txt` and deterministic `CHECKPOINT_CONTENT_SHA256.txt`. The content manifest lists sorted SHA-256 hashes for the payload and its own SHA-256 is recorded in the checkpoint manifest. ZIP entry order is deterministic and entry timestamps are fixed. Commit provenance must still be read from the manifest and verified against Git when the repository is available; do not infer it only from the ZIP filename.
+- cannot use `-SkipVerify`;
+- requires shareable verification;
+- requires clean Git state;
+- requires strict `origin/<branch>...HEAD = 0 0` synchronization;
+- excludes private evidence, Git metadata, dependencies, build/runtime output, environment files and temporary artifacts;
+- writes `CHECKPOINT_MANIFEST.txt` and deterministic `CHECKPOINT_CONTENT_SHA256.txt`;
+- uses deterministic entry ordering and fixed ZIP timestamps.
 
-## Next step
+`INTERNAL_AUDIT` may retain private evidence for controlled internal review and runs `verify:internal`.
 
-The V8–V8.3 functional stack is closed. Do not reopen its geometry/state logic without a new explicit finding.
+Commit provenance is read from the checkpoint manifest and should be verified against Git when the repository is available. Do not infer provenance only from a ZIP filename.
 
-For any maintenance change after audited checkpoint `7071c2b`, run the canonical closure protocol before creating a new shareable checkpoint:
+## Current closure decision
+
+Base `9d185aa` is functionally and safety-green for the integrated V1→V6 design, but the independent audit found a canonical regression gap because `.test.tsx` suites were not discovered and a duplicate normal-prompt Human Review surface remained.
+
+QA02 addresses those findings. It is ready for target-repository verification but **must not be called CLOSED before**:
 
 ```bash
 npm ci
@@ -119,4 +226,20 @@ git diff --check
 git status --short
 ```
 
-Then stage only the intended maintenance files, review the staged diff, commit/push, confirm `origin/<branch>...HEAD = 0 0`, and create the canonical `SHAREABLE_CLEAN` checkpoint. After that, the next feature/data phase may be selected under a new explicit acceptance boundary.
+Then:
+
+1. review intended diff;
+2. stage only QA02 files;
+3. commit/push;
+4. `git fetch origin`;
+5. confirm `git rev-list --left-right --count origin/master...master` returns `0 0`;
+6. confirm clean `git status`;
+7. create canonical `SHAREABLE_CLEAN` checkpoint.
+
+## Next technical phase after QA02 closure
+
+Do not unlock V5/V6 by adding UI flags.
+
+The next correct technical direction is a narrowly scoped **production-validation knowledge foundation**: begin with one real PRELUDE assembly relationship (for example FRAME ↔ SASH) and establish authoritative manufacturer compatibility evidence, exact joint geometry, overlap/rebate semantics, deductions, tolerances and validated deterministic rules.
+
+Only cases backed by that authority may later become individually production-validatable. Manufacturing handoff remains a separate later boundary.

@@ -9,7 +9,7 @@ UI01.2B repairs the human-visible source-project presentation introduced by UI01
 ## Visual result
 
 - Bulgarian source labels are stored and rendered as UTF-8 text without mojibake.
-- `Надежда · Вадим-2` is a dedicated source-project card with four project metrics.
+- `Надежда · PROJECT_EVIDENCE_A` is a dedicated source-project card with four project metrics.
 - 78.01 / 78.27 / 78.33 / 78.51 are structured evidence cards with dimensions, XML/LTE counts, lengths and machining counts.
 - FRAME / SASH / MULLION review controls use the FacadeFlow visual language.
 - Human review opens a dedicated inline review panel; source evidence remains immutable.

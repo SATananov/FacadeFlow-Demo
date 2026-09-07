@@ -12,7 +12,7 @@ It does not validate an executable engineering rule and it does not create produ
 
 ## Current real-corpus truth
 
-The locked real corpus still contains only `Вадим-2`.
+The locked real corpus still contains only `PROJECT_EVIDENCE_A`.
 
 Therefore current real data still has:
 

@@ -5,8 +5,8 @@ import {
   extractSkyGlazingLteObservations,
   extractSkyGlazingXmlObservations,
   summarizeSkyGlazingObservations,
-  vadimRp01EvidenceMatchesExistingCatalogueAggregate,
-  vadimRp01ExpectedEvidence,
+  projectEvidenceARp01EvidenceMatchesExistingCatalogueAggregate,
+  projectEvidenceARp01ExpectedEvidence,
 } from '../src/realProduction/skyGlazingObservationExtraction'
 
 const xmlFixture = `<?xml version='1.0' encoding='utf-8'?>
@@ -14,7 +14,7 @@ const xmlFixture = `<?xml version='1.0' encoding='utf-8'?>
   <Version>1.0</Version>
   <Generator>SkyGlazing</Generator>
   <Unit>mm</Unit>
-  <Name>Вадим-2</Name>
+  <Name>PROJECT_EVIDENCE_A</Name>
   <Bar>
     <DXF_Name>78.51.dxf</DXF_Name>
     <MaxY>74</MaxY>
@@ -22,7 +22,7 @@ const xmlFixture = `<?xml version='1.0' encoding='utf-8'?>
     <Piece>
       <Cutting></Cutting>
       <Machining>
-        <BarCode>100029200082</BarCode>
+        <BarCode>900000000001</BarCode>
         <Cut>
           <sxB>90.00</sxB><dxB>90.00</dxB><sxC>90.00</sxC><dxC>90.00</dxC>
           <Length>2131.0</Length>
@@ -37,7 +37,7 @@ const xmlFixture = `<?xml version='1.0' encoding='utf-8'?>
     <Piece>
       <Cutting></Cutting>
       <Machining>
-        <BarCode>200029200067</BarCode>
+        <BarCode>900000000002</BarCode>
         <Cut>
           <sxB>135.00</sxB><dxB>90.00</dxB><sxC>135.00</sxC><dxC>90.00</dxC>
           <Length>2166.0</Length>
@@ -59,15 +59,15 @@ const xmlFixture = `<?xml version='1.0' encoding='utf-8'?>
 </Order>`
 
 const lteFixture = [
-  '78.51       Vadim Xaskov2           02131.000000.0AL V 67     00011/1     2/26    78.51   090.0090.0090.0090.01  02131.002131.0  0       100029200082',
-  '78.27       Vadim Xaskov2 DR Left   02166.000917.0AL V 67     00121/2     2/29    78.27   135.0090.0135.0090.01  02166.002166.0  1       200029200067',
-  '78.27       Vadim Xaskov2  Right    02166.000917.0AL V 67     00131/2     2/29    78.27   135.0090.0135.0090.01  02166.002166.0  5       100029200069',
+  '78.51       Synthetic Project A           02131.000000.0AL V 67     00011/1     2/26    78.51   090.0090.0090.0090.01  02131.002131.0  0       900000000001',
+  '78.27       Synthetic Project A DR Left   02166.000917.0AL V 67     00121/2     2/29    78.27   135.0090.0135.0090.01  02166.002166.0  1       900000000002',
+  '78.27       Synthetic Project A  Right    02166.000917.0AL V 67     00131/2     2/29    78.27   135.0090.0135.0090.01  02166.002166.0  5       900000000003',
 ].join('\n')
 
 test('RP01.1 extracts XML piece observations without promoting observations to production rules', () => {
   const observations = extractSkyGlazingXmlObservations(xmlFixture)
   assert.equal(observations.length, 2)
-  assert.equal(observations[0].project, 'Вадим-2')
+  assert.equal(observations[0].project, 'PROJECT_EVIDENCE_A')
   assert.equal(observations[0].generator, 'SkyGlazing')
   assert.equal(observations[0].profileCode, '78.51')
   assert.equal(observations[0].cut.length, 2131)
@@ -109,7 +109,7 @@ test('RP01.1 extracts all LTE records and only derives positions explicitly pres
   const observations = extractSkyGlazingLteObservations(lteFixture)
   assert.equal(observations.length, 3)
   assert.equal(observations[0].observedPosition, null)
-  assert.equal(observations[1].description, 'Vadim Xaskov2 DR Left')
+  assert.equal(observations[1].description, 'Synthetic Project A DR Left')
   assert.equal(observations[1].observedPosition, 'Left')
   assert.equal(observations[2].observedPosition, 'Right')
 })
@@ -122,7 +122,7 @@ test('RP01.1 correlates XML and LTE only by exact barcode evidence', () => {
   assert.equal(correlations.length, 2)
   assert.equal(correlations[0].correlationState, 'XML_LTE_BARCODE_MATCH')
   assert.equal(correlations[1].correlationState, 'XML_LTE_BARCODE_MATCH')
-  assert.equal(correlations[1].lte?.description, 'Vadim Xaskov2 DR Left')
+  assert.equal(correlations[1].lte?.description, 'Synthetic Project A DR Left')
 })
 
 test('RP01.1 summary distinguishes correlated XML records from LTE-only records', () => {
@@ -139,13 +139,13 @@ test('RP01.1 summary distinguishes correlated XML records from LTE-only records'
   assert.deepEqual(summary.operationNameCounts, { STD_HOLE: 1 })
 })
 
-test('RP01.1 Vadim evidence snapshot matches the existing FacadeFlow aggregate and remains observation-only', () => {
-  assert.equal(vadimRp01ExpectedEvidence.xmlObservationCount, 46)
-  assert.equal(vadimRp01ExpectedEvidence.lteObservationCount, 84)
-  assert.equal(vadimRp01ExpectedEvidence.correlatedBarcodeCount, 46)
-  assert.equal(vadimRp01ExpectedEvidence.lteOnlyCount, 38)
-  assert.equal(vadimRp01ExpectedEvidence.machiningOperationCount, 220)
-  assert.deepEqual(vadimRp01ExpectedEvidence.operationNameCounts, {
+test('RP01.1 ProjectEvidenceA evidence snapshot matches the existing FacadeFlow aggregate and remains observation-only', () => {
+  assert.equal(projectEvidenceARp01ExpectedEvidence.xmlObservationCount, 46)
+  assert.equal(projectEvidenceARp01ExpectedEvidence.lteObservationCount, 84)
+  assert.equal(projectEvidenceARp01ExpectedEvidence.correlatedBarcodeCount, 46)
+  assert.equal(projectEvidenceARp01ExpectedEvidence.lteOnlyCount, 38)
+  assert.equal(projectEvidenceARp01ExpectedEvidence.machiningOperationCount, 220)
+  assert.deepEqual(projectEvidenceARp01ExpectedEvidence.operationNameCounts, {
     STD_NOTCH: 112,
     STD_HOLE: 76,
     STD_SLOT: 17,
@@ -153,8 +153,8 @@ test('RP01.1 Vadim evidence snapshot matches the existing FacadeFlow aggregate a
     STD_KEYHOLE: 6,
     STD_POCKET: 3,
   })
-  assert.equal(vadimRp01EvidenceMatchesExistingCatalogueAggregate(), true)
-  assert.equal(vadimRp01ExpectedEvidence.productionRuleCreated, false)
-  assert.equal(vadimRp01ExpectedEvidence.machineReady, false)
-  assert.equal(vadimRp01ExpectedEvidence.productionApproved, false)
+  assert.equal(projectEvidenceARp01EvidenceMatchesExistingCatalogueAggregate(), true)
+  assert.equal(projectEvidenceARp01ExpectedEvidence.productionRuleCreated, false)
+  assert.equal(projectEvidenceARp01ExpectedEvidence.machineReady, false)
+  assert.equal(projectEvidenceARp01ExpectedEvidence.productionApproved, false)
 })

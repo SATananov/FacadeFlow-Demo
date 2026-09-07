@@ -1,6 +1,6 @@
 import { existsSync, readdirSync, rmSync } from 'node:fs'
 import { spawnSync } from 'node:child_process'
-import { basename, dirname, join, resolve } from 'node:path'
+import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const scriptDir = dirname(fileURLToPath(import.meta.url))
@@ -9,12 +9,16 @@ const testsDir = join(repoRoot, 'tests')
 const runtimeRoot = join(repoRoot, '.facadeflow-runtime', 'regression')
 const viteBin = join(repoRoot, 'node_modules', 'vite', 'bin', 'vite.js')
 
+const isTypeScriptTest = (name) => /\.test\.tsx?$/.test(name)
+const isInternalEvidenceTest = (name) => /\.internal\.test\.tsx?$/.test(name)
+const testBaseName = (name) => name.replace(/\.tsx?$/, '')
+
 const testFiles = readdirSync(testsDir)
-  .filter((name) => name.endsWith('.test.ts') && !name.endsWith('.internal.test.ts'))
+  .filter((name) => isTypeScriptTest(name) && !isInternalEvidenceTest(name))
   .sort((a, b) => a.localeCompare(b))
 
 if (testFiles.length === 0) {
-  console.error('No shareable tests/*.test.ts files found.')
+  console.error('No shareable tests/*.test.ts or tests/*.test.tsx files found.')
   process.exit(1)
 }
 
@@ -26,12 +30,12 @@ if (!existsSync(viteBin)) {
 rmSync(runtimeRoot, { recursive: true, force: true })
 
 console.log(`FacadeFlow shareable regression: ${testFiles.length} test files`)
-console.log('Private evidence tests (*.internal.test.ts) are intentionally excluded from shareable verification.')
+console.log('Private evidence tests (*.internal.test.ts / *.internal.test.tsx) are intentionally excluded from shareable verification.')
 console.log('Each shareable test file is bundled and executed in isolation.')
 
 for (const [index, name] of testFiles.entries()) {
   const sourceFile = join(testsDir, name)
-  const testBase = basename(name, '.ts')
+  const testBase = testBaseName(name)
   const outDir = join(runtimeRoot, testBase)
   const outputFile = join(outDir, `${testBase}.js`)
 

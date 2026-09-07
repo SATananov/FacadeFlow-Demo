@@ -9,18 +9,21 @@ const internalRunner = readFileSync('scripts/run-internal-evidence.mjs', 'utf8')
 const status = readFileSync('docs/CURRENT_ARCHITECTURE_STATUS.md', 'utf8')
 const acceptance = readFileSync('docs/QA01_CHECKPOINT_HARDENING_ACCEPTANCE.md', 'utf8')
 
-test('QA01 exposes canonical full regression and verify commands', () => {
+// QA01 established the canonical verification/checkpoint primitives.
+// QA02 later widens the discovered TypeScript test extensions from .ts only to .ts + .tsx.
+
+test('QA01 canonical full regression and verify commands remain intact', () => {
   assert.equal(packageJson.scripts['test:regression'], 'node scripts/run-regression.mjs')
   assert.equal(packageJson.scripts.verify, 'npm run test:regression && npm run lint && npm run build')
   assert.equal(packageJson.scripts['test:internal-evidence'], 'node scripts/run-internal-evidence.mjs')
   assert.equal(packageJson.scripts['verify:internal'], 'npm run test:regression && npm run test:internal-evidence && npm run lint && npm run build')
 })
 
-test('QA01 regression runner discovers all tests instead of maintaining a manual phase list', () => {
+test('QA01 dynamic discovery/checkpoint separation remains intact after QA02 extension hardening', () => {
   assert.match(runner, /readdirSync\(testsDir\)/)
-  assert.match(runner, /\.endsWith\('\.test\.ts'\)/)
-  assert.match(runner, /!name\.endsWith\('\.internal\.test\.ts'\)/)
-  assert.match(internalRunner, /\.endsWith\('\.internal\.test\.ts'\)/)
+  assert.match(runner, /isTypeScriptTest/)
+  assert.match(runner, /isInternalEvidenceTest/)
+  assert.match(internalRunner, /isInternalEvidenceTest/)
   assert.match(internalRunner, /local-samples/)
   assert.match(runner, /vite\.js/)
   assert.match(runner, /--test/)
@@ -52,20 +55,19 @@ test('QA01 checkpoint ZIP writer loads both compression assemblies for Windows P
   assert.match(checkpointScript, /Add-Type -AssemblyName System\.IO\.Compression\r?\n/)
   assert.match(checkpointScript, /Add-Type -AssemblyName System\.IO\.Compression\.FileSystem/)
 })
-test('QA01 status source of truth preserves closed safety boundaries and audited V8 closure', () => {
+
+test('QA01 status source of truth preserves core safety/checkpoint boundaries while current checkpoint advances', () => {
   for (const token of [
-    'UI01.2B',
     'AI04',
     'RP01.1–RP01.21',
     'machineReady',
     'productionApproved',
     'SHAREABLE_CLEAN',
-    'V8.3.1',
-    '7071c2b',
+    '9d185aa',
+    'QA02',
   ]) {
     assert.match(status, new RegExp(token))
   }
-  assert.doesNotMatch(status, /V8\.3 \| IMPLEMENTED — VERIFY\/HUMAN AUDIT PENDING/)
   assert.match(acceptance, /non-feature maintenance phase/i)
   assert.match(acceptance, /must not change UI behavior/i)
 })

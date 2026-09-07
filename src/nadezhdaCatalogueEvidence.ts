@@ -3,7 +3,7 @@ import { catalogueProfileIsSelectable } from './profileCatalogueState'
 
 export interface NadezhdaProfileEvidence {
   id: string
-  project: 'Вадим-2'
+  project: 'PROJECT_EVIDENCE_A'
   code: string
   sourceGroup: '78'
   maxY: number
@@ -21,12 +21,12 @@ export interface NadezhdaProfileEvidence {
 export const NADEZHDA_EVIDENCE_SYSTEM_LABEL = 'НАДЕЖДА · ГРУПА 78 · СИСТЕМА НЕПОТВЪРДЕНА'
 
 export const nadezhdaSourceEvidence = {
-  project: 'Вадим-2',
-  source: 'Надежда · реален проект',
+  project: 'PROJECT_EVIDENCE_A',
+  source: 'Надежда · анонимизиран derived evidence snapshot',
   generatedBy: 'SkyGlazing',
   unit: 'mm',
-  xmlSha256: '1FAFBDE7A13A28936EDC9FE9382DB5F50DA6B22D8168CF5959D95AE053E8DF08',
-  lteSha256: '6D753E558A1EA330573F2555F34603CD406EC9C6842A4CAB4EE210D1450A272A',
+  xmlSha256: 'SHAREABLE_REDACTED_XML_SHA256',
+  lteSha256: 'SHAREABLE_REDACTED_LTE_SHA256',
   xmlPieceCount: 46,
   lteRecordCount: 84,
   matchedXmlBarcodesInLte: 46,
@@ -37,10 +37,10 @@ export const nadezhdaSourceEvidence = {
 } as const
 
 export const nadezhdaProfileEvidence: NadezhdaProfileEvidence[] = [
-  { id: 'nadezhda-vadim2-78-01', project: 'Вадим-2', code: '78.01', sourceGroup: '78', maxY: 70, maxZ: 57, xmlPieceCount: 29, lteRecordCount: 49, machiningCount: 83, minLength: 570, maxLength: 2770, role: 'UNCONFIRMED', xmlLteBarcodeMatch: true, sourceBacked: true },
-  { id: 'nadezhda-vadim2-78-27', project: 'Вадим-2', code: '78.27', sourceGroup: '78', maxY: 78, maxZ: 96, xmlPieceCount: 6, lteRecordCount: 24, machiningCount: 15, minLength: 2166, maxLength: 2166, role: 'UNCONFIRMED', xmlLteBarcodeMatch: true, sourceBacked: true },
-  { id: 'nadezhda-vadim2-78-33', project: 'Вадим-2', code: '78.33', sourceGroup: '78', maxY: 79, maxZ: 70, xmlPieceCount: 8, lteRecordCount: 8, machiningCount: 122, minLength: 1100, maxLength: 2158, role: 'UNCONFIRMED', xmlLteBarcodeMatch: true, sourceBacked: true },
-  { id: 'nadezhda-vadim2-78-51', project: 'Вадим-2', code: '78.51', sourceGroup: '78', maxY: 74, maxZ: 61, xmlPieceCount: 3, lteRecordCount: 3, machiningCount: 0, minLength: 2131, maxLength: 2131, role: 'UNCONFIRMED', xmlLteBarcodeMatch: true, sourceBacked: true },
+  { id: 'nadezhda-projectEvidenceA2-78-01', project: 'PROJECT_EVIDENCE_A', code: '78.01', sourceGroup: '78', maxY: 70, maxZ: 57, xmlPieceCount: 29, lteRecordCount: 49, machiningCount: 83, minLength: 570, maxLength: 2770, role: 'UNCONFIRMED', xmlLteBarcodeMatch: true, sourceBacked: true },
+  { id: 'nadezhda-projectEvidenceA2-78-27', project: 'PROJECT_EVIDENCE_A', code: '78.27', sourceGroup: '78', maxY: 78, maxZ: 96, xmlPieceCount: 6, lteRecordCount: 24, machiningCount: 15, minLength: 2166, maxLength: 2166, role: 'UNCONFIRMED', xmlLteBarcodeMatch: true, sourceBacked: true },
+  { id: 'nadezhda-projectEvidenceA2-78-33', project: 'PROJECT_EVIDENCE_A', code: '78.33', sourceGroup: '78', maxY: 79, maxZ: 70, xmlPieceCount: 8, lteRecordCount: 8, machiningCount: 122, minLength: 1100, maxLength: 2158, role: 'UNCONFIRMED', xmlLteBarcodeMatch: true, sourceBacked: true },
+  { id: 'nadezhda-projectEvidenceA2-78-51', project: 'PROJECT_EVIDENCE_A', code: '78.51', sourceGroup: '78', maxY: 74, maxZ: 61, xmlPieceCount: 3, lteRecordCount: 3, machiningCount: 0, minLength: 2131, maxLength: 2131, role: 'UNCONFIRMED', xmlLteBarcodeMatch: true, sourceBacked: true },
 ]
 
 function baseCatalogueProfileFromNadezhdaEvidence(evidence: NadezhdaProfileEvidence, role: ProfileRole, now: string): CatalogueProfile {

@@ -5,7 +5,7 @@
 RP01.5 distinguishes repetition inside one project from exact pattern evidence observed
 across distinct projects.
 
-The current locked real production corpus contains only the `Вадим-2` project. Therefore
+The current locked real production corpus contains only the `PROJECT_EVIDENCE_A` project. Therefore
 every current real RP01.3 candidate remains:
 
 `SINGLE_PROJECT_ONLY`
@@ -89,7 +89,7 @@ Required locks remain:
 
 PASS requires:
 
-- RP01.5 focused tests against the real locked Vadim corpus plus synthetic algorithm-only fixtures;
+- RP01.5 focused tests against the real locked ProjectEvidenceA corpus plus synthetic algorithm-only fixtures;
 - RP01.4 regression;
 - RP01.3 regression;
 - RP01.2 regression;

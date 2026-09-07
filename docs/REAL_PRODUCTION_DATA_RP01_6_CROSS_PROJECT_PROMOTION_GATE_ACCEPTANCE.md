@@ -9,7 +9,7 @@ It does not perform that review and it does not create a production rule.
 
 ## Current real-corpus truth
 
-The locked real corpus still contains only `Вадим-2`.
+The locked real corpus still contains only `PROJECT_EVIDENCE_A`.
 
 Therefore the current real RP01.5 set contains:
 

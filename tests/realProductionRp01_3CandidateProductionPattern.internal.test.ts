@@ -16,7 +16,7 @@ const sampleDir = join(process.cwd(), 'local-samples', 'phase05a')
 const sampleNames = readdirSync(sampleDir)
 const xmlName = sampleNames.find((name) => extname(name).toLowerCase() === '.xml')
 const lteName = sampleNames.find((name) => extname(name).toLowerCase() === '.lte')
-if (!xmlName || !lteName) throw new Error('RP01.3 requires the locked Vadim XML/LTE sample pair.')
+if (!xmlName || !lteName) throw new Error('RP01.3 requires the locked ProjectEvidenceA XML/LTE sample pair.')
 
 const xml = readFileSync(join(sampleDir, xmlName), 'utf8')
 const lte = readFileSync(join(sampleDir, lteName)).toString('latin1')
@@ -24,7 +24,7 @@ const aggregation = aggregateSkyGlazingObservationPatterns(
   extractSkyGlazingXmlObservations(xml),
   extractSkyGlazingLteObservations(lte),
 )
-const candidateSet = buildProductionPatternCandidateSet(aggregation, 'Вадим-2')
+const candidateSet = buildProductionPatternCandidateSet(aggregation, 'PROJECT_EVIDENCE_A')
 
 const candidatesFor = (profileCode: string) =>
   candidateSet.candidates.filter((candidate) => candidate.profileCode === profileCode)
@@ -39,7 +39,7 @@ test('RP01.3 promotes only repeated RP01.2 observations into review candidates, 
   assert.ok(candidateSet.candidates.every((candidate) => candidate.reviewStatus === 'NOT_REVIEWED'))
 })
 
-test('RP01.3 candidate counts stay tied to the real Vadim repeated-pattern corpus', () => {
+test('RP01.3 candidate counts stay tied to the real ProjectEvidenceA repeated-pattern corpus', () => {
   assert.deepEqual(
     ['78.01', '78.27', '78.33', '78.51'].map((code) => ({ code, candidates: candidatesFor(code).length })),
     [
@@ -137,7 +137,7 @@ test('RP01.3 refuses anonymous, undated, or repeated review recording', () => {
 })
 
 test('RP01.3 stays single-project, non-automatic, non-machine and non-production', () => {
-  assert.equal(candidateSet.sourceProject, 'Вадим-2')
+  assert.equal(candidateSet.sourceProject, 'PROJECT_EVIDENCE_A')
   assert.equal(candidateSet.singleProjectOnly, true)
   assert.equal(candidateSet.crossProjectCorroborated, false)
   assert.equal(candidateSet.automaticRulePromotionAllowed, false)

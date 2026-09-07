@@ -42,19 +42,19 @@ const sampleDir = join(process.cwd(), 'local-samples', 'phase05a')
 const sampleNames = readdirSync(sampleDir)
 const xmlName = sampleNames.find((name) => extname(name).toLowerCase() === '.xml')
 const lteName = sampleNames.find((name) => extname(name).toLowerCase() === '.lte')
-if (!xmlName || !lteName) throw new Error('RP01.10 requires the locked Vadim XML/LTE sample pair.')
+if (!xmlName || !lteName) throw new Error('RP01.10 requires the locked ProjectEvidenceA XML/LTE sample pair.')
 
 const xml = readFileSync(join(sampleDir, xmlName), 'utf8')
 const lte = readFileSync(join(sampleDir, lteName)).toString('latin1')
-const vadimCandidateSet = buildProductionPatternCandidateSet(
+const projectEvidenceACandidateSet = buildProductionPatternCandidateSet(
   aggregateSkyGlazingObservationPatterns(
     extractSkyGlazingXmlObservations(xml),
     extractSkyGlazingLteObservations(lte),
   ),
-  'Вадим-2',
+  'PROJECT_EVIDENCE_A',
 )
 
-const repeated7801Cut = vadimCandidateSet.candidates.find((candidate) =>
+const repeated7801Cut = projectEvidenceACandidateSet.candidates.find((candidate) =>
   candidate.profileCode === '78.01'
   && candidate.kind === 'CUT_TUPLE'
   && candidate.sourcePatternKey === 'sxB=135|dxB=135|sxC=90|dxC=90')
@@ -131,9 +131,9 @@ function executableReviewFixture() {
     5,
   )
   const secondSet = syntheticProjectSet('SYNTHETIC_TEST_PROJECT_B', [secondCandidate])
-  const candidateSets = [vadimCandidateSet, secondSet] as const
+  const candidateSets = [projectEvidenceACandidateSet, secondSet] as const
   const currentCandidates = [
-    ...vadimCandidateSet.candidates,
+    ...projectEvidenceACandidateSet.candidates,
     ...secondSet.candidates,
   ]
 
@@ -221,11 +221,11 @@ function executableReviewFixture() {
   }
 }
 
-test('RP01.10 current real Vadim-only corpus still cannot reach executable-rule review', () => {
-  const corroborationSet = buildProductionPatternCrossProjectCorroboration([vadimCandidateSet])
+test('RP01.10 current real ProjectEvidenceA-only corpus still cannot reach executable-rule review', () => {
+  const corroborationSet = buildProductionPatternCrossProjectCorroboration([projectEvidenceACandidateSet])
   const gates = buildCrossProjectHumanPromotionGateAssessmentSet(
     corroborationSet,
-    [vadimCandidateSet],
+    [projectEvidenceACandidateSet],
     [],
   )
 

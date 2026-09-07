@@ -34,7 +34,7 @@ An all-confirmed set cannot be converted into a rejection by this layer.
 ## Evidence-gap behavior
 
 A source-only profile such as WP78 `78,22` can reach WP78.6 only if WP78.5 already
-recorded the review, including the explicit Vadim-project evidence-gap acknowledgement.
+recorded the review, including the explicit ProjectEvidenceA-project evidence-gap acknowledgement.
 
 Project-only codes with unconfirmed roles, such as `78.27` and `78.51`, remain blocked
 upstream and therefore cannot become a valid WP78.6 closure.

@@ -12,7 +12,7 @@ This phase still does not validate or activate a production rule.
 
 ## Current real-corpus truth
 
-The locked real corpus still contains only `Вадим-2`.
+The locked real corpus still contains only `PROJECT_EVIDENCE_A`.
 
 Therefore current real RP01.6 assessments remain blocked:
 

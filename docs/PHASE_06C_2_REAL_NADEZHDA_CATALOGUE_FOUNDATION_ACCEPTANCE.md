@@ -6,9 +6,9 @@ Introduce a source-backed, read-only evidence layer from the locked real Nadezhd
 
 ## Locked evidence
 
-- Project evidence label: `Вадим-2`.
-- SkyGlazing XML SHA-256: `1FAFBDE7A13A28936EDC9FE9382DB5F50DA6B22D8168CF5959D95AE053E8DF08`.
-- LTE SHA-256: `6D753E558A1EA330573F2555F34603CD406EC9C6842A4CAB4EE210D1450A272A`.
+- Project evidence label: `PROJECT_EVIDENCE_A`.
+- SkyGlazing XML SHA-256: `SHAREABLE_REDACTED_XML_SHA256`.
+- LTE SHA-256: `SHAREABLE_REDACTED_LTE_SHA256`.
 - XML pieces: 46.
 - LTE fixed-width records: 84.
 - XML barcodes found in LTE: 46/46.

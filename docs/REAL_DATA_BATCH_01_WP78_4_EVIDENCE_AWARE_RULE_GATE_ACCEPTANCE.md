@@ -8,18 +8,18 @@ It is an evidence precondition layer only. It does **not** create a real rule PA
 
 ## Evidence classes
 
-- `SOURCE_VERIFIED_PROJECT_OBSERVED` — the requested code/role is verified by the WP 78 source sheet and the normalized code is also observed in the existing Vadim-2 project evidence.
-- `SOURCE_VERIFIED_SOURCE_ONLY` — the requested code/role is verified by the WP 78 source sheet but has no matching code observation in Vadim-2.
-- `PROJECT_OBSERVED_ROLE_UNCONFIRMED` — the code is observed in Vadim-2 but no source-backed role is established.
+- `SOURCE_VERIFIED_PROJECT_OBSERVED` — the requested code/role is verified by the WP 78 source sheet and the normalized code is also observed in the existing PROJECT_EVIDENCE_A project evidence.
+- `SOURCE_VERIFIED_SOURCE_ONLY` — the requested code/role is verified by the WP 78 source sheet but has no matching code observation in PROJECT_EVIDENCE_A.
+- `PROJECT_OBSERVED_ROLE_UNCONFIRMED` — the code is observed in PROJECT_EVIDENCE_A but no source-backed role is established.
 - `SOURCE_ROLE_MISMATCH` — a source-backed code is requested under a role that contradicts the verified source role.
-- `UNKNOWN_CODE` — no WP 78 source or Vadim project evidence exists for the code.
+- `UNKNOWN_CODE` — no WP 78 source or ProjectEvidenceA project evidence exists for the code.
 - `SYSTEM_MISMATCH` — the specialized WP 78 gate was asked to assess a different system.
 
 ## Deterministic WP 78 behavior
 
 - `78,01` / `78.01` + `FRAME` → eligible for human rule review; source verified + project observed.
 - `78,33` / `78.33` + `MULLION` → eligible for human rule review; source verified + project observed.
-- `78,22` + `SASH` → eligible with an explicit Vadim project-evidence gap.
+- `78,22` + `SASH` → eligible with an explicit ProjectEvidenceA project-evidence gap.
 - `78.27` and `78.51` → role assumption blocked; real project observations remain role-unconfirmed.
 - A verified code requested under the wrong role is blocked.
 - Unknown codes are blocked.

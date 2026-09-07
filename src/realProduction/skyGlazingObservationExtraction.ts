@@ -87,7 +87,7 @@ export interface SkyGlazingObservationSummary {
   operationNameCounts: Readonly<Record<string, number>>
 }
 
-export const vadimRp01ExpectedEvidence = Object.freeze({
+export const projectEvidenceARp01ExpectedEvidence = Object.freeze({
   project: nadezhdaSourceEvidence.project,
   generator: nadezhdaSourceEvidence.generatedBy,
   xmlSha256: nadezhdaSourceEvidence.xmlSha256,
@@ -325,12 +325,12 @@ export function summarizeSkyGlazingObservations(
   })
 }
 
-export function vadimRp01EvidenceMatchesExistingCatalogueAggregate(): boolean {
+export function projectEvidenceARp01EvidenceMatchesExistingCatalogueAggregate(): boolean {
   const profileByCode = new Map(nadezhdaProfileEvidence.map((record) => [record.code, record]))
 
-  return Object.entries(vadimRp01ExpectedEvidence.profileXmlCounts).every(([code, xmlCount]) => {
+  return Object.entries(projectEvidenceARp01ExpectedEvidence.profileXmlCounts).every(([code, xmlCount]) => {
     const evidence = profileByCode.get(code)
     return evidence?.xmlPieceCount === xmlCount
-      && evidence?.lteRecordCount === vadimRp01ExpectedEvidence.profileLteCounts[code as keyof typeof vadimRp01ExpectedEvidence.profileLteCounts]
+      && evidence?.lteRecordCount === projectEvidenceARp01ExpectedEvidence.profileLteCounts[code as keyof typeof projectEvidenceARp01ExpectedEvidence.profileLteCounts]
   })
 }

@@ -4,7 +4,7 @@ Status: implementation candidate — requires local regression/build and human v
 
 ## Acceptance boundary
 
-- Real Nadezhda / Vadim-2 profile evidence remains visible and immutable as source evidence.
+- Real Nadezhda / PROJECT_EVIDENCE_A profile evidence remains visible and immutable as source evidence.
 - Clicking `Каса / Крило / Делител` opens a **pending human review**; it does not immediately add the source profile to the catalogue.
 - The reviewer must explicitly confirm the proposed role and identify the human / technologist who confirmed it.
 - Source code and observed section dimensions remain read-only during the review.

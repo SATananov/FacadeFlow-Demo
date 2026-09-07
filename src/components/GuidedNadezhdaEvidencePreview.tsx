@@ -15,7 +15,7 @@ export function GuidedNadezhdaEvidencePreview({ profiles, onOpenCatalogue }: Pro
   return <section className="ff-guided-catalogue-sources" aria-label="Реален и демонстрационен каталог">
     <section className="ff-guided-real-catalogue-preview" aria-labelledby="ff-guided-real-catalogue-title" data-legacy-label="РЕАЛЕН КАТАЛОГ · SOURCE EVIDENCE">
       <div className="ff-guided-real-catalogue-head">
-        <div><span>РЕАЛЕН КАТАЛОГ · НАДЕЖДА</span><b id="ff-guided-real-catalogue-title">Вадим-2 · доказателства от източника</b><small>Реалните кодове са видими винаги. Само ролите, потвърдени от човек, могат да влязат в нормалните списъци за избор.</small></div>
+        <div><span>РЕАЛЕН КАТАЛОГ · НАДЕЖДА</span><b id="ff-guided-real-catalogue-title">PROJECT_EVIDENCE_A · доказателства от източника</b><small>Реалните кодове са видими винаги. Само ролите, потвърдени от човек, могат да влязат в нормалните списъци за избор.</small></div>
         <div className="ff-guided-real-catalogue-kpi"><b>{available}/{rows.length}</b><span>ПОТВЪРДЕНО ОТ ЧОВЕК</span></div>
       </div>
       <div className="ff-guided-real-catalogue-grid">

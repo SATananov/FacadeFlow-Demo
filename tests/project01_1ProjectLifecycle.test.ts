@@ -154,10 +154,10 @@ test('PROJECT01.1 reusable-template status requires a separate explicit human de
 test('PROJECT01.1 source links remain evidence links and do not change lifecycle, review or production authority', () => {
   const project = createProject()
   const linked = linkProjectSource(project, {
-    id: 'source-vadim',
+    id: 'source-projectEvidenceA',
     kind: 'SOURCE_PROJECT',
-    sourceId: 'nadezhda-vadim-2',
-    label: 'Nadezhda / Vadim-2',
+    sourceId: 'nadezhda-projectEvidenceA-2',
+    label: 'Nadezhda / PROJECT_EVIDENCE_A',
     now: T1,
   })
   assert.equal(linked.changed, true)
@@ -170,7 +170,7 @@ test('PROJECT01.1 source links remain evidence links and do not change lifecycle
   const duplicate = linkProjectSource(linked.project, {
     id: 'other-id',
     kind: 'SOURCE_PROJECT',
-    sourceId: 'nadezhda-vadim-2',
+    sourceId: 'nadezhda-projectEvidenceA-2',
     label: 'Duplicate source',
     now: T2,
   })

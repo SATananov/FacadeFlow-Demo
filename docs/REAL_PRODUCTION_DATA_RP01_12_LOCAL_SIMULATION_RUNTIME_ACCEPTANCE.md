@@ -37,7 +37,7 @@ A boolean result of `false` is still a completed dry-run, not an execution error
 
 ## Current real-corpus truth
 
-The locked real corpus still contains only `Вадим-2`, so the real chain remains blocked upstream.
+The locked real corpus still contains only `PROJECT_EVIDENCE_A`, so the real chain remains blocked upstream.
 `SYNTHETIC_TEST_PROJECT_B` remains test-only algorithm evidence.
 
 ## Safety boundary

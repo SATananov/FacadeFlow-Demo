@@ -28,19 +28,19 @@ const sampleDir = join(process.cwd(), 'local-samples', 'phase05a')
 const sampleNames = readdirSync(sampleDir)
 const xmlName = sampleNames.find((name) => extname(name).toLowerCase() === '.xml')
 const lteName = sampleNames.find((name) => extname(name).toLowerCase() === '.lte')
-if (!xmlName || !lteName) throw new Error('RP01.6 requires the locked Vadim XML/LTE sample pair.')
+if (!xmlName || !lteName) throw new Error('RP01.6 requires the locked ProjectEvidenceA XML/LTE sample pair.')
 
 const xml = readFileSync(join(sampleDir, xmlName), 'utf8')
 const lte = readFileSync(join(sampleDir, lteName)).toString('latin1')
-const vadimCandidateSet = buildProductionPatternCandidateSet(
+const projectEvidenceACandidateSet = buildProductionPatternCandidateSet(
   aggregateSkyGlazingObservationPatterns(
     extractSkyGlazingXmlObservations(xml),
     extractSkyGlazingLteObservations(lte),
   ),
-  'Вадим-2',
+  'PROJECT_EVIDENCE_A',
 )
 
-const repeated7801Cut = vadimCandidateSet.candidates.find((candidate) =>
+const repeated7801Cut = projectEvidenceACandidateSet.candidates.find((candidate) =>
   candidate.profileCode === '78.01'
   && candidate.kind === 'CUT_TUPLE'
   && candidate.sourcePatternKey === 'sxB=135|dxB=135|sxC=90|dxC=90')
@@ -97,7 +97,7 @@ function matchingCrossProjectFixture() {
     5,
   )
   const secondSet = syntheticProjectSet('SYNTHETIC_TEST_PROJECT_B', [secondCandidate])
-  const candidateSets = [vadimCandidateSet, secondSet] as const
+  const candidateSets = [projectEvidenceACandidateSet, secondSet] as const
   const corroborationSet = buildProductionPatternCrossProjectCorroboration(candidateSets)
   const corroboration = corroborationSet.patterns.find((pattern) =>
     pattern.profileCode === repeated7801Cut.profileCode
@@ -154,11 +154,11 @@ function rejectedReview(
   return [...result.ledger.entries]
 }
 
-test('RP01.6 keeps every current real Vadim pattern blocked because no real cross-project evidence exists', () => {
-  const corroborationSet = buildProductionPatternCrossProjectCorroboration([vadimCandidateSet])
+test('RP01.6 keeps every current real ProjectEvidenceA pattern blocked because no real cross-project evidence exists', () => {
+  const corroborationSet = buildProductionPatternCrossProjectCorroboration([projectEvidenceACandidateSet])
   const result = buildCrossProjectHumanPromotionGateAssessmentSet(
     corroborationSet,
-    [vadimCandidateSet],
+    [projectEvidenceACandidateSet],
     [],
   )
 
@@ -174,7 +174,7 @@ test('RP01.6 keeps every current real Vadim pattern blocked because no real cros
 test('RP01.6 requires a current confirmed candidate review from every distinct corroborating project', () => {
   const fixture = matchingCrossProjectFixture()
   const currentCandidates = [
-    ...vadimCandidateSet.candidates,
+    ...projectEvidenceACandidateSet.candidates,
     ...fixture.secondSet.candidates,
   ]
 
@@ -215,7 +215,7 @@ test('RP01.6 requires a current confirmed candidate review from every distinct c
 test('RP01.6 current candidate rejection blocks the gate even when another project is confirmed', () => {
   const fixture = matchingCrossProjectFixture()
   const currentCandidates = [
-    ...vadimCandidateSet.candidates,
+    ...projectEvidenceACandidateSet.candidates,
     ...fixture.secondSet.candidates,
   ]
 
@@ -248,7 +248,7 @@ test('RP01.6 current candidate rejection blocks the gate even when another proje
 test('RP01.6 stale review evidence does not satisfy the current-confirmation requirement', () => {
   const fixture = matchingCrossProjectFixture()
   const originalCandidates = [
-    ...vadimCandidateSet.candidates,
+    ...projectEvidenceACandidateSet.candidates,
     ...fixture.secondSet.candidates,
   ]
 
@@ -278,7 +278,7 @@ test('RP01.6 stale review evidence does not satisfy the current-confirmation req
 
   const result = assessCrossProjectHumanPromotionGate(
     fixture.corroboration,
-    [vadimCandidateSet, changedSecondSet],
+    [projectEvidenceACandidateSet, changedSecondSet],
     reviews,
   )
 
@@ -294,7 +294,7 @@ test('RP01.6 stale review evidence does not satisfy the current-confirmation req
 
 test('RP01.6 blocks when corroboration references a project candidate missing from the current candidate sets', () => {
   const fixture = matchingCrossProjectFixture()
-  const currentCandidates = [...vadimCandidateSet.candidates]
+  const currentCandidates = [...projectEvidenceACandidateSet.candidates]
 
   let reviews: ProductionPatternCandidateReviewLedgerEntry[] = []
   reviews = confirmedReview(
@@ -306,7 +306,7 @@ test('RP01.6 blocks when corroboration references a project candidate missing fr
 
   const result = assessCrossProjectHumanPromotionGate(
     fixture.corroboration,
-    [vadimCandidateSet],
+    [projectEvidenceACandidateSet],
     reviews,
   )
 
@@ -316,14 +316,14 @@ test('RP01.6 blocks when corroboration references a project candidate missing fr
 })
 
 test('RP01.6 does not let repeated evidence from one project pass the promotion gate', () => {
-  const singleProjectSet = buildProductionPatternCrossProjectCorroboration([vadimCandidateSet])
+  const singleProjectSet = buildProductionPatternCrossProjectCorroboration([projectEvidenceACandidateSet])
   const corroboration = singleProjectSet.patterns.find((pattern) =>
     pattern.profileCode === repeated7801Cut.profileCode
     && pattern.kind === repeated7801Cut.kind
     && pattern.sourcePatternKey === repeated7801Cut.sourcePatternKey)
   if (!corroboration) throw new Error('RP01.6 single-project corroboration missing.')
 
-  const currentCandidates = [...vadimCandidateSet.candidates]
+  const currentCandidates = [...projectEvidenceACandidateSet.candidates]
   const reviews = confirmedReview(
     [],
     currentCandidates,
@@ -333,7 +333,7 @@ test('RP01.6 does not let repeated evidence from one project pass the promotion 
 
   const result = assessCrossProjectHumanPromotionGate(
     corroboration,
-    [vadimCandidateSet],
+    [projectEvidenceACandidateSet],
     reviews,
   )
 
@@ -348,7 +348,7 @@ test('RP01.6 synthetic second-project evidence remains test-only and never chang
 
   assert.equal(fixture.corroboration.crossProjectCorroborated, true)
 
-  const realOnly = buildProductionPatternCrossProjectCorroboration([vadimCandidateSet])
+  const realOnly = buildProductionPatternCrossProjectCorroboration([projectEvidenceACandidateSet])
   assert.equal(realOnly.crossProjectCorroboratedCount, 0)
 
   const acceptance = readFileSync(
@@ -363,7 +363,7 @@ test('RP01.6 synthetic second-project evidence remains test-only and never chang
 test('RP01.6 eligibility only opens human promotion review and never creates or validates a production rule', () => {
   const fixture = matchingCrossProjectFixture()
   const currentCandidates = [
-    ...vadimCandidateSet.candidates,
+    ...projectEvidenceACandidateSet.candidates,
     ...fixture.secondSet.candidates,
   ]
 

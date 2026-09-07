@@ -97,17 +97,17 @@ export function ProjectSourceEvidence({ profiles, onProfiles, onOpenCatalogue }:
       <footer className="project-source-safety">ИЗТОЧНИК: НАДЕЖДА · ТЕХНИЧЕСКИ КОНТАКТ: БАТ ТРИФОН · БЕЗ АВТОМАТИЧЕН CATALOGUE MERGE · ПРАВИЛА: НЕВАЛИДИРАНИ · ГОТОВ ЗА МАШИНА: НЕ · ПРОИЗВОДСТВЕНО ОДОБРЕН: НЕ</footer>
     </article>
 
-    <article className="project-source-card project-source-card-vadim" aria-labelledby="project-source-vadim-title">
+    <article className="project-source-card project-source-card-projectEvidenceA" aria-labelledby="project-source-projectEvidenceA-title">
       <header className="project-source-head">
         <div>
           <span className="project-source-kicker">ИЗТОЧНИКОВ ПРОЕКТ · XML + LTE · САМО ЗА ЧЕТЕНЕ</span>
-          <h4 id="project-source-vadim-title">Надежда · {nadezhdaSourceEvidence.project}</h4>
+          <h4 id="project-source-projectEvidenceA-title">Надежда · {nadezhdaSourceEvidence.project}</h4>
           <p>Заключен реален проектен източник. Профилните кодове и сеченията идват от реалния източник; ролята каса / крило / делител остава изрично човешко решение.</p>
         </div>
         <span className="project-source-state">ИЗТОЧНИКЪТ Е НЕПРОМЕНЯЕМ</span>
       </header>
 
-      <div className="project-source-metrics" aria-label="Обобщение на Вадим-2">
+      <div className="project-source-metrics" aria-label="Обобщение на PROJECT_EVIDENCE_A">
         <span><b>{nadezhdaSourceEvidence.xmlPieceCount}</b><small>XML детайла</small></span>
         <span><b>{nadezhdaSourceEvidence.lteRecordCount}</b><small>LTE записа</small></span>
         <span><b>{nadezhdaSourceEvidence.matchedXmlBarcodesInLte}/{nadezhdaSourceEvidence.xmlPieceCount}</b><small>съвпадение на баркодове</small></span>
@@ -143,7 +143,7 @@ export function ProjectSourceEvidence({ profiles, onProfiles, onOpenCatalogue }:
         })}
       </div>
 
-      {editing?.sourceEvidenceId?.startsWith('nadezhda-vadim2-') && <section className="project-source-review-panel" aria-live="polite">
+      {editing?.sourceEvidenceId?.startsWith('nadezhda-projectEvidenceA2-') && <section className="project-source-review-panel" aria-live="polite">
         <div className="project-source-review-heading"><span>ЧОВЕШКИ ПРЕГЛЕД</span><b>{editing.code} · {roleLabels[editing.role]}</b><small>Данните от източника остават неизменни. В каталога се добавя само отделен нормализиран запис след изрично човешко потвърждение.</small></div>
         <ProfileEditor value={editing} errors={errors} onChange={setEditing} onSave={save} onCancel={() => setEditing(null)}/>
       </section>}

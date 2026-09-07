@@ -19,7 +19,7 @@ test('WP78.3.1 bridge compares comma and dot source literals without overwriting
   assert.equal(frame.catalogueRole, 'FRAME')
 })
 
-test('WP78.3.1 bridge links the verified divider role to existing Vadim-2 evidence', () => {
+test('WP78.3.1 bridge links the verified divider role to existing PROJECT_EVIDENCE_A evidence', () => {
   const mullion = wp78RoleProjectEvidenceLinks.find((link) => link.sourceCodeLiteral === '78,33')
   assert.ok(mullion)
   assert.equal(mullion.state, 'ROLE_AND_PROJECT_CODE_MATCH')
@@ -30,7 +30,7 @@ test('WP78.3.1 bridge links the verified divider role to existing Vadim-2 eviden
   assert.equal(mullion.projectXmlMaxZ, 70)
 })
 
-test('WP78.3.1 keeps 78,22 as source-only because Vadim-2 does not contain a matching project code', () => {
+test('WP78.3.1 keeps 78,22 as source-only because PROJECT_EVIDENCE_A does not contain a matching project code', () => {
   const sash = wp78RoleProjectEvidenceLinks.find((link) => link.sourceCodeLiteral === '78,22')
   assert.ok(sash)
   assert.equal(sash.state, 'SOURCE_ONLY_NO_PROJECT_CODE_MATCH')
@@ -39,7 +39,7 @@ test('WP78.3.1 keeps 78,22 as source-only because Vadim-2 does not contain a mat
   assert.equal(sash.catalogueRole, 'SASH')
 })
 
-test('WP78.3.1 keeps Vadim-2 78.27 and 78.51 real but role-unconfirmed', () => {
+test('WP78.3.1 keeps PROJECT_EVIDENCE_A 78.27 and 78.51 real but role-unconfirmed', () => {
   assert.deepEqual(
     wp78ProjectOnlyEvidenceLinks.map((link) => ({ code: link.projectCodeLiteral, roleStatus: link.roleStatus })),
     [
@@ -51,7 +51,7 @@ test('WP78.3.1 keeps Vadim-2 78.27 and 78.51 real but role-unconfirmed', () => {
 })
 
 test('WP78.3.1 records a candidate project-system match but never auto-confirms the system or roles', () => {
-  assert.equal(wp78ProjectSystemEvidenceLink.project, 'Вадим-2')
+  assert.equal(wp78ProjectSystemEvidenceLink.project, 'PROJECT_EVIDENCE_A')
   assert.equal(wp78ProjectSystemEvidenceLink.candidateSystem, 'WP 78')
   assert.equal(wp78ProjectSystemEvidenceLink.candidateStatus, 'CANDIDATE_REQUIRES_HUMAN_CONFIRMATION')
   assert.equal(wp78ProjectSystemEvidenceLink.matchedRoleProjectCodeCount, 2)

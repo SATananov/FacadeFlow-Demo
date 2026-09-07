@@ -11,7 +11,7 @@ The phase does **not** change project lifecycle semantics, AI behavior, catalogu
 - Project Detail headings, lifecycle descriptions and safety chips are Bulgarian.
 - Project creation, project library and safe-reuse copy is Bulgarian.
 - Project lifecycle/domain blocker messages are translated at the UI boundary; the canonical internal blocker strings remain unchanged.
-- Vadim-2 and WP78 source evidence cards use Bulgarian labels and safety copy while preserving technical identifiers such as XML, LTE, WP 78 and profile codes.
+- PROJECT_EVIDENCE_A and WP78 source evidence cards use Bulgarian labels and safety copy while preserving technical identifiers such as XML, LTE, WP 78 and profile codes.
 - Raw WP78 blocker enum identifiers are mapped to readable Bulgarian messages before rendering.
 - Catalogue and embedded profile human-review copy is Bulgarian.
 - `PROJECT01.x`, XML, LTE, WP 78, AI, profile codes and units remain unchanged because they are phase/technical identifiers rather than UI language drift.

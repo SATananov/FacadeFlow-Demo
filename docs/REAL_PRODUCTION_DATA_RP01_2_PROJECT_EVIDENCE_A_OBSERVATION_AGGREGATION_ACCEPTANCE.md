@@ -3,7 +3,7 @@
 ## Purpose
 
 RP01.2 groups the source-preserving RP01.1 SkyGlazing XML/LTE observations from the
-locked `Вадим-2` sample pair.
+locked `PROJECT_EVIDENCE_A` sample pair.
 
 The goal is to measure repetition without converting repetition into engineering truth.
 
@@ -47,7 +47,7 @@ These labels are frequency descriptions only.
 ## Real-sample verification
 
 The focused test reads the existing locked `local-samples/phase05a` XML/LTE pair and
-verifies the aggregation against the current Vadim evidence corpus.
+verifies the aggregation against the current ProjectEvidenceA evidence corpus.
 
 It does not copy the private source files into the repository.
 

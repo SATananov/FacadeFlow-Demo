@@ -35,7 +35,7 @@ export interface Rp01FinalClosureManifest {
   phaseCount: 20
   phases: readonly Rp01ArchitecturePhase[]
   realCorpusProjectCount: 1
-  realCorpusProjects: readonly ['Вадим-2']
+  realCorpusProjects: readonly ['PROJECT_EVIDENCE_A']
   realCrossProjectCorroborationAvailable: false
   foundationClosed: true
   architectureConsolidated: true
@@ -51,7 +51,7 @@ export interface Rp01FinalClosureManifest {
 const phases: readonly Rp01ArchitecturePhase[] = Object.freeze([
   Object.freeze({
     phaseId: 'RP01.1',
-    title: 'Vadim Observation Extraction Foundation',
+    title: 'ProjectEvidenceA Observation Extraction Foundation',
     status: 'CLOSED',
     dependsOn: null,
     responsibility: 'Extract locked XML/LTE observations without undocumented semantic inference.',
@@ -233,7 +233,7 @@ export const RP01_FINAL_CLOSURE_MANIFEST: Rp01FinalClosureManifest =
     phaseCount: 20,
     phases,
     realCorpusProjectCount: 1,
-    realCorpusProjects: Object.freeze(['Вадим-2'] as const),
+    realCorpusProjects: Object.freeze(['PROJECT_EVIDENCE_A'] as const),
     realCrossProjectCorroborationAvailable: false,
     foundationClosed: true,
     architectureConsolidated: true,

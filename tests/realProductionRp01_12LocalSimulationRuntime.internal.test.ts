@@ -44,18 +44,18 @@ const sampleDir = join(process.cwd(), 'local-samples', 'phase05a')
 const names = readdirSync(sampleDir)
 const xmlName = names.find((name) => extname(name).toLowerCase() === '.xml')
 const lteName = names.find((name) => extname(name).toLowerCase() === '.lte')
-if (!xmlName || !lteName) throw new Error('RP01.12 requires the locked Vadim XML/LTE sample pair.')
+if (!xmlName || !lteName) throw new Error('RP01.12 requires the locked ProjectEvidenceA XML/LTE sample pair.')
 
 const xml = readFileSync(join(sampleDir, xmlName), 'utf8')
 const lte = readFileSync(join(sampleDir, lteName)).toString('latin1')
-const vadim = buildProductionPatternCandidateSet(
+const projectEvidenceA = buildProductionPatternCandidateSet(
   aggregateSkyGlazingObservationPatterns(
     extractSkyGlazingXmlObservations(xml),
     extractSkyGlazingLteObservations(lte),
   ),
-  'Вадим-2',
+  'PROJECT_EVIDENCE_A',
 )
-const baseCandidate = vadim.candidates.find((candidate) =>
+const baseCandidate = projectEvidenceA.candidates.find((candidate) =>
   candidate.profileCode === '78.01'
   && candidate.kind === 'CUT_TUPLE'
   && candidate.sourcePatternKey === 'sxB=135|dxB=135|sxC=90|dxC=90')
@@ -129,8 +129,8 @@ function fixture(
 ) {
   const synthetic = cloneCandidate(baseCandidate, 'SYNTHETIC_TEST_PROJECT_B')
   const syntheticSet = candidateSet('SYNTHETIC_TEST_PROJECT_B', synthetic)
-  const sets = [vadim, syntheticSet] as const
-  const currentCandidates = [...vadim.candidates, synthetic]
+  const sets = [projectEvidenceA, syntheticSet] as const
+  const currentCandidates = [...projectEvidenceA.candidates, synthetic]
   let reviews: ProductionPatternCandidateReviewLedgerEntry[] = []
   reviews = addReview(reviews, currentCandidates, baseCandidate, '2026-09-01T15:00:00+03:00')
   reviews = addReview(reviews, currentCandidates, synthetic, '2026-09-01T15:01:00+03:00')
@@ -276,11 +276,11 @@ function adapterFor(f: ReturnType<typeof fixture>) {
   return result.adapter
 }
 
-test('RP01.12 real Vadim-only corpus remains blocked upstream', () => {
-  const cross = buildProductionPatternCrossProjectCorroboration([vadim])
+test('RP01.12 real ProjectEvidenceA-only corpus remains blocked upstream', () => {
+  const cross = buildProductionPatternCrossProjectCorroboration([projectEvidenceA])
   const gates = buildCrossProjectHumanPromotionGateAssessmentSet(
     cross,
-    [vadim],
+    [projectEvidenceA],
     [],
   )
   assert.equal(gates.assessmentCount, 74)

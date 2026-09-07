@@ -1,9 +1,9 @@
-# REAL PRODUCTION DATA — RP01.1 Vadim Observation Extraction Foundation
+# REAL PRODUCTION DATA — RP01.1 ProjectEvidenceA Observation Extraction Foundation
 
 ## Purpose
 
 RP01.1 creates a conservative, source-preserving extraction foundation for the existing
-SkyGlazing project evidence **Вадим-2**.
+SkyGlazing project evidence **PROJECT_EVIDENCE_A**.
 
 The layer extracts what was actually observed in SkyGlazing XML/LTE exports. It does not
 promote one project into a universal production rule.
@@ -43,7 +43,7 @@ It does not decode undocumented fixed-width LTE fields.
 Correlation is barcode-only. No profile-code, length, position, or fuzzy inference is used
 to manufacture a match.
 
-## Verified Vadim-2 snapshot
+## Verified PROJECT_EVIDENCE_A snapshot
 
 The source audit used for RP01.1 records:
 

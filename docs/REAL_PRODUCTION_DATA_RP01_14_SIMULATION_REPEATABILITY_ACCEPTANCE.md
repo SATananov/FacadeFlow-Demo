@@ -72,7 +72,7 @@ Adding, removing, changing, or staling evidence changes the fingerprint and make
 
 ## Current real-corpus truth
 
-The locked real corpus still contains only `Вадим-2`, so the real pipeline remains blocked
+The locked real corpus still contains only `PROJECT_EVIDENCE_A`, so the real pipeline remains blocked
 upstream because there is no second real corroborating project.
 
 `SYNTHETIC_TEST_PROJECT_B` remains test-only algorithm evidence.

@@ -5,7 +5,7 @@ This maintenance slice closes issues found by an independent audit of the V8–V
 ## Closure changes
 
 - Shareable regression is self-contained: `tests/*.internal.test.ts` are private-evidence tests and are excluded from `npm run test:regression`.
-- Locked Vadim XML/LTE evidence remains covered by `npm run test:internal-evidence` and `npm run verify:internal` when `local-samples/phase05a` is present.
+- Locked ProjectEvidenceA XML/LTE evidence remains covered by `npm run test:internal-evidence` and `npm run verify:internal` when `local-samples/phase05a` is present.
 - `ShareableClean` runs `npm run verify`; `InternalAudit` runs `npm run verify:internal`.
 - Door Composer composition is parent-owned and survives Back → Reopen. It is reseeded only when the configured starting topology changes.
 - Obsolete separate DOOR DEMO runtime gates were retired from `src`.

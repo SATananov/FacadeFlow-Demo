@@ -66,7 +66,7 @@ test('UI02.1A presents guided AI and constructor handoff status labels in Bulgar
   for (const marker of [
     'ЧОВЕШКА ПРОВЕРКА',
     '✓ ПОТВЪРДЕНО ОТ ЧОВЕК',
-    'Вадим-2 · доказателства от източника',
+    'PROJECT_EVIDENCE_A · доказателства от източника',
     'ПОТВЪРДЕНО ОТ ЧОВЕК',
     'СТРУКТУРА · ПО ЖЕЛАНИЕ',
     'AI → ПРЕХОД КЪМ КОНСТРУКТОРА',

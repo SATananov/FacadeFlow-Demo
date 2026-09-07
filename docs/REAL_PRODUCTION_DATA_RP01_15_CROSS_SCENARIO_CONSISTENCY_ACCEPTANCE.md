@@ -92,7 +92,7 @@ Adding/removing/changing a reviewed scenario changes the fingerprint and makes a
 
 ## Current real-corpus truth
 
-The locked real corpus still contains only `Вадим-2`, so the real production-data chain remains
+The locked real corpus still contains only `PROJECT_EVIDENCE_A`, so the real production-data chain remains
 blocked upstream because there is no second real corroborating project.
 
 `SYNTHETIC_TEST_PROJECT_B` remains test-only algorithm evidence.

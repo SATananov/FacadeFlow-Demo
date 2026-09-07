@@ -18,7 +18,7 @@ Any future major phase requires a new explicit human plan and acceptance boundar
 
 The closure manifest contains exactly 20 closed RP01 phases:
 
-1. RP01.1 — Vadim Observation Extraction Foundation
+1. RP01.1 — ProjectEvidenceA Observation Extraction Foundation
 2. RP01.2 — Observation Aggregation / Repeated Pattern Foundation
 3. RP01.3 — Candidate Production Pattern Foundation
 4. RP01.4 — Human Candidate Review Ledger / Invalidation
@@ -64,7 +64,7 @@ They do not promote any layer to production authority.
 
 The closure records exactly one real project:
 
-`Вадим-2`
+`PROJECT_EVIDENCE_A`
 
 Therefore:
 

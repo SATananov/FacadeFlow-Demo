@@ -65,7 +65,7 @@ authorized by RP01.18 to transform it into an inferred engineering result.
 
 ## Current real-corpus truth
 
-The locked real corpus still contains only `Вадим-2`.
+The locked real corpus still contains only `PROJECT_EVIDENCE_A`.
 
 The real chain remains blocked upstream because there is no second real corroborating project.
 Focused RP01.18 tests use synthetic reviewed-scenario evidence to exercise only the safe consumer

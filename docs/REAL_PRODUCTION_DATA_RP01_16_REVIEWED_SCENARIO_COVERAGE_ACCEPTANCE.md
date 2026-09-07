@@ -63,7 +63,7 @@ If the RP01.15 evidence or review changes, the old coverage boundary becomes:
 
 ## Current real-corpus truth
 
-The locked real corpus still contains only `Вадим-2`.
+The locked real corpus still contains only `PROJECT_EVIDENCE_A`.
 
 The real pipeline remains blocked upstream because there is no second real corroborating project.
 The focused RP01.16 logic tests use synthetic scenario-evidence objects only to test the boundary

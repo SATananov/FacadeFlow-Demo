@@ -30,16 +30,16 @@ const sampleDir = join(process.cwd(), 'local-samples', 'phase05a')
 const names = readdirSync(sampleDir)
 const xmlName = names.find((name) => extname(name).toLowerCase() === '.xml')
 const lteName = names.find((name) => extname(name).toLowerCase() === '.lte')
-if (!xmlName || !lteName) throw new Error('RP01.19 requires the locked Vadim XML/LTE sample pair.')
+if (!xmlName || !lteName) throw new Error('RP01.19 requires the locked ProjectEvidenceA XML/LTE sample pair.')
 
 const xml = readFileSync(join(sampleDir, xmlName), 'utf8')
 const lte = readFileSync(join(sampleDir, lteName)).toString('latin1')
-const vadim = buildProductionPatternCandidateSet(
+const projectEvidenceA = buildProductionPatternCandidateSet(
   aggregateSkyGlazingObservationPatterns(
     extractSkyGlazingXmlObservations(xml),
     extractSkyGlazingLteObservations(lte),
   ),
-  'Вадим-2',
+  'PROJECT_EVIDENCE_A',
 )
 
 function availableQuery(): ReviewedScenarioEvidenceQueryResult {
@@ -110,11 +110,11 @@ function unavailableQuery(): ReviewedScenarioEvidenceQueryResult {
   })
 }
 
-test('RP01.19 current real Vadim-only corpus remains blocked upstream', () => {
-  const cross = buildProductionPatternCrossProjectCorroboration([vadim])
+test('RP01.19 current real ProjectEvidenceA-only corpus remains blocked upstream', () => {
+  const cross = buildProductionPatternCrossProjectCorroboration([projectEvidenceA])
   const gates = buildCrossProjectHumanPromotionGateAssessmentSet(
     cross,
-    [vadim],
+    [projectEvidenceA],
     [],
   )
   assert.equal(gates.assessmentCount, 74)

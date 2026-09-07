@@ -18,16 +18,16 @@ const sampleDir = join(process.cwd(), 'local-samples', 'phase05a')
 const sampleNames = readdirSync(sampleDir)
 const xmlName = sampleNames.find((name) => extname(name).toLowerCase() === '.xml')
 const lteName = sampleNames.find((name) => extname(name).toLowerCase() === '.lte')
-if (!xmlName || !lteName) throw new Error('RP01.5 requires the locked Vadim XML/LTE sample pair.')
+if (!xmlName || !lteName) throw new Error('RP01.5 requires the locked ProjectEvidenceA XML/LTE sample pair.')
 
 const xml = readFileSync(join(sampleDir, xmlName), 'utf8')
 const lte = readFileSync(join(sampleDir, lteName)).toString('latin1')
-const vadimCandidateSet = buildProductionPatternCandidateSet(
+const projectEvidenceACandidateSet = buildProductionPatternCandidateSet(
   aggregateSkyGlazingObservationPatterns(
     extractSkyGlazingXmlObservations(xml),
     extractSkyGlazingLteObservations(lte),
   ),
-  'Вадим-2',
+  'PROJECT_EVIDENCE_A',
 )
 
 function syntheticProjectSet(
@@ -74,18 +74,18 @@ function cloneCandidateForSyntheticProject(
   })
 }
 
-const repeated7801Cut = vadimCandidateSet.candidates.find((candidate) =>
+const repeated7801Cut = projectEvidenceACandidateSet.candidates.find((candidate) =>
   candidate.profileCode === '78.01'
   && candidate.kind === 'CUT_TUPLE'
   && candidate.sourcePatternKey === 'sxB=135|dxB=135|sxC=90|dxC=90')
 if (!repeated7801Cut) throw new Error('RP01.5 expected the repeated 78.01 cut candidate.')
 
-test('RP01.5 reports the real locked Vadim corpus as single-project evidence only', () => {
-  const result = buildProductionPatternCrossProjectCorroboration([vadimCandidateSet])
+test('RP01.5 reports the real locked ProjectEvidenceA corpus as single-project evidence only', () => {
+  const result = buildProductionPatternCrossProjectCorroboration([projectEvidenceACandidateSet])
 
   assert.equal(result.inputProjectSetCount, 1)
   assert.equal(result.distinctInputProjectCount, 1)
-  assert.deepEqual(result.sourceProjects, ['Вадим-2'])
+  assert.deepEqual(result.sourceProjects, ['PROJECT_EVIDENCE_A'])
   assert.equal(result.patternCount, 74)
   assert.equal(result.singleProjectOnlyCount, 74)
   assert.equal(result.crossProjectCorroboratedCount, 0)
@@ -101,7 +101,7 @@ test('RP01.5 corroborates only the exact same pattern across distinct project la
     { evidenceCount: 5 },
   )
   const result = buildProductionPatternCrossProjectCorroboration([
-    vadimCandidateSet,
+    projectEvidenceACandidateSet,
     syntheticProjectSet('SYNTHETIC_TEST_PROJECT_B', [syntheticMatch]),
   ])
   const match = result.patterns.find((pattern) =>
@@ -112,7 +112,7 @@ test('RP01.5 corroborates only the exact same pattern across distinct project la
   assert.ok(match)
   assert.equal(match.state, 'CROSS_PROJECT_CORROBORATED')
   assert.equal(match.distinctProjectCount, 2)
-  assert.deepEqual(match.sourceProjects, ['SYNTHETIC_TEST_PROJECT_B', 'Вадим-2'])
+  assert.deepEqual(match.sourceProjects, ['SYNTHETIC_TEST_PROJECT_B', 'PROJECT_EVIDENCE_A'])
   assert.equal(match.totalEvidenceCountAcrossProjects, 32)
   assert.equal(match.exactPatternIdentityRequired, true)
 })
@@ -124,7 +124,7 @@ test('RP01.5 does not treat a near-match pattern as corroboration', () => {
     { sourcePatternKey: `${repeated7801Cut.sourcePatternKey}|different` },
   )
   const result = buildProductionPatternCrossProjectCorroboration([
-    vadimCandidateSet,
+    projectEvidenceACandidateSet,
     syntheticProjectSet('SYNTHETIC_TEST_PROJECT_B', [nearMatch]),
   ])
   const realPattern = result.patterns.find((pattern) =>
@@ -140,12 +140,12 @@ test('RP01.5 does not treat a near-match pattern as corroboration', () => {
 test('RP01.5 never counts duplicate evidence from one project as cross-project support', () => {
   const duplicateSameProject = cloneCandidateForSyntheticProject(
     repeated7801Cut,
-    'Вадим-2',
+    'PROJECT_EVIDENCE_A',
     { evidenceCount: 9 },
   )
   const result = buildProductionPatternCrossProjectCorroboration([
-    vadimCandidateSet,
-    syntheticProjectSet('Вадим-2', [duplicateSameProject]),
+    projectEvidenceACandidateSet,
+    syntheticProjectSet('PROJECT_EVIDENCE_A', [duplicateSameProject]),
   ])
   const pattern = result.patterns.find((item) =>
     item.profileCode === repeated7801Cut.profileCode
@@ -166,7 +166,7 @@ test('RP01.5 preserves per-project evidence counts', () => {
     { evidenceCount: 5 },
   )
   const result = buildProductionPatternCrossProjectCorroboration([
-    vadimCandidateSet,
+    projectEvidenceACandidateSet,
     syntheticProjectSet('SYNTHETIC_TEST_PROJECT_B', [syntheticMatch]),
   ])
   const pattern = result.patterns.find((item) =>
@@ -182,7 +182,7 @@ test('RP01.5 preserves per-project evidence counts', () => {
     })),
     [
       { project: 'SYNTHETIC_TEST_PROJECT_B', evidenceCounts: [5] },
-      { project: 'Вадим-2', evidenceCounts: [27] },
+      { project: 'PROJECT_EVIDENCE_A', evidenceCounts: [27] },
     ],
   )
 })
@@ -194,7 +194,7 @@ test('RP01.5 allows evidence count to differ between projects without changing p
     { evidenceCount: 2 },
   )
   const result = buildProductionPatternCrossProjectCorroboration([
-    vadimCandidateSet,
+    projectEvidenceACandidateSet,
     syntheticProjectSet('SYNTHETIC_TEST_PROJECT_B', [syntheticMatch]),
   ])
   const pattern = result.patterns.find((item) =>
@@ -213,7 +213,7 @@ test('RP01.5 synthetic test project is algorithm-only evidence, not a claimed re
     'SYNTHETIC_TEST_PROJECT_B',
   )
   const result = buildProductionPatternCrossProjectCorroboration([
-    vadimCandidateSet,
+    projectEvidenceACandidateSet,
     syntheticProjectSet('SYNTHETIC_TEST_PROJECT_B', [syntheticMatch]),
   ])
 
@@ -234,7 +234,7 @@ test('RP01.5 corroboration never becomes a production rule or machine/production
     'SYNTHETIC_TEST_PROJECT_B',
   )
   const result = buildProductionPatternCrossProjectCorroboration([
-    vadimCandidateSet,
+    projectEvidenceACandidateSet,
     syntheticProjectSet('SYNTHETIC_TEST_PROJECT_B', [syntheticMatch]),
   ])
   const corroborated = result.patterns.find((pattern) => pattern.crossProjectCorroborated)

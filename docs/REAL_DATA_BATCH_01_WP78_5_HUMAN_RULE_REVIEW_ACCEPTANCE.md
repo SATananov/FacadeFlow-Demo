@@ -17,13 +17,13 @@ A WP78.5 decision may be recorded only when all of the following are true:
 - the requirement is one of the WP78 evidence-relevant requirements (`PROFILE_COMPATIBILITY` or `SOURCE_TRACEABILITY`);
 - a human reviewer and review timestamp are supplied.
 
-For source-backed `78,22` (`SASH`), which is not observed in the existing Vadim-2 project evidence, confirmation additionally requires explicit acknowledgement of that project-evidence gap.
+For source-backed `78,22` (`SASH`), which is not observed in the existing PROJECT_EVIDENCE_A project evidence, confirmation additionally requires explicit acknowledgement of that project-evidence gap.
 
 ## Evidence boundaries preserved
 
-- `78,01` / `78.01` remains source-verified as `FRAME` and project-observed in Vadim-2.
-- `78,33` / `78.33` remains source-verified as `MULLION` and project-observed in Vadim-2.
-- `78,22` remains source-verified as `SASH` but source-only relative to Vadim-2.
+- `78,01` / `78.01` remains source-verified as `FRAME` and project-observed in PROJECT_EVIDENCE_A.
+- `78,33` / `78.33` remains source-verified as `MULLION` and project-observed in PROJECT_EVIDENCE_A.
+- `78,22` remains source-verified as `SASH` but source-only relative to PROJECT_EVIDENCE_A.
 - `78.27` and `78.51` remain project-observed with `ROLE_UNCONFIRMED` and cannot receive a WP78.5 confirmation record.
 - unrelated requirements cannot be repurposed as WP78 profile-evidence decisions.
 
@@ -55,7 +55,7 @@ Focused tests must prove that:
 
 1. eligible source + project evidence can receive an explicit human confirmation record only after generic human rule review;
 2. non-human-reviewed generic evaluations cannot be accepted;
-3. the Vadim evidence gap for `78,22` must be explicitly acknowledged before confirmation;
+3. the ProjectEvidenceA evidence gap for `78,22` must be explicitly acknowledged before confirmation;
 4. `78.27` and other evidence-blocked role assumptions remain blocked;
 5. unrelated rule requirements remain ineligible;
 6. an explicit human rejection is recorded as a blocker;

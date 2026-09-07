@@ -88,7 +88,7 @@ These remain blocked:
 
 ## Current real-corpus truth
 
-The locked real corpus still contains only `Вадим-2`.
+The locked real corpus still contains only `PROJECT_EVIDENCE_A`.
 
 The real production-data chain therefore remains blocked upstream because there is still no second
 real corroborating project.
