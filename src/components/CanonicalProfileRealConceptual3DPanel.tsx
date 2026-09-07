@@ -14,6 +14,7 @@ import { CanonicalProfile3DHumanReviewGatePanel } from './CanonicalProfile3DHuma
 import { CanonicalProfileTechnicalSemanticsPanel } from './CanonicalProfileTechnicalSemanticsPanel'
 import { CanonicalProfileCompatibilitySemanticsPanel } from './CanonicalProfileCompatibilitySemanticsPanel'
 import { CanonicalProfileAssemblyEvidencePanel } from './CanonicalProfileAssemblyEvidencePanel'
+import { CanonicalProfileAssemblyEvidenceHumanReviewPanel } from './CanonicalProfileAssemblyEvidenceHumanReviewPanel'
 
 export interface CanonicalProfileRealConceptual3DPanelProps {
   proposal: FacadeFlowAi03ParametricProposal
@@ -155,6 +156,7 @@ export function CanonicalProfileRealConceptual3DPanel({
           <CanonicalProfileTechnicalSemanticsPanel bridge={bridge} />
           <CanonicalProfileCompatibilitySemanticsPanel bridge={bridge} />
           <CanonicalProfileAssemblyEvidencePanel bridge={bridge} />
+          <CanonicalProfileAssemblyEvidenceHumanReviewPanel bridge={bridge} />
         </>
       )}
 
