@@ -51,7 +51,7 @@ export function createFacadeFlowAiSession(id = 'facadeflow-ai-session'): FacadeF
     id,
     view: 'INTAKE',
     job: {
-      id: `${id}-job`, name: '', reference: '', jobType: null, inputMode: null, description: '', realUserWorkflow: null, demoScenario: null, guidedProduct: createEmptyGuidedProductDraft(), products: [], technicalDetails: [], groupLabels: [], projectStructure: createEmptyProjectStructure(), reviewPacket: null,
+      id: `${id}-job`, name: '', reference: '', jobType: null, inputMode: null, description: '', realUserWorkflow: null, realUserMilestones: null, demoScenario: null, guidedProduct: createEmptyGuidedProductDraft(), products: [], technicalDetails: [], groupLabels: [], projectStructure: createEmptyProjectStructure(), reviewPacket: null,
       intakeStatus: 'EMPTY', createdAt: timestamp, updatedAt: timestamp, sessionOnly: true, simulationOnly: true, machineReady: false,
     },
     aiModelStatus: 'NOT_CONNECTED', humanReviewRequired: true, rulesValidationRequired: true, automaticGeometryAllowed: false,
@@ -71,7 +71,7 @@ export function selectFacadeFlowAiInputMode(session: FacadeFlowAiSession, inputM
 
 export function updateFacadeFlowJobMetadata(session: FacadeFlowAiSession, patch: Partial<Pick<FacadeFlowAiSession['job'], 'name' | 'reference' | 'description'>>): FacadeFlowAiSession {
   const clearPromptDerivedState = patch.description !== undefined
-  const job = { ...session.job, ...patch, ...(clearPromptDerivedState ? { quickProductIntent: null, realUserWorkflow: null } : {}), reviewPacket: null, updatedAt: now() }
+  const job = { ...session.job, ...patch, ...(clearPromptDerivedState ? { quickProductIntent: null, realUserWorkflow: null, realUserMilestones: null } : {}), reviewPacket: null, updatedAt: now() }
   const captured = Boolean(job.name.trim() || job.reference.trim() || job.description.trim() || job.quickProductIntent || guidedProductHasInput(job.guidedProduct))
   return { ...session, job: { ...job, intakeStatus: captured ? 'SOURCE_CAPTURED' : 'EMPTY' } }
 }
@@ -86,6 +86,7 @@ export function applyFacadeFlowQuickStructuredSelection(session: FacadeFlowAiSes
       description: selection.description,
       quickProductIntent: selection.intent,
       realUserWorkflow: null,
+      realUserMilestones: null,
       products,
       reviewPacket: null,
       intakeStatus: 'NEEDS_REVIEW',
@@ -95,7 +96,11 @@ export function applyFacadeFlowQuickStructuredSelection(session: FacadeFlowAiSes
 }
 
 export function setFacadeFlowRealUserWorkflowV1(session: FacadeFlowAiSession, workflow: FacadeFlowAiSession['job']['realUserWorkflow']): FacadeFlowAiSession {
-  return { ...session, job: { ...session.job, realUserWorkflow: workflow, reviewPacket: null, updatedAt: now() } }
+  return { ...session, job: { ...session.job, realUserWorkflow: workflow, realUserMilestones: null, reviewPacket: null, updatedAt: now() } }
+}
+
+export function setFacadeFlowRealUserMilestonesV2V6(session: FacadeFlowAiSession, milestones: FacadeFlowAiSession['job']['realUserMilestones']): FacadeFlowAiSession {
+  return { ...session, job: { ...session.job, realUserMilestones: milestones, reviewPacket: null, updatedAt: now() } }
 }
 
 export function setFacadeFlowAiView(session: FacadeFlowAiSession, view: FacadeFlowAiSession['view']): FacadeFlowAiSession { return { ...session, view } }

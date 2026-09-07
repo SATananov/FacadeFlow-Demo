@@ -142,7 +142,8 @@
     "test:profile_data03_21_23": "vite build --ssr tests/profileData03_21_23AiKnowledgeContextBundle.test.tsx --outDir .facadeflow-runtime/profile-data03-21-23-tests --emptyOutDir && node --test .facadeflow-runtime/profile-data03-21-23-tests/profileData03_21_23AiKnowledgeContextBundle.test.js",
     "test:profile_data03_24_26": "vite build --ssr tests/profileData03_24_26AiEvidenceRequestSafeResponseBundle.test.tsx --outDir .facadeflow-runtime/profile-data03-24-26-tests --emptyOutDir && node --test .facadeflow-runtime/profile-data03-24-26-tests/profileData03_24_26AiEvidenceRequestSafeResponseBundle.test.js",
     "test:profile_data03_27_29": "vite build --ssr tests/profileData03_27_29AiClarificationIntakeBundle.test.tsx --outDir .facadeflow-runtime/profile-data03-27-29-tests --emptyOutDir && node --test .facadeflow-runtime/profile-data03-27-29-tests/profileData03_27_29AiClarificationIntakeBundle.test.js",
-    "test:real_user_workflow_v1": "vite build --ssr tests/realUserWorkflowIntegrationV1.test.tsx --outDir .facadeflow-runtime/real-user-workflow-v1-tests --emptyOutDir && node --test .facadeflow-runtime/real-user-workflow-v1-tests/realUserWorkflowIntegrationV1.test.js"
+    "test:real_user_workflow_v1": "vite build --ssr tests/realUserWorkflowIntegrationV1.test.tsx --outDir .facadeflow-runtime/real-user-workflow-v1-tests --emptyOutDir && node --test .facadeflow-runtime/real-user-workflow-v1-tests/realUserWorkflowIntegrationV1.test.js",
+    "test:real_user_workflow_v2_v6": "vite build --ssr tests/realUserWorkflowIntegratedV2V6.test.ts --outDir .facadeflow-runtime/real-user-workflow-v2-v6-tests --emptyOutDir && node --test .facadeflow-runtime/real-user-workflow-v2-v6-tests/realUserWorkflowIntegratedV2V6.test.js"
   },
   "dependencies": {
     "@mlightcad/libredwg-web": "0.7.10",

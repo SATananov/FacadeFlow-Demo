@@ -1,4 +1,5 @@
 import type { FacadeFlowProductIntent } from './aiProductIntent'
+import type { FacadeFlowRealUserWorkflowV2V6State } from './aiRealUserWorkflowIntegratedV2V6'
 
 export type FacadeFlowJobType = 'BUILDING' | 'HOUSE' | 'SMALL_PROJECT' | 'SINGLE_PRODUCT' | 'CUSTOM_ORDER' | 'TECHNICAL_DETAIL'
 export type FacadeFlowAiInputMode = 'DOCUMENTS' | 'DESCRIPTION' | 'SKETCH' | 'MANUAL'
@@ -395,6 +396,7 @@ export interface FacadeFlowJobDraft {
   description: string
   quickProductIntent?: FacadeFlowProductIntent | null
   realUserWorkflow?: FacadeFlowRealUserWorkflowV1State | null
+  realUserMilestones?: FacadeFlowRealUserWorkflowV2V6State | null
   demoScenario: FacadeFlowAiDemoScenario | null
   guidedProduct: FacadeFlowGuidedProductDraft
   products: FacadeFlowProductSpecification[]

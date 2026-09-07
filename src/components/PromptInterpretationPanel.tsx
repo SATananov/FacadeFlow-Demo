@@ -1,6 +1,6 @@
 import { interpretFacadeFlowPrompt, type FacadeFlowPromptInterpretationResult } from '../aiPromptInterpreter'
 import { facadeFlowPromptIntentToGuidedPatch } from '../aiPromptGuidedBridge'
-import { setFacadeFlowRealUserWorkflowV1, updateFacadeFlowGuidedProduct } from '../aiWorkspaceState'
+import { setFacadeFlowRealUserMilestonesV2V6, setFacadeFlowRealUserWorkflowV1, updateFacadeFlowGuidedProduct } from '../aiWorkspaceState'
 import type { FacadeFlowAiSession } from '../aiWorkspaceTypes'
 import type { CatalogueProfile } from '../profileCatalogueTypes'
 import { FacadeFlowIcon } from './FacadeFlowIcons'
@@ -9,6 +9,7 @@ import type { FacadeFlowIntentField, FacadeFlowProductIntent } from '../aiProduc
 import { ParametricConstructionProposalPanel } from './ParametricConstructionProposalPanel'
 import { answerFacadeFlowRealUserWorkflowV1, removeFacadeFlowRealUserWorkflowV1Answer, startFacadeFlowRealUserWorkflowV1 } from '../aiRealUserWorkflowV1'
 import { RealUserWorkflowV1Panel } from './RealUserWorkflowV1Panel'
+import { RealUserWorkflowV2ToV6Panel } from './RealUserWorkflowV2ToV6Panel'
 
 
 function quickFieldLabel(field: FacadeFlowIntentField) {
@@ -105,6 +106,7 @@ export function PromptInterpretationPanel({ session, profiles, setSession, onOpe
       {result.unresolved.length > 0 && <div className="ff-ai-prompt-unresolved"><b>НЕУТОЧНЕНО</b><div>{result.unresolved.map((item) => <span key={item}>{item}</span>)}</div></div>}
       {result.warnings.length > 0 && <details className="ff-ai-prompt-warnings"><summary>Предупреждения / граници ({result.warnings.length})</summary><ul>{result.warnings.map((item) => <li key={item}>{item}</li>)}</ul></details>}
       {!stale && workflow && <RealUserWorkflowV1Panel workflow={workflow} onAnswer={answerWorkflowQuestion} onRemoveAnswer={removeWorkflowAnswer}/>}
+      {!stale && workflow && result.validForHumanReview && <RealUserWorkflowV2ToV6Panel workflow={workflow} milestones={session.job.realUserMilestones} profiles={profiles} onSetMilestones={(next) => setSession((current) => setFacadeFlowRealUserMilestonesV2V6(current, next))} onOpenAi04Constructor={onOpenAi04Constructor}/>}
       <div className="ff-ai-prompt-bridge"><button type="button" className="primary-button" disabled={stale || !result.validForHumanReview || result.recognized.length === 0 || (workflow?.requiredQuestionCount ?? 0) > 0} onClick={apply}>Прехвърли разпознатото към формуляра</button><span>{(workflow?.requiredQuestionCount ?? 0) > 0 ? `Първо отговори на ${workflow?.requiredQuestionCount ?? 0} задължителни уточнения.` : bridge ? `${bridge.transferred.length} съвместими стойности могат да се прехвърлят. ${bridge.notTransferred.length ? 'Топологията остава за отделна човешка/геометрична стъпка.' : ''}` : 'Първо разчети актуалния текст.'}</span></div>
       {!stale && workflow && workflow.requiredQuestionCount > 0 && <div className="ff-real-user-drawing-wait"><b>AI ЧЕРТЕЖЪТ ЧАКА УТОЧНЕНИЕ</b><span>Отговори на задължителните въпроси по-горе. Няма да се измисля топология или техническа стойност.</span></div>}
       {!stale && result.validForHumanReview && result.recognized.length > 0 && (workflow?.requiredQuestionCount ?? 0) === 0 && <ParametricConstructionProposalPanel intent={result.intent} sourceLabel={workflow?.answers.length ? `Свободно описание + ${workflow.answers.length} човешки уточнения` : 'Свободно описание'} onOpenEditableConstructor={onOpenAi04Constructor}/>}
