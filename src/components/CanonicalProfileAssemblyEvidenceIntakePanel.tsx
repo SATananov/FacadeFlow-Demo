@@ -5,6 +5,7 @@ import {
   createCanonicalProfileAssemblyEvidenceSubmissionRecord,
   type CanonicalProfileAssemblyEvidenceSubmissionRecord,
 } from '../aiCanonicalProfileAssemblyEvidenceIntake'
+import { CanonicalProfileAssemblyEvidenceIntakeHumanReviewPanel } from './CanonicalProfileAssemblyEvidenceIntakeHumanReviewPanel'
 
 interface CanonicalProfileAssemblyEvidenceIntakePanelProps {
   readiness: CanonicalProfileAssemblyEvidenceReadiness
@@ -129,6 +130,8 @@ export function CanonicalProfileAssemblyEvidenceIntakePanel({
           </article>
         ))}
       </div>
+
+      <CanonicalProfileAssemblyEvidenceIntakeHumanReviewPanel readiness={readiness} submissions={records} />
 
       <p><strong>Registered:</strong> {ledger.registeredCount}</p>
       <p><strong>Pending human review:</strong> {ledger.pendingHumanReviewCount}</p>
