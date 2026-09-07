@@ -1,4 +1,5 @@
 import { useMemo } from 'react'
+import { CanonicalProfileAssemblyEvidenceIntakePanel } from './CanonicalProfileAssemblyEvidenceIntakePanel'
 import type { CanonicalProfileAssemblyEvidenceReviewSummary } from '../aiCanonicalProfileAssemblyEvidenceReviewSummary'
 import {
   buildCanonicalProfileAssemblyEvidenceReadiness,
@@ -80,6 +81,8 @@ export function CanonicalProfileAssemblyEvidenceReadinessPanel({
       <p><strong>Evidence readiness for production:</strong> NOT VALIDATED</p>
       <p><strong>Automatic evidence generation:</strong> NO</p>
       <p><strong>Production unlock:</strong> NO</p>
+
+      <CanonicalProfileAssemblyEvidenceIntakePanel readiness={readiness} />
 
       <footer data-safety="REQUIREMENTS ONLY: YES · CREATES EVIDENCE: NO · MANUFACTURER APPROVAL: NO · VERIFIED ASSEMBLY NODE EVIDENCE CREATED: NO · EXACT JOINT GEOMETRY VERIFIED: NO · EVIDENCE MATURITY AUTO UPGRADE: NO · AUTOMATIC GEOMETRY: NO · PRODUCTION COMPATIBILITY: NO · PRODUCTION UNLOCK: NO · MACHINE READY: NO">
         REQUIREMENTS ONLY: ДА · НЕ СЪЗДАВА EVIDENCE · MANUFACTURER APPROVAL: НЕ · VERIFIED ASSEMBLY NODE: НЕ · EXACT JOINT GEOMETRY: НЕ · AUTO MATURITY UPGRADE: НЕ · AUTOMATIC GEOMETRY: НЕ · PRODUCTION COMPATIBILITY: НЕ · PRODUCTION UNLOCK: НЕ · ГОТОВО ЗА МАШИНА: НЕ
