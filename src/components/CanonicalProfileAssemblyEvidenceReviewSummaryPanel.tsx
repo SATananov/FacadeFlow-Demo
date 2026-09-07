@@ -1,4 +1,5 @@
 import { useMemo } from 'react'
+import { CanonicalProfileAssemblyEvidenceReadinessPanel } from './CanonicalProfileAssemblyEvidenceReadinessPanel'
 import type { CanonicalProfileAssemblyEvidenceHumanReviewGate } from '../aiCanonicalProfileAssemblyEvidenceHumanReview'
 import { buildCanonicalProfileAssemblyEvidenceReviewSummary } from '../aiCanonicalProfileAssemblyEvidenceReviewSummary'
 
@@ -74,6 +75,8 @@ export function CanonicalProfileAssemblyEvidenceReviewSummaryPanel({
       <p><strong>Verified assembly-node evidence:</strong> NO</p>
       <p><strong>Exact joint geometry:</strong> NOT VERIFIED</p>
       <p><strong>Production compatibility:</strong> NOT VALIDATED</p>
+
+      <CanonicalProfileAssemblyEvidenceReadinessPanel summary={summary} />
 
       <footer data-safety="SUMMARY ONLY: YES · CURRENT EVIDENCE CLASSIFICATION REVIEW ONLY: YES · HUMAN ACCEPTANCE IS MANUFACTURER APPROVAL: NO · VERIFIED ASSEMBLY NODE EVIDENCE: NO · EXACT JOINT GEOMETRY: NO · AUTOMATIC GEOMETRY: NO · PRODUCTION COMPATIBILITY: NO · PRODUCTION UNLOCK: NO · MACHINE READY: NO">
         SUMMARY ONLY: ДА · ПРИЕТО Е САМО ТЕКУЩОТО НИВО НА EVIDENCE · HUMAN ACCEPTANCE ≠ MANUFACTURER APPROVAL · VERIFIED ASSEMBLY NODE EVIDENCE: НЕ · EXACT JOINT GEOMETRY: НЕ · AUTOMATIC GEOMETRY: НЕ · PRODUCTION COMPATIBILITY: НЕ · PRODUCTION UNLOCK: НЕ · ГОТОВО ЗА МАШИНА: НЕ
