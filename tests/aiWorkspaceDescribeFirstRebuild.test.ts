@@ -52,7 +52,7 @@ test('description-first sample reaches graph-driven conceptual AI drawing withou
 })
 
 test('prompt action explicitly couples interpretation to drawing while keeping local/no-network wording', () => {
-  assert.match(promptPanel, /Разчети описанието и начертай/)
+  assert.match(promptPanel, /Разчети описанието и провери/)
   assert.match(promptPanel, /ЛОКАЛНО РАЗЧИТАНЕ → AI ЧЕРТЕЖ/)
   assert.match(promptPanel, /без външен модел \/ без мрежа/)
   assert.match(promptPanel, /AUTOMATIC GEOMETRY: NO · RULES VALIDATED: NO · MACHINE READY: NO/)

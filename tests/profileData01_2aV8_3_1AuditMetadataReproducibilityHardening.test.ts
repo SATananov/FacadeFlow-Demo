@@ -48,11 +48,32 @@ test('V8.3.1 checkpoint writes deterministic content provenance', () => {
   assert.equal(checkpoint.includes('Created: $(Get-Date'), false)
 })
 
-test('V8.3.1 source-of-truth docs describe V8-V8.3 as closed and keep production safety explicit', () => {
-  assert.equal(status.includes('functionally CLOSED / independently audited at `7071c2b`'), true)
-  assert.equal(status.includes('V8.3 | CLOSED / INDEPENDENT AUDIT PASS'), true)
-  assert.equal(readme.includes('функционално затворен и независимо одитиран'), true)
-  for (const marker of ['machineReady', 'productionApproved', 'production authority']) {
-    assert.equal(status.includes(marker) || readme.includes(marker), true)
+test('V8.3.1 historical closure remains documented while current source-of-truth docs keep production safety explicit', () => {
+  const historicalClosure = readFileSync(
+    'docs/PROFILE_DATA_01_2A_V8_3_AUDIT_CLOSURE_HARDENING.md',
+    'utf8',
+  )
+
+  // Historical closure belongs to its dedicated acceptance record,
+  // not to the current README/status checkpoint headline.
+  assert.equal(
+    historicalClosure.includes('V8–V8.3 Audit Closure Hardening'),
+    true,
+  )
+  assert.equal(
+    historicalClosure.includes('closes issues found by an independent audit'),
+    true,
+  )
+
+  // Current source-of-truth documents must preserve the live safety boundary.
+  const currentSafety = `${status}\n${readme}`.toLowerCase()
+
+  for (const marker of [
+    'machineready = false',
+    'rules validated = no',
+    'production unlock = no',
+    'production approved = no',
+  ]) {
+    assert.equal(currentSafety.includes(marker), true)
   }
 })

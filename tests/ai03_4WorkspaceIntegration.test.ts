@@ -7,9 +7,16 @@ const documentPanel = readFileSync('src/components/ProjectDocumentIntelligencePa
 const proposalPanel = readFileSync('src/components/ParametricConstructionProposalPanel.tsx', 'utf8')
 const workspace = readFileSync('src/components/FacadeFlowAIWorkspace.tsx', 'utf8')
 
-test('AI03 proposal UI is integrated into both prompt and document intelligence routes', () => {
+test('AI03 workspace integration respects the QA02 single-workflow routing contract', () => {
+  // Normal free-text prompt route is now canonical REAL USER WORKFLOW V1 -> V2-V6.
+  assert.match(promptPanel, /RealUserWorkflowV2ToV6Panel/)
+  assert.doesNotMatch(promptPanel, /intent=\{result\.intent\}/)
+
+  // Direct structured quick input intentionally retains the explicit AI03 proposal panel.
   assert.match(promptPanel, /ParametricConstructionProposalPanel/)
-  assert.match(promptPanel, /intent=\{result\.intent\}/)
+  assert.match(promptPanel, /intent=\{quickIntent\}/)
+
+  // Document intelligence remains an explicit AI03 proposal route.
   assert.match(documentPanel, /ParametricConstructionProposalPanel/)
   assert.match(documentPanel, /intent=\{selectedGroup\.mergedIntent\}/)
 })
