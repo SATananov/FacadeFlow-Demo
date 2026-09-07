@@ -4,10 +4,12 @@ import type { FacadeFlowConstructionDrawing } from '../aiConstructionDrawing'
 import type { FacadeFlowCanonicalProfileAssignmentBridge } from '../aiCanonicalProfileAssignmentBridge'
 import { buildCanonicalProfileAssignmentHumanReview } from '../aiCanonicalProfileAssignmentHumanReview'
 import { buildCanonicalProfileRealConceptual3D } from '../aiCanonicalProfileRealConceptual3DScene'
+import { buildCanonicalProfile3DInspectionEvidence } from '../aiCanonicalProfile3DInspectionEvidence'
 import { DEFAULT_CONCEPTUAL_DEPTH_MM } from '../threeDSceneBuilder'
 import { defaultDimensionVisibility, type DimensionAnnotation } from '../dimensionTypes'
 import { Product3DPreview } from './Product3DPreview'
 import { CanonicalProfileAssignmentReviewPanel } from './CanonicalProfileAssignmentReviewPanel'
+import { CanonicalProfile3DInspectionPanel } from './CanonicalProfile3DInspectionPanel'
 
 export interface CanonicalProfileRealConceptual3DPanelProps {
   proposal: FacadeFlowAi03ParametricProposal
@@ -88,6 +90,10 @@ export function CanonicalProfileRealConceptual3DPanel({
     () => result.scene ? buildCanonicalProfileAssignmentHumanReview({ bridge, scene: result.scene }) : null,
     [bridge, result.scene],
   )
+  const inspection = useMemo(
+    () => result.scene ? buildCanonicalProfile3DInspectionEvidence({ bridge, scene: result.scene }) : null,
+    [bridge, result.scene],
+  )
   const annotations = useMemo(
     () => conceptualAnnotations(proposal.dimensions.widthMm, proposal.dimensions.heightMm, depth),
     [proposal.dimensions.widthMm, proposal.dimensions.heightMm, depth],
@@ -133,6 +139,14 @@ export function CanonicalProfileRealConceptual3DPanel({
         onDepth={setDepth}
         onSelect={setSelectedId}
       />
+
+      {inspection && (
+        <CanonicalProfile3DInspectionPanel
+          evidence={inspection}
+          selectedNodeId={selectedId}
+          onSelectNode={setSelectedId}
+        />
+      )}
 
       <div aria-label="Canonical assignments към real conceptual 3D nodes">
         {result.bindings.map((binding) => (
