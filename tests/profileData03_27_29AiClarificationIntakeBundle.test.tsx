@@ -168,7 +168,7 @@ test('03.27-03.29 UI is wired under the existing 03.24-03.26 safe response panel
   const panel = readFileSync(resolve(repoRoot, 'src/components/CanonicalProfileClarificationIntakePanel.tsx'), 'utf8')
   assert.match(parent, /CanonicalProfileClarificationIntakePanel/)
   assert.match(parent, /queue=\{queue\}/)
-  assert.match(panel, /PROFILE DATA 03\.27-03\.29/)
+  assert.match(panel, /PROFILE DATA V2 · HUMAN CLARIFICATION WORKFLOW/)
   assert.match(panel, /Automatic evidence registration:<\/strong> NO/)
   assert.match(panel, /Automatic knowledge resolution:<\/strong> NO/)
   assert.match(panel, /Production unlock:<\/strong> NO/)
