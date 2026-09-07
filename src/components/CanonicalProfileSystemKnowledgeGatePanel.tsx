@@ -5,6 +5,7 @@ import type { CanonicalProfileKnowledgeReadinessSummary } from '../aiCanonicalPr
 import { buildCanonicalProfileRelationKnowledgeReadiness } from '../aiCanonicalProfileRelationKnowledgeReadiness'
 import { buildCanonicalProfileSystemKnowledgeReadiness } from '../aiCanonicalProfileSystemKnowledgeReadiness'
 import { buildCanonicalProfileSystemKnowledgeGate } from '../aiCanonicalProfileSystemKnowledgeGate'
+import { CanonicalProfileAiKnowledgeContextPanel } from './CanonicalProfileAiKnowledgeContextPanel'
 
 interface Props {
   readiness: CanonicalProfileAssemblyEvidenceReadiness
@@ -70,6 +71,8 @@ export function CanonicalProfileSystemKnowledgeGatePanel({ readiness, aggregatio
       <p><strong>Production rules validated:</strong> NO</p>
       <p><strong>Production unlock:</strong> NO</p>
       <p><strong>Machine ready:</strong> NO</p>
+
+      <CanonicalProfileAiKnowledgeContextPanel relationMatrix={relationMatrix} systemReadiness={systemReadiness} gate={gate} />
 
       <footer data-safety="BUNDLE 03.18-03.20: READ-ONLY KNOWLEDGE DIAGNOSTIC · MANUFACTURER APPROVAL NO · EXACT JOINT GEOMETRY NO · PRODUCTION COMPATIBILITY NO · AUTOMATIC PROFILE SELECTION NO · AUTOMATIC GEOMETRY NO · PRODUCTION UNLOCK NO · MACHINE READY NO">
         03.18–03.20 BUNDLE · READ-ONLY KNOWLEDGE DIAGNOSTIC · PRODUCTION BOUNDARIES ОСТАВАТ ЗАКЛЮЧЕНИ

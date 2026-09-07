@@ -138,7 +138,8 @@
     "test:profile_data03_11": "vite build --ssr tests/profileData03_11CanonicalProfileAssemblyEvidenceIntakeHumanReview.test.tsx --outDir .facadeflow-runtime/profile-data03-11-tests --emptyOutDir && node --test .facadeflow-runtime/profile-data03-11-tests/profileData03_11CanonicalProfileAssemblyEvidenceIntakeHumanReview.test.js",
     "test:profile_data03_12_14": "vite build --ssr tests/profileData03_12_14EvidenceApplicationBundle.test.tsx --outDir .facadeflow-runtime/profile-data03-12-14-tests --emptyOutDir && node --test .facadeflow-runtime/profile-data03-12-14-tests/profileData03_12_14EvidenceApplicationBundle.test.js",
     "test:profile_data03_15_17": "vite build --ssr tests/profileData03_15_17KnowledgeReadinessBundle.test.tsx --outDir .facadeflow-runtime/profile-data03-15-17-tests --emptyOutDir && node --test .facadeflow-runtime/profile-data03-15-17-tests/profileData03_15_17KnowledgeReadinessBundle.test.js",
-    "test:profile_data03_18_20": "vite build --ssr tests/profileData03_18_20SystemKnowledgeGateBundle.test.tsx --outDir .facadeflow-runtime/profile-data03-18-20-tests --emptyOutDir && node --test .facadeflow-runtime/profile-data03-18-20-tests/profileData03_18_20SystemKnowledgeGateBundle.test.js"
+    "test:profile_data03_18_20": "vite build --ssr tests/profileData03_18_20SystemKnowledgeGateBundle.test.tsx --outDir .facadeflow-runtime/profile-data03-18-20-tests --emptyOutDir && node --test .facadeflow-runtime/profile-data03-18-20-tests/profileData03_18_20SystemKnowledgeGateBundle.test.js",
+    "test:profile_data03_21_23": "vite build --ssr tests/profileData03_21_23AiKnowledgeContextBundle.test.tsx --outDir .facadeflow-runtime/profile-data03-21-23-tests --emptyOutDir && node --test .facadeflow-runtime/profile-data03-21-23-tests/profileData03_21_23AiKnowledgeContextBundle.test.js"
   },
   "dependencies": {
     "@mlightcad/libredwg-web": "0.7.10",
