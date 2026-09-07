@@ -18,6 +18,9 @@ import { TechnicalProfileInspector } from './TechnicalProfileInspector'
 import { TechnicalZoomModal } from './TechnicalZoomModal'
 import { AiDrawingProfileSections } from './AiDrawingProfileSections'
 import { facadeFlowAiDrawingCalloutForProfile } from '../aiDrawingProfileSections'
+import { buildFacadeFlowCanonicalProfileAssignmentBridge } from '../aiCanonicalProfileAssignmentBridge'
+import { buildCanonicalProfileAssignmentWorkspaceReview } from '../aiCanonicalProfileAssignmentWorkspaceReview'
+import { CanonicalProfileAssignmentWorkspaceTracePanel } from './CanonicalProfileAssignmentWorkspaceTracePanel'
 
 const AI03_SAFETY_MARKERS = 'AUTO-GENERATED PROPOSAL: YES · AI05.3 GRAPH-DRAWING: YES · AUTOMATIC ACCEPTANCE: NO · EXACT PROFILE CONTOUR: NO · RULES VALIDATED: NO · MACHINE READY: NO'
 
@@ -113,6 +116,14 @@ export function ParametricConstructionProposalPanel({ intent, sourceLabel, onOpe
   const baseProposal = useMemo(() => buildFacadeFlowParametricConstructionProposal(intent), [intent])
   const constructionGraph = useMemo(() => buildFacadeFlowConstructionGraph(intent), [intent])
   const constructionDrawing = useMemo(() => buildFacadeFlowConstructionDrawing(intent, constructionGraph), [intent, constructionGraph])
+  const canonicalProfileBridge = useMemo(
+    () => buildFacadeFlowCanonicalProfileAssignmentBridge(intent, constructionGraph, constructionDrawing),
+    [intent, constructionGraph, constructionDrawing],
+  )
+  const canonicalProfileWorkspaceReview = useMemo(
+    () => buildCanonicalProfileAssignmentWorkspaceReview(canonicalProfileBridge),
+    [canonicalProfileBridge],
+  )
   const technicalProfileCodes = useMemo(() => [
     constructionDrawing.frame?.profileRef,
     ...constructionDrawing.fields.map((field) => field.sash?.profileRef),
@@ -180,6 +191,8 @@ export function ParametricConstructionProposalPanel({ intent, sourceLabel, onOpe
         </div>
       </aside>
     </div>}
+
+    <CanonicalProfileAssignmentWorkspaceTracePanel review={canonicalProfileWorkspaceReview}/>
 
     {!proposal.blockers.length && technicalProfileCodes.length > 0 && <TechnicalProfileInspector key={profileInspectorCode ?? 'profile-inspector'} profileCodes={technicalProfileCodes} requestedCode={profileInspectorCode} open={profileInspectorOpen} onOpenChange={setProfileInspectorOpen}/>}
 

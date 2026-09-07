@@ -1,6 +1,35 @@
 export type Component3DRole = 'FRAME' | 'DIVIDER' | 'SASH' | 'GLAZING' | 'PANEL' | 'PLACEHOLDER'
 export type CameraPreset = 'FRONT' | 'BACK' | 'LEFT' | 'RIGHT' | 'TOP' | 'BOTTOM' | 'ISOMETRIC'
+export type Conceptual3DCanonicalProfileRole = 'FRAME' | 'MULLION' | 'SASH'
 export interface Vector3Value { x: number; y: number; z: number }
+export interface Conceptual3DCanonicalProfileAssignment {
+  targetKind: 'FRAME' | 'MULLION' | 'SASH'
+  targetRef: string
+  systemId: string
+  systemLabel: string
+  role: Conceptual3DCanonicalProfileRole
+  profileCode: string
+  source: 'AI05.3.4_EXPLICIT_PRODUCT_INTENT_PROPAGATION'
+  explicit: true
+  automaticProfileSelectionAllowed: false
+  exactProfileContourApplied: false
+  productionGeometryApproved: false
+  machineReady: false
+  productionApproved: false
+}
+export interface Product3DProfileAssignmentBridge {
+  version: 'AI05.3.4'
+  status: 'READY_FOR_HUMAN_REVIEW' | 'NEEDS_EXPLICIT_PROFILE_ASSIGNMENT' | 'BLOCKED_CONFLICT'
+  assignments: Conceptual3DCanonicalProfileAssignment[]
+  missingExplicitAssignments: string[]
+  conflicts: string[]
+  automaticProfileSelectionAllowed: false
+  exactProfileContourApplied: false
+  geometryMutatedByBridge: false
+  productionGeometryApproved: false
+  machineReady: false
+  productionApproved: false
+}
 export interface Component3DNode {
   id: string
   role: Component3DRole
@@ -25,6 +54,7 @@ export interface Product3DScene {
   nodes: Component3DNode[]
   conceptualDepthMm: number
   conceptualOnly: true
+  profileAssignmentBridge?: Product3DProfileAssignmentBridge
   productionGeometryApproved: false
   machineReady: false
 }
