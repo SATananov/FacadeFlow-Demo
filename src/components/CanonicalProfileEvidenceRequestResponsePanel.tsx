@@ -3,6 +3,7 @@ import type { CanonicalProfileAiConsumableKnowledgeContext } from '../aiCanonica
 import { buildCanonicalProfileEvidenceRequestPlan } from '../aiCanonicalProfileEvidenceRequestPlanner'
 import { buildCanonicalProfileHumanEvidenceRequestQueue } from '../aiCanonicalProfileHumanEvidenceRequestQueue'
 import { buildCanonicalProfileSafeAiResponse } from '../aiCanonicalProfileSafeResponseComposer'
+import { CanonicalProfileClarificationIntakePanel } from './CanonicalProfileClarificationIntakePanel'
 
 interface Props {
   aiContext: CanonicalProfileAiConsumableKnowledgeContext
@@ -65,6 +66,8 @@ export function CanonicalProfileEvidenceRequestResponsePanel({ aiContext }: Prop
       <p><strong>Automatic geometry:</strong> NO</p>
       <p><strong>Production unlock:</strong> NO</p>
       <p><strong>Machine ready:</strong> NO</p>
+
+      <CanonicalProfileClarificationIntakePanel queue={queue} />
 
       <footer data-safety="BUNDLE 03.24-03.26: HUMAN EVIDENCE REQUESTS ONLY · NO AUTO FETCH · NO AUTO ACCEPT · UNKNOWN STAYS UNKNOWN · NO TECHNICAL GUESSING · MANUFACTURER APPROVAL NO · EXACT JOINT GEOMETRY NO · PRODUCTION COMPATIBILITY NO · AUTOMATIC PROFILE SELECTION NO · AUTOMATIC GEOMETRY NO · PRODUCTION UNLOCK NO · MACHINE READY NO">
         03.24–03.26 BUNDLE · AI ИСКА ТОЧНО ЛИПСВАЩОТО EVIDENCE · ЧОВЕКЪТ РЕШАВА · PRODUCTION ОСТАВА ЗАКЛЮЧЕН
