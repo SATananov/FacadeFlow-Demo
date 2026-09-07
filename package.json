@@ -124,7 +124,8 @@
     "test:ai_offer_workspace_hotfix10": "vite build --ssr tests/aiOfferWorkspaceHumanAuditHotfix10.test.ts --outDir .facadeflow-runtime/ai-offer-workspace-hotfix10-tests --emptyOutDir && node --test .facadeflow-runtime/ai-offer-workspace-hotfix10-tests/aiOfferWorkspaceHumanAuditHotfix10.test.js",
     "test:profile_data03_3_ai05_3_4": "vite build --ssr tests/profileData03_3Ai05_3_4CanonicalProfileAssignmentBridge.test.ts --outDir .facadeflow-runtime/profile-data03-3-ai05-3-4-tests --emptyOutDir && node --test .facadeflow-runtime/profile-data03-3-ai05-3-4-tests/profileData03_3Ai05_3_4CanonicalProfileAssignmentBridge.test.js",
     "test:ai05_3_5": "vite build --ssr tests/ai05_3_5CanonicalProfileAssignmentHumanReview.test.tsx --outDir .facadeflow-runtime/ai05-3-5-tests --emptyOutDir && node --test .facadeflow-runtime/ai05-3-5-tests/ai05_3_5CanonicalProfileAssignmentHumanReview.test.js",
-    "test:ai05_3_6": "vite build --ssr tests/ai05_3_6CanonicalProfileWorkspaceIntegration.test.tsx --outDir .facadeflow-runtime/ai05-3-6-tests --emptyOutDir && node --test .facadeflow-runtime/ai05-3-6-tests/ai05_3_6CanonicalProfileWorkspaceIntegration.test.js"
+    "test:ai05_3_6": "vite build --ssr tests/ai05_3_6CanonicalProfileWorkspaceIntegration.test.tsx --outDir .facadeflow-runtime/ai05-3-6-tests --emptyOutDir && node --test .facadeflow-runtime/ai05-3-6-tests/ai05_3_6CanonicalProfileWorkspaceIntegration.test.js",
+    "test:ai05_3_7": "vite build --ssr tests/ai05_3_7CanonicalProfileRealConceptual3DScene.test.ts --outDir .facadeflow-runtime/ai05-3-7-tests --emptyOutDir && node --test .facadeflow-runtime/ai05-3-7-tests/ai05_3_7CanonicalProfileRealConceptual3DScene.test.js"
   },
   "dependencies": {
     "@mlightcad/libredwg-web": "0.7.10",

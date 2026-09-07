@@ -21,6 +21,7 @@ import { facadeFlowAiDrawingCalloutForProfile } from '../aiDrawingProfileSection
 import { buildFacadeFlowCanonicalProfileAssignmentBridge } from '../aiCanonicalProfileAssignmentBridge'
 import { buildCanonicalProfileAssignmentWorkspaceReview } from '../aiCanonicalProfileAssignmentWorkspaceReview'
 import { CanonicalProfileAssignmentWorkspaceTracePanel } from './CanonicalProfileAssignmentWorkspaceTracePanel'
+import { CanonicalProfileRealConceptual3DPanel } from './CanonicalProfileRealConceptual3DPanel'
 
 const AI03_SAFETY_MARKERS = 'AUTO-GENERATED PROPOSAL: YES · AI05.3 GRAPH-DRAWING: YES · AUTOMATIC ACCEPTANCE: NO · EXACT PROFILE CONTOUR: NO · RULES VALIDATED: NO · MACHINE READY: NO'
 
@@ -192,7 +193,8 @@ export function ParametricConstructionProposalPanel({ intent, sourceLabel, onOpe
       </aside>
     </div>}
 
-    <CanonicalProfileAssignmentWorkspaceTracePanel review={canonicalProfileWorkspaceReview}/>
+    {proposal.status !== 'HUMAN_REVIEWED' && <CanonicalProfileAssignmentWorkspaceTracePanel review={canonicalProfileWorkspaceReview}/>}
+    {proposal.status === 'HUMAN_REVIEWED' && <CanonicalProfileRealConceptual3DPanel proposal={proposal} drawing={constructionDrawing} bridge={canonicalProfileBridge}/>}
 
     {!proposal.blockers.length && technicalProfileCodes.length > 0 && <TechnicalProfileInspector key={profileInspectorCode ?? 'profile-inspector'} profileCodes={technicalProfileCodes} requestedCode={profileInspectorCode} open={profileInspectorOpen} onOpenChange={setProfileInspectorOpen}/>}
 

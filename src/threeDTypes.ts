@@ -48,7 +48,7 @@ export interface Component3DNode {
 export interface SceneBounds3D { width: number; height: number; depth: number }
 export interface Product3DScene {
   id: string
-  sourceType: 'CUSTOM' | 'TEMPLATE' | 'VERIFIED_IMPORT'
+  sourceType: 'CUSTOM' | 'TEMPLATE' | 'VERIFIED_IMPORT' | 'HUMAN_REVIEWED_AI'
   sourceReference: string
   bounds: SceneBounds3D
   nodes: Component3DNode[]
