@@ -162,7 +162,7 @@ function ReviewColumn({ session, profiles, offerWorkspacePreview, onReset }: { s
   const completion = guidedProductCompletion(draft, profiles)
   const profileCode = (id: string) => profiles.find((profile) => profile.id === id)?.code || ''
   const quickIntent = session.job.quickProductIntent ?? null
-  const promptResult = !quickIntent && hasDescription ? interpretFacadeFlowPrompt(session.job.description.replace(/\s+/g, ' ').trim(), `${session.job.id}-sidebar-preview`) : null
+  const promptResult = !quickIntent && hasDescription ? (session.job.realUserWorkflow?.currentInterpretation ?? interpretFacadeFlowPrompt(session.job.description.replace(/\s+/g, ' ').trim(), `${session.job.id}-sidebar-preview`)) : null
   const promptIntent = promptResult?.validForHumanReview && promptResult.recognized.length > 0 ? promptResult.intent : null
   const draftHasValues = Boolean(draft.productType || draft.width || draft.height || draft.frameProfileId || draft.manualFrameProfile.trim() || draft.openingType || draft.fillDescription.trim())
   const useOfferPreview = Boolean(offerWorkspacePreview?.moduleNumber)

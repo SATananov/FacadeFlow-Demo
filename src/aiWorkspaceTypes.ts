@@ -317,6 +317,75 @@ export interface FacadeFlowUnifiedReviewPacket {
   machineReady: false
 }
 
+
+export type FacadeFlowRealUserWorkflowV1Status =
+  | 'BLOCKED'
+  | 'NEEDS_HUMAN_CLARIFICATION'
+  | 'READY_FOR_HUMAN_REVIEW_WITH_GAPS'
+  | 'READY_FOR_HUMAN_REVIEW'
+
+export type FacadeFlowRealUserWorkflowQuestionPriority = 'REQUIRED' | 'OPTIONAL'
+
+export interface FacadeFlowRealUserWorkflowQuestion {
+  id: string
+  target: string
+  label: string
+  questionBg: string
+  priority: FacadeFlowRealUserWorkflowQuestionPriority
+  suggestedAnswer?: string
+  suggestionReason?: string
+  answerHint?: string
+  source: 'PROMPT_GAP' | 'PROFILE_DATA_V1'
+}
+
+export interface FacadeFlowRealUserWorkflowAnswer {
+  target: string
+  questionId: string
+  answerText: string
+  fragment: string
+  answeredAt: string
+  answeredByRole: 'TECHNICAL_USER'
+  deferred: boolean
+}
+
+export interface FacadeFlowRealUserWorkflowKnowledgeFact {
+  id: string
+  label: string
+  value: string
+  authority: 'EXPLICIT_USER_INPUT' | 'HUMAN_CONFIRMED_WORKING_SEMANTICS'
+  safetyNote: string
+}
+
+export interface FacadeFlowRealUserWorkflowKnowledgeGap {
+  id: string
+  label: string
+  message: string
+  authorityNeeded: string
+}
+
+export interface FacadeFlowRealUserWorkflowV1State {
+  version: 'REAL_USER_WORKFLOW_V1'
+  sourceText: string
+  augmentedSourceText: string
+  intentId: string
+  currentInterpretation: import('./aiPromptInterpreter').FacadeFlowPromptInterpretationResult
+  status: FacadeFlowRealUserWorkflowV1Status
+  questions: FacadeFlowRealUserWorkflowQuestion[]
+  answers: FacadeFlowRealUserWorkflowAnswer[]
+  declaredUnknownTargets: string[]
+  knowledgeFacts: FacadeFlowRealUserWorkflowKnowledgeFact[]
+  knowledgeGaps: FacadeFlowRealUserWorkflowKnowledgeGap[]
+  requiredQuestionCount: number
+  optionalQuestionCount: number
+  humanClarificationRequired: boolean
+  humanReviewRequired: true
+  automaticProfileSelectionAllowed: false
+  automaticGeometryAllowed: false
+  rulesValidated: false
+  productionUnlockAllowed: false
+  machineReady: false
+}
+
 export interface FacadeFlowJobDraft {
   id: string
   name: string
@@ -325,6 +394,7 @@ export interface FacadeFlowJobDraft {
   inputMode: FacadeFlowAiInputMode | null
   description: string
   quickProductIntent?: FacadeFlowProductIntent | null
+  realUserWorkflow?: FacadeFlowRealUserWorkflowV1State | null
   demoScenario: FacadeFlowAiDemoScenario | null
   guidedProduct: FacadeFlowGuidedProductDraft
   products: FacadeFlowProductSpecification[]

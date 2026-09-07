@@ -126,6 +126,12 @@ function parseFieldCount(text: string) {
   if (numeric && Number(numeric[1]) > 0 && Number(numeric[1]) <= 12) return { count: Number(numeric[1]), excerpt: numeric[0] }
   const words = text.match(new RegExp(`(един|едно|два|две|три|четири|пет|шест|two|three|four|five|six)\\s+${orientation}(?:полета|поле|fields?|sections?)`, 'i'))
   if (words) return { count: numberWords[words[1].toLocaleLowerCase('bg')], excerpt: words[0] }
+  const leafAdjective = text.match(/(?:(?:дву|три|четири)крил(?:ен|на|но|ни|а)|double[- ]leaf|triple[- ]leaf|four[- ]leaf)(?=\s|[,;.]|$)/iu)
+  if (leafAdjective) {
+    const value = leafAdjective[0].toLocaleLowerCase('bg')
+    const count = /(?:три|triple)/u.test(value) ? 3 : /(?:четири|four)/u.test(value) ? 4 : 2
+    return { count, excerpt: leafAdjective[0] }
+  }
   return null
 }
 
