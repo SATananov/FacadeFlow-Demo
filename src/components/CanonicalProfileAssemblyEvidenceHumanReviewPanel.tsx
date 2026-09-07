@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { CanonicalProfileAssemblyEvidenceReviewSummaryPanel } from './CanonicalProfileAssemblyEvidenceReviewSummaryPanel'
 import type { FacadeFlowCanonicalProfileAssignmentBridge } from '../aiCanonicalProfileAssignmentBridge'
 import { buildCanonicalProfileTechnicalSemanticsBridge } from '../aiCanonicalProfileTechnicalSemanticsBridge'
 import { buildCanonicalProfileCompatibilitySemanticsBridge } from '../aiCanonicalProfileCompatibilitySemanticsBridge'
@@ -119,6 +120,8 @@ export function CanonicalProfileAssemblyEvidenceHumanReviewPanel({
           ))}
         </div>
       )}
+
+      <CanonicalProfileAssemblyEvidenceReviewSummaryPanel gate={gate} />
 
       <footer data-safety="HUMAN REVIEW OF CURRENT EVIDENCE ONLY: YES · HUMAN ACCEPTANCE IS MANUFACTURER APPROVAL: NO · VERIFIED ASSEMBLY NODE EVIDENCE CREATED: NO · EXACT JOINT GEOMETRY: NO · PRODUCTION COMPATIBILITY VALIDATED: NO · PRODUCTION UNLOCK: NO · MACHINE READY: NO">
         HUMAN REVIEW НА CURRENT EVIDENCE: ДА · HUMAN ACCEPTANCE ≠ MANUFACTURER APPROVAL · VERIFIED ASSEMBLY NODE EVIDENCE: НЕ · EXACT JOINT GEOMETRY: НЕ · PRODUCTION COMPATIBILITY: НЕ · PRODUCTION UNLOCK: НЕ · ГОТОВО ЗА МАШИНА: НЕ

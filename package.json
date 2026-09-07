@@ -131,7 +131,8 @@
     "test:profile_data03_4": "vite build --ssr tests/profileData03_4CanonicalProfileTechnicalSemantics.test.ts --outDir .facadeflow-runtime/profile-data03-4-tests --emptyOutDir && node --test .facadeflow-runtime/profile-data03-4-tests/profileData03_4CanonicalProfileTechnicalSemantics.test.js",
     "test:profile_data03_5": "vite build --ssr tests/profileData03_5CanonicalProfileCompatibilitySemantics.test.ts --outDir .facadeflow-runtime/profile-data03-5-tests --emptyOutDir && node --test .facadeflow-runtime/profile-data03-5-tests/profileData03_5CanonicalProfileCompatibilitySemantics.test.js",
     "test:profile_data03_6": "vite build --ssr tests/profileData03_6CanonicalProfileAssemblyEvidence.test.ts --outDir .facadeflow-runtime/profile-data03-6-tests --emptyOutDir && node --test .facadeflow-runtime/profile-data03-6-tests/profileData03_6CanonicalProfileAssemblyEvidence.test.js",
-    "test:profile_data03_7": "vite build --ssr tests/profileData03_7CanonicalProfileAssemblyEvidenceHumanReview.test.tsx --outDir .facadeflow-runtime/profile-data03-7-tests --emptyOutDir && node --test .facadeflow-runtime/profile-data03-7-tests/profileData03_7CanonicalProfileAssemblyEvidenceHumanReview.test.js"
+    "test:profile_data03_7": "vite build --ssr tests/profileData03_7CanonicalProfileAssemblyEvidenceHumanReview.test.tsx --outDir .facadeflow-runtime/profile-data03-7-tests --emptyOutDir && node --test .facadeflow-runtime/profile-data03-7-tests/profileData03_7CanonicalProfileAssemblyEvidenceHumanReview.test.js",
+    "test:profile_data03_8": "vite build --ssr tests/profileData03_8CanonicalProfileAssemblyEvidenceReviewSummary.test.tsx --outDir .facadeflow-runtime/profile-data03-8-tests --emptyOutDir && node --test .facadeflow-runtime/profile-data03-8-tests/profileData03_8CanonicalProfileAssemblyEvidenceReviewSummary.test.js"
   },
   "dependencies": {
     "@mlightcad/libredwg-web": "0.7.10",
