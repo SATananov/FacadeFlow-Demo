@@ -128,7 +128,8 @@
     "test:ai05_3_7": "vite build --ssr tests/ai05_3_7CanonicalProfileRealConceptual3DScene.test.ts --outDir .facadeflow-runtime/ai05-3-7-tests --emptyOutDir && node --test .facadeflow-runtime/ai05-3-7-tests/ai05_3_7CanonicalProfileRealConceptual3DScene.test.js",
     "test:ai05_3_8": "vite build --ssr tests/ai05_3_8CanonicalProfile3DInspectionEvidence.test.ts --outDir .facadeflow-runtime/ai05-3-8-tests --emptyOutDir && node --test .facadeflow-runtime/ai05-3-8-tests/ai05_3_8CanonicalProfile3DInspectionEvidence.test.js",
     "test:ai05_3_9": "vite build --ssr tests/ai05_3_9CanonicalProfile3DHumanReviewGate.test.tsx --outDir .facadeflow-runtime/ai05-3-9-tests --emptyOutDir && node --test .facadeflow-runtime/ai05-3-9-tests/ai05_3_9CanonicalProfile3DHumanReviewGate.test.js",
-    "test:profile_data03_4": "vite build --ssr tests/profileData03_4CanonicalProfileTechnicalSemantics.test.ts --outDir .facadeflow-runtime/profile-data03-4-tests --emptyOutDir && node --test .facadeflow-runtime/profile-data03-4-tests/profileData03_4CanonicalProfileTechnicalSemantics.test.js"
+    "test:profile_data03_4": "vite build --ssr tests/profileData03_4CanonicalProfileTechnicalSemantics.test.ts --outDir .facadeflow-runtime/profile-data03-4-tests --emptyOutDir && node --test .facadeflow-runtime/profile-data03-4-tests/profileData03_4CanonicalProfileTechnicalSemantics.test.js",
+    "test:profile_data03_5": "vite build --ssr tests/profileData03_5CanonicalProfileCompatibilitySemantics.test.ts --outDir .facadeflow-runtime/profile-data03-5-tests --emptyOutDir && node --test .facadeflow-runtime/profile-data03-5-tests/profileData03_5CanonicalProfileCompatibilitySemantics.test.js"
   },
   "dependencies": {
     "@mlightcad/libredwg-web": "0.7.10",
