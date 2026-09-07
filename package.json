@@ -126,7 +126,8 @@
     "test:ai05_3_5": "vite build --ssr tests/ai05_3_5CanonicalProfileAssignmentHumanReview.test.tsx --outDir .facadeflow-runtime/ai05-3-5-tests --emptyOutDir && node --test .facadeflow-runtime/ai05-3-5-tests/ai05_3_5CanonicalProfileAssignmentHumanReview.test.js",
     "test:ai05_3_6": "vite build --ssr tests/ai05_3_6CanonicalProfileWorkspaceIntegration.test.tsx --outDir .facadeflow-runtime/ai05-3-6-tests --emptyOutDir && node --test .facadeflow-runtime/ai05-3-6-tests/ai05_3_6CanonicalProfileWorkspaceIntegration.test.js",
     "test:ai05_3_7": "vite build --ssr tests/ai05_3_7CanonicalProfileRealConceptual3DScene.test.ts --outDir .facadeflow-runtime/ai05-3-7-tests --emptyOutDir && node --test .facadeflow-runtime/ai05-3-7-tests/ai05_3_7CanonicalProfileRealConceptual3DScene.test.js",
-    "test:ai05_3_8": "vite build --ssr tests/ai05_3_8CanonicalProfile3DInspectionEvidence.test.ts --outDir .facadeflow-runtime/ai05-3-8-tests --emptyOutDir && node --test .facadeflow-runtime/ai05-3-8-tests/ai05_3_8CanonicalProfile3DInspectionEvidence.test.js"
+    "test:ai05_3_8": "vite build --ssr tests/ai05_3_8CanonicalProfile3DInspectionEvidence.test.ts --outDir .facadeflow-runtime/ai05-3-8-tests --emptyOutDir && node --test .facadeflow-runtime/ai05-3-8-tests/ai05_3_8CanonicalProfile3DInspectionEvidence.test.js",
+    "test:ai05_3_9": "vite build --ssr tests/ai05_3_9CanonicalProfile3DHumanReviewGate.test.tsx --outDir .facadeflow-runtime/ai05-3-9-tests --emptyOutDir && node --test .facadeflow-runtime/ai05-3-9-tests/ai05_3_9CanonicalProfile3DHumanReviewGate.test.js"
   },
   "dependencies": {
     "@mlightcad/libredwg-web": "0.7.10",

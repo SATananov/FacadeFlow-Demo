@@ -10,6 +10,7 @@ import { defaultDimensionVisibility, type DimensionAnnotation } from '../dimensi
 import { Product3DPreview } from './Product3DPreview'
 import { CanonicalProfileAssignmentReviewPanel } from './CanonicalProfileAssignmentReviewPanel'
 import { CanonicalProfile3DInspectionPanel } from './CanonicalProfile3DInspectionPanel'
+import { CanonicalProfile3DHumanReviewGatePanel } from './CanonicalProfile3DHumanReviewGatePanel'
 
 export interface CanonicalProfileRealConceptual3DPanelProps {
   proposal: FacadeFlowAi03ParametricProposal
@@ -141,11 +142,14 @@ export function CanonicalProfileRealConceptual3DPanel({
       />
 
       {inspection && (
-        <CanonicalProfile3DInspectionPanel
-          evidence={inspection}
-          selectedNodeId={selectedId}
-          onSelectNode={setSelectedId}
-        />
+        <>
+          <CanonicalProfile3DInspectionPanel
+            evidence={inspection}
+            selectedNodeId={selectedId}
+            onSelectNode={setSelectedId}
+          />
+          <CanonicalProfile3DHumanReviewGatePanel evidence={inspection} />
+        </>
       )}
 
       <div aria-label="Canonical assignments към real conceptual 3D nodes">
