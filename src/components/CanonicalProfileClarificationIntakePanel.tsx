@@ -16,6 +16,11 @@ import {
   upsertProfileDataV2HumanClarificationAnswer,
   type ProfileDataV2HumanClarificationDraft,
 } from '../profileData/profileDataV2HumanClarificationWorkflow'
+import {
+  buildProfileDataV2ManualEvidenceIntakeHandoffDraft,
+  profileDataV2ManualEvidenceHandoffIsCurrent,
+  type ProfileDataV2ManualEvidenceIntakeHandoffDraft,
+} from '../profileData/profileDataV2ManualEvidenceIntakeHandoff'
 
 interface Props {
   queue: CanonicalProfileHumanEvidenceRequestQueue
@@ -26,6 +31,8 @@ export function CanonicalProfileClarificationIntakePanel({ queue }: Props) {
   const [drafts, setDrafts] = useState<Record<string, ProfileDataV2HumanClarificationDraft>>({})
   const [answers, setAnswers] = useState<CanonicalProfileClarificationAnswerInput[]>([])
   const [captureErrors, setCaptureErrors] = useState<Record<string, string>>({})
+  const [handoffs, setHandoffs] = useState<Record<string, ProfileDataV2ManualEvidenceIntakeHandoffDraft>>({})
+  const [handoffErrors, setHandoffErrors] = useState<Record<string, string>>({})
   const session = useMemo(
     () => buildCanonicalProfileGuidedClarificationSession({ plan: questionPlan, answers }),
     [questionPlan, answers],
@@ -71,11 +78,27 @@ export function CanonicalProfileClarificationIntakePanel({ queue }: Props) {
     setCaptureErrors((current) => ({ ...current, [questionKey]: '' }))
   }
 
+  const prepareManualEvidenceHandoff = (candidate: typeof intakeBridge.candidates[number]) => {
+    try {
+      const handoff = buildProfileDataV2ManualEvidenceIntakeHandoffDraft({
+        candidate,
+        handedOffAt: new Date().toISOString(),
+      })
+      setHandoffs((current) => ({ ...current, [candidate.candidateKey]: handoff }))
+      setHandoffErrors((current) => ({ ...current, [candidate.candidateKey]: '' }))
+    } catch (error) {
+      setHandoffErrors((current) => ({
+        ...current,
+        [candidate.candidateKey]: error instanceof Error ? error.message : String(error),
+      }))
+    }
+  }
+
   return (
     <section
       className="ff-ai03-facts"
-      aria-label="PROFILE DATA V2.1 real human clarification capture"
-      data-profile-data-bundle="PROFILE DATA V2.1"
+      aria-label="PROFILE DATA V2.2 human clarification to manual evidence handoff"
+      data-profile-data-bundle="PROFILE DATA V2.2"
       data-profile-data-v2-status={intakeBridge.status}
     >
       <div className="ff-ai03-card-heading">
@@ -84,9 +107,9 @@ export function CanonicalProfileClarificationIntakePanel({ queue }: Props) {
       </div>
 
       <p>
-        V2.1 свързва съществуващите 03.27–03.29 knowledge gaps с реален human input. AI задава точния въпрос,
-        човекът въвежда отговора, а приложението го пази само като pending clarification/candidate intake.
-        Capture не регистрира и не приема evidence.
+        V2.2 запазва V2.1 human clarification capture и добавя изричен human handoff към manual evidence intake.
+        Pending source candidate може да стане само handoff draft за PROFILE DATA 03.10. Самият handoff не създава
+        03.10 submission, не регистрира source и не приема evidence.
       </p>
 
       <h4>03.27 · Clarification question planner</h4>
@@ -175,23 +198,60 @@ export function CanonicalProfileClarificationIntakePanel({ queue }: Props) {
       <p><strong>Status:</strong> {intakeBridge.status}</p>
       <p><strong>Candidate intake rows:</strong> {intakeBridge.candidateCount}</p>
 
-      {intakeBridge.candidates.map((candidate) => (
-        <article key={candidate.candidateKey} data-profile-data-v2-candidate={candidate.candidateKey}>
-          <p>
-            <strong>{candidate.candidateKind}</strong> · {candidate.relation} · {candidate.leftProfileCode} ↔ {candidate.rightProfileCode}
-          </p>
-          <p><strong>Requirement:</strong> {candidate.requirementKind}</p>
-          <p><strong>Human answer:</strong> {candidate.humanAnswerText}</p>
-          {candidate.candidateKind === 'EVIDENCE_SOURCE_REFERENCE_CANDIDATE' && (
-            <p><strong>Source:</strong> {candidate.sourceLabel} · {candidate.sourceRef}</p>
-          )}
-          <p><strong>State:</strong> {candidate.state}</p>
-          <p><strong>May create manual evidence registration later:</strong> {candidate.mayCreateManualEvidenceRegistration ? 'YES' : 'NO'}</p>
-          <p><strong>Automatically registered:</strong> NO</p>
-          <p><strong>Human intake/review required:</strong> YES</p>
-        </article>
-      ))}
+      {intakeBridge.candidates.map((candidate) => {
+        const handoff = handoffs[candidate.candidateKey]
+        const handoffCurrent = handoff ? profileDataV2ManualEvidenceHandoffIsCurrent(handoff, candidate) : false
 
+        return (
+          <article key={candidate.candidateKey} data-profile-data-v2-candidate={candidate.candidateKey}>
+            <p>
+              <strong>{candidate.candidateKind}</strong> · {candidate.relation} · {candidate.leftProfileCode} ↔ {candidate.rightProfileCode}
+            </p>
+            <p><strong>Requirement:</strong> {candidate.requirementKind}</p>
+            <p><strong>Human answer:</strong> {candidate.humanAnswerText}</p>
+            {candidate.candidateKind === 'EVIDENCE_SOURCE_REFERENCE_CANDIDATE' && (
+              <p><strong>Source:</strong> {candidate.sourceLabel} · {candidate.sourceRef}</p>
+            )}
+            <p><strong>State:</strong> {candidate.state}</p>
+            <p><strong>May create manual evidence registration later:</strong> {candidate.mayCreateManualEvidenceRegistration ? 'YES' : 'NO'}</p>
+
+            {candidate.candidateKind === 'EVIDENCE_SOURCE_REFERENCE_CANDIDATE'
+              && candidate.mayCreateManualEvidenceRegistration && (
+                <button type="button" onClick={() => prepareManualEvidenceHandoff(candidate)}>
+                  {handoff ? 'Обнови manual evidence intake handoff' : 'Подготви manual evidence intake handoff'}
+                </button>
+              )}
+
+            {candidate.candidateKind === 'HUMAN_REVIEW_RENEWAL_CANDIDATE' && (
+              <p>Renewed human review остава отделен human-review поток; V2.2 не го превръща в evidence registration.</p>
+            )}
+
+            {handoffErrors[candidate.candidateKey] && (
+              <p role="alert">{handoffErrors[candidate.candidateKey]}</p>
+            )}
+
+            {handoff && (
+              <div
+                data-profile-data-v2-handoff={handoff.handoffId}
+                data-profile-data-v2-target-step="PROFILE_DATA_03.10"
+                data-profile-data-v2-handoff-state={handoffCurrent ? handoff.state : 'STALE_HANDOFF_RECREATE_REQUIRED'}
+              >
+                <p><strong>V2.2 handoff:</strong> {handoffCurrent ? handoff.state : 'STALE_HANDOFF_RECREATE_REQUIRED'}</p>
+                <p><strong>Target:</strong> {handoff.targetStep}</p>
+                <p><strong>Prefill source:</strong> {handoff.manualIntakePrefill.sourceLabel} · {handoff.manualIntakePrefill.sourceRef}</p>
+                <p><strong>Creates 03.10 submission record:</strong> NO</p>
+                <p><strong>Explicit 03.10 registration still required:</strong> YES</p>
+              </div>
+            )}
+
+            <p><strong>Automatically registered:</strong> NO</p>
+            <p><strong>Human intake/review required:</strong> YES</p>
+          </article>
+        )
+      })}
+
+      <p><strong>V2.2 automatic handoff:</strong> NO</p>
+      <p><strong>03.10 registration requires explicit human action:</strong> YES</p>
       <p><strong>Automatic requirement satisfaction:</strong> NO</p>
       <p><strong>Automatic knowledge resolution:</strong> NO</p>
       <p><strong>Manufacturer approval:</strong> NO</p>
@@ -203,8 +263,8 @@ export function CanonicalProfileClarificationIntakePanel({ queue }: Props) {
       <p><strong>Production unlock:</strong> NO</p>
       <p><strong>Machine ready:</strong> NO</p>
 
-      <footer data-safety="PROFILE DATA V2.1: REAL HUMAN ANSWER CAPTURE YES · CANDIDATE INTAKE ONLY · NO AUTO FETCH · NO AUTO REGISTER · NO AUTO ACCEPT · NO AUTO SATISFY · NO AUTO RESOLVE · MANUFACTURER APPROVAL NO · EXACT JOINT GEOMETRY NO · PRODUCTION COMPATIBILITY NO · AUTOMATIC PROFILE SELECTION NO · AUTOMATIC GEOMETRY NO · RULES VALIDATED NO · PRODUCTION UNLOCK NO · MACHINE READY NO">
-        PROFILE DATA V2.1 · AI ПИТА · ЧОВЕКЪТ ОТГОВАРЯ · ОТГОВОРЪТ СТАВА САМО PENDING CANDIDATE · HUMAN INTAKE/REVIEW ОСТАВА ЗАДЪЛЖИТЕЛЕН
+      <footer data-safety="PROFILE DATA V2.2: REAL HUMAN ANSWER CAPTURE YES · EXPLICIT MANUAL EVIDENCE HANDOFF DRAFT YES · CREATES 03.10 SUBMISSION NO · NO AUTO FETCH · NO AUTO REGISTER · NO AUTO ACCEPT · NO AUTO SATISFY · NO AUTO RESOLVE · MANUFACTURER APPROVAL NO · EXACT JOINT GEOMETRY NO · PRODUCTION COMPATIBILITY NO · AUTOMATIC PROFILE SELECTION NO · AUTOMATIC GEOMETRY NO · RULES VALIDATED NO · PRODUCTION UNLOCK NO · MACHINE READY NO">
+        PROFILE DATA V2.2 · HUMAN ANSWER → PENDING CANDIDATE → EXPLICIT HANDOFF DRAFT · 03.10 MANUAL REGISTRATION И HUMAN REVIEW ОСТАВАТ ЗАДЪЛЖИТЕЛНИ
       </footer>
     </section>
   )
